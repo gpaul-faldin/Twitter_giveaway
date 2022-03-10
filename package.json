@@ -1,0 +1,27 @@
+{
+  "name": "twitter_giveaway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gpaul-42/Twitter_giveaway.git"
+  },
+  "author": "Gpaul | Faldin#8570",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gpaul-42/Twitter_giveaway/issues"
+  },
+  "homepage": "https://github.com/gpaul-42/Twitter_giveaway#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "nodemon": "^2.0.15",
+    "puppeteer": "^13.5.1",
+    "puppeteer-extra": "^3.2.3",
+    "puppeteer-extra-plugin-stealth": "^2.9.0"
+  }
+}
