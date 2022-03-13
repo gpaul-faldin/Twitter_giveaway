@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/gpaul-42/Twitter_giveaway#readme",
   "dependencies": {
+    "chance": "^1.1.8",
     "express": "^4.17.3",
     "nodemon": "^2.0.15",
     "puppeteer": "^13.5.1",
