@@ -1,7 +1,6 @@
 /*
 	REQUIRE
 */
-const express = require('express')
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 var Chance = require('chance');
@@ -81,7 +80,7 @@ action.handler_follow(["@Tot_SamiyNFT", "@KingArthurrNFT", "@nftbadger", "@PoorA
 //action.handler_tag(1)
 
 function	create_proxy_array() {
-	let proxy = fs.readFileSync("./db/proxy.txt", 'utf8')
+	let proxy = fs.readFileSync(__dirname + "/db/proxy.txt", 'utf8')
 	let re = new Array
 
 	proxy = proxy.split('\r')
@@ -93,7 +92,7 @@ function	create_proxy_array() {
 	return (re);
 }
 function	create_acc_array() {
-	let acc = fs.readFileSync("./db/accounts.txt", 'utf8')
+	let acc = fs.readFileSync(__dirname + "/db/accounts.txt", 'utf8')
 	let re = new Array
 
 	acc = acc.split('\r')
@@ -170,7 +169,7 @@ async function action_todo(action, page, user) {
 }
 
 async function test_img(page, browser) {
-
+	await page.goto("https://twitter.com/settings/profile", {waitUntil: 'networkidle2'})
 	const [fileChooser] = await Promise.all([
 		page.waitForFileChooser(),
 		page.click('div[aria-label="Add avatar photo"]'),
@@ -185,7 +184,7 @@ async function test_img(page, browser) {
 
 async function log_in_twitter(action, account) {
 	const browser = await puppeteer.launch({
-		headless: true//,
+		headless: false//,
 		//timeout: 9999999
 	});
 	const page = await browser.newPage();
@@ -204,7 +203,7 @@ async function log_in_twitter(action, account) {
 	else {
 		await page.waitForSelector("#react-root")
 		await page.goto(action.url, {waitUntil: 'networkidle2'})
-		await page.goto("https://twitter.com/settings/profile", {waitUntil: 'networkidle2'})
+		
 		await test_img(page, browser)
 		//await action_todo(action, page, account.user)
 		await browser.close()
