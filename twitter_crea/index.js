@@ -270,7 +270,7 @@ async function create_twitter(mail, pass) {
 	console.log("PROXY == " + proxy)
 
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: true,
 		args: [`--proxy-server=${proxy}`]
 	});
 	const page = await browser.newPage();
