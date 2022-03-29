@@ -13,7 +13,7 @@ const {parentPort} = require("worker_threads");
 	THREADS
 */
 parentPort.on("message", async (data) => {
-	await log_in_twitter(data.action, data.account, data.array)
+	await log_in_twitter(data.action, data.account, data.array, data.index)
 	parentPort.postMessage("OK")
 })
 
@@ -83,7 +83,7 @@ class phone_number {
 		let re = await this.get_status()
 		if (re === "STATUS_WAIT_CODE") {
 			await this.set_status(8)
-			return (0)
+			return ("NONE")
 		}
 		return (re)
 	}
@@ -167,13 +167,19 @@ async function pva(page, user) {
 	await page.waitForTimeout(5000)
 }
 
-async function log_in_twitter(action, account, array) {
+async function log_in_twitter(action, account, array, index) {
 	var stop = false
+	var suspended = false
 	const browser = await puppeteer.launch({
 		headless: action.info.headless,
 		args: [`--proxy-server=${account.proxy}`]
 	});
 	const page = await browser.newPage();
+	page.on('pageerror', async (msg) => {
+		if (msg.message.includes("HTTP-403 codes:[64]") == true) {
+			suspended = true
+		}
+	})
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 1280, height: 720 })
 	const cookiesString = fs.readFileSync(__dirname + `/cookies/${account.user}_cookies.json`);
@@ -186,12 +192,18 @@ async function log_in_twitter(action, account, array) {
 		if (await pva(page, account.user) == 1)
 			stop = true
 	}
-	if (stop == false) {
+	if (stop == false && suspended == false) {
 		if (action.url != '') {
 			await page.goto(action.url, { waitUntil: 'networkidle2' })
 			await page.waitForTimeout(2000)
 		}
 		await action_todo(action, page, account.user, array)
+	}
+	else if (suspended == true) {
+		const acc = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
+		acc[index].tag = "SUSPENDED"
+		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
+		console.log(`${account.user} is suspended`)
 	}
 	await browser.close()
 	return (0)

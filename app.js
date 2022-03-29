@@ -1,10 +1,6 @@
 /*
 	REQUIRE
 */
-const puppeteer = require('puppeteer-extra')
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
-const { ImapFlow } = require('imapflow');
 var chance = require('chance').Chance()
 const {StaticPool} = require("node-worker-threads-pool");
 const fs = require('fs');
@@ -17,15 +13,17 @@ const fs = require('fs');
 	//////CLASS//////
 
 class	accounts {
-	constructor(user, pass, tag, proxy, size) {
+	constructor(user, pass, tag, mail, proxy, size) {
 		this.user = user
 		this.pass = pass
 		this.tag = tag
+		this.mail = mail
 		if (proxy)
 			this.proxy = proxy
 		else
 			this.proxy = ""
 		this.size = size
+		this.used = 0
 	}
 	async write_file(acc) {
 		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), {flags:"w"});
@@ -117,7 +115,7 @@ action.url = ""
 action.rt = true
 action.like = true
 action.info.headless = true
-action.info.threads = 5
+action.info.threads = 8
 action.handler_follow([`@wungay`])
 action.handler_tag(1)
 
@@ -128,15 +126,14 @@ function	create_acc_array() {
 	var size = 0
 
 	for (let i in db) {
-		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].proxy, 0))
+		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, 0))
 	}
 	acc = acc.split('\n')
 	for (let x in acc) {
 		acc[x] = acc[x].trim()
 		if (acc[x] && already_in(db, acc[x]) == -1) {
 			let tmp = acc[x].split(':')
-			let prox = acc[x].split('|')[1]
-			re.push(new accounts(tmp[0], tmp[1], tmp[2] ? tmp[2].split('|')[0] : "", prox == undefined ? "" : prox, 0))
+			re.push(new accounts(tmp[0], tmp[1], "", tmp[2], "", 0))
 		}
 	}
 	for (let i in re)
@@ -188,11 +185,10 @@ async function main_handler() {
 	});
 
 	while (i < acc[0].size) {
-		prom.push(pool.exec({action: action, account: acc[i], array: acc}))
+		prom.push(pool.exec({action: action, account: acc[i], array: acc, index: i}))
 		i++;
 	}
 	await Promise.all(prom)
-	process.exit()
 }
 
 async function init_handler() {
@@ -207,7 +203,6 @@ async function init_handler() {
 		if (acc[i].tag == "" || fs.existsSync(__dirname + `/cookies/${acc[i].user}_cookies.json`) == false) {
 			if (acc[i].proxy == "") {
 				acc[i].proxy = give_proxy()
-				console.log(acc[i].proxy)
 			}
 			prom.push(pool.exec({account: acc[i], index: i}))
 		}
@@ -228,7 +223,8 @@ async function main() {
 	console.log("Remove suspended accounts cookies nor info")
 	await rm_suspended()
 	console.log("Starting the actions")
-	await main_handler()
+	//await main_handler()
+	await rm_suspended()
 	process.exit()
 }
 
@@ -243,7 +239,7 @@ function rm_useless_cookies() {
 	var db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
 
 	for (let x in files) {
-		let tmp = files[x].split('_')[0]
+		let tmp = files[x].split('_cookies.json')[0]
 		var i = 0
 		var exist = false
 		while (db[i]) {
@@ -259,9 +255,14 @@ function rm_useless_cookies() {
 async function rm_suspended() {
 	var db_new = []
 	let db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
+	var size = 0
+
+	for (let x in db)
+		size++
 
 	for (let i in db) {
 		if (db[i].tag != "SUSPENDED") {
+			db[i].size = size
 			db_new.push(db[i])
 		}
 	}

@@ -7,8 +7,8 @@ var Chance = require('chance').Chance()
 
 
 async function test() {
-	var acc = "CherylW40397442"
-	var proxy = "45.146.131.137:3128"
+	var acc = "MarinaP96106633"
+	var proxy = "45.146.131.119:3128"
 
 	const browser = await puppeteer.launch({
 		headless: false,

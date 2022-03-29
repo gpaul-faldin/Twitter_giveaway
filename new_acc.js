@@ -20,18 +20,100 @@ parentPort.on("message", async (data) => {
 })
 
 /*
+	CLASS
+*/
+
+class phone_number {
+	constructor(country, service, opt) {
+		this.api_key = "d096b72Aec81876efebAf8104e98e1f6",
+		this.url = "https://api.sms-activate.org/stubs/handler_api.php?",
+		this.country = country,
+		this.service = service
+		this.action = [
+			"getNumber",
+			"setStatus",
+			"getStatus"
+		]
+		this.id = ""
+		this.nbr = ""
+		this.opt = opt
+		this.end = 0
+	}
+	async get_number() {
+		try {
+			const resp = await axios.get(this.url + `api_key=${this.api_key}&action=${this.action[0]}&service=${this.service}&country=${this.country}`)
+			let tmp = resp.data.split(':')
+			if (tmp[0] === "ACCESS_NUMBER") {
+				this.id = tmp[1]
+				this.nbr = tmp[2].substring(this.opt)
+			}
+			else if (resp.date == "NO_NUMBERS") {
+				console.log(resp.date)
+				await this.get_number(this.opt)
+			}
+			else
+				console.log(resp.date)
+		}
+		catch(e){
+			console.log(e)
+		}
+	}
+	async set_status(status) {
+		try {
+			const resp = await axios.get(this.url + `api_key=${this.api_key}&action=${this.action[1]}&status=${status}&id=${this.id}`)
+			return (resp.data)
+		}
+		catch(e){
+			console.log(e)
+		}
+	}
+	async get_status() {
+		try {
+			const resp = await axios.get(this.url + `api_key=${this.api_key}&action=${this.action[2]}&id=${this.id}`)
+			return (resp.data)
+		}
+		catch(e){
+			console.log(e)
+		}
+	}
+	async get_code() {
+		this.end = Date.now() + 600000
+		await this.set_status(1)
+		await this.sleep(10000)
+		while (await this.get_status() === "STATUS_WAIT_CODE" && Date.now() < this.end)
+			await this.sleep(5000)
+		let re = await this.get_status()
+		if (re === "STATUS_WAIT_CODE") {
+			await this.set_status(8)
+			return (0)
+		}
+		return (re)
+	}
+	async sleep(ms) {
+		return new Promise((resolve) => {
+			setTimeout(resolve, ms);
+		});
+	}
+}
+
+/*
 	PUPPETEER
 */
 
 puppeteer.use(StealthPlugin())
 puppeteer.use(RecaptchaPlugin({ provider: { id: '2captcha', token: '89f71b2cf02b35c6b5c1f8deb9f9161b' }, visualFeedback: true }))
 
-async function assign_img(page) {
-	const [pp_choose] = await Promise.all([
+async function assign_img(page, user) {
+	try {const [pp_choose] = await Promise.all([
 		page.waitForFileChooser(),
 		page.click('div[aria-label="Add avatar photo"]'),
 	]);
 	await pp_choose.accept([picture.get_pp()])
+	}
+	catch(e) {
+		console.log(`${user} error add Avatar photo`)
+		await page.screenshot({ path: __dirname + `/debug_screenshot/${user}.jpg`})
+	}
 	await page.waitForSelector('div[data-testid="applyButton"]')
 	await page.click('div[data-testid="applyButton"]')
 	await page.waitForTimeout(1000)
@@ -88,16 +170,40 @@ async function init_twitter(account, index) {
 		await page.waitForTimeout(1000)
 		await page.click('div[data-testid="LoginForm_Login_Button"]')
 		if (suspended == false) {
-			await page.waitForNavigation({ timeout: 0, waitUntil: 'networkidle2' })
+			await page.waitForTimeout(2000)
+			if (await page.$('input[type="email"]')) {
+				await page.type('input[type="email"]', account.mail)
+				await page.evaluate(`
+					document.querySelectorAll('div[role="button"]')[1].click()
+				`)
+			}
 			await page.waitForTimeout(10000)
+			await page.evaluate(`
+				function accept_cookies() {
+					var selectors = document.querySelectorAll('span')
+						for (let i in selectors) {
+							if (selectors[i].innerHTML === 'Accept all cookies') {
+								selectors[i].parentElement.parentElement.parentElement.click()
+								break;
+							}
+						}
+				}
+				accept_cookies()
+			`)
 			let cookie = await page.cookies()
 			fs.writeFileSync(__dirname + `/cookies/${account.user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
 		}
 	}
+	if (await page.url() == "https://twitter.com/account/access") {
+		await page.waitForTimeout(5000)
+		console.log(`PVA for ${account.user}`)
+		if (await pva(page, account.user) == 1)
+			suspended = true
+	}
 	await page.goto("https://twitter.com/settings/profile", { waitUntil: 'networkidle2' })
 	await page.waitForTimeout(2000)
 	if (suspended == false) {
-		var tag = await assign_img(page)
+		var tag = await assign_img(page, account.user)
 		if (account.tag == "") {
 			const acc = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
 			acc[index].tag = tag
@@ -105,9 +211,32 @@ async function init_twitter(account, index) {
 		}
 	}
 	else {
-		const acc = require(__dirname + "/db/acc.json")
+		const acc = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
 		acc[index].tag = "SUSPENDED"
 		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 	}
 	await browser.close()
+}
+
+async function pva(page, user) {
+	if (await page.$('input[value="Start"]'))
+		await page.click('input[value="Start"]')
+	await page.waitForSelector('#country_code')
+	await page.select('#country_code', "84")
+	let phone = new phone_number(10, 'tw', 2)
+	await phone.get_number()
+	await page.type('#phone_number', phone.nbr)
+	await page.click('input[name="discoverable_by_mobile_phone"]')
+	await page.waitForTimeout(500)
+	await page.click('input[type="submit"]')
+	let code = await phone.get_code()
+	console.log(user + ": " + code)
+	if (code == "NONE")
+		return (1)
+	await page.type('#code', code)
+	await page.waitForTimeout(2000)
+	await page.click('input[value="Next"]')
+	await page.waitForSelector('input[value="Continue to Twitter"]')
+	await page.click('input[value="Continue to Twitter"]')
+	await page.waitForTimeout(5000)
 }
