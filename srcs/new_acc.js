@@ -4,12 +4,17 @@
 
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const pic = require('./banner-pp/index.js').gen
+const {picture} = require('./banner-pp/index.js')
+const {phone_number} = require('./sms_wrapper.js')
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 const fs = require('fs');
 const {parentPort} = require("worker_threads");
 
-const picture = new pic
+/*
+	INIT
+*/
+
+const pic = new picture
 
 /*
 	THREADS
@@ -18,83 +23,6 @@ parentPort.on("message", async (data) => {
 	await init_twitter(data.account, data.index)
 	parentPort.postMessage("OK")
 })
-
-/*
-	CLASS
-*/
-
-class phone_number {
-	constructor(country, service, opt) {
-		this.api_key = "d096b72Aec81876efebAf8104e98e1f6",
-		this.url = "https://api.sms-activate.org/stubs/handler_api.php?",
-		this.country = country,
-		this.service = service
-		this.action = [
-			"getNumber",
-			"setStatus",
-			"getStatus"
-		]
-		this.id = ""
-		this.nbr = ""
-		this.opt = opt
-		this.end = 0
-	}
-	async get_number() {
-		try {
-			const resp = await axios.get(this.url + `api_key=${this.api_key}&action=${this.action[0]}&service=${this.service}&country=${this.country}`)
-			let tmp = resp.data.split(':')
-			if (tmp[0] === "ACCESS_NUMBER") {
-				this.id = tmp[1]
-				this.nbr = tmp[2].substring(this.opt)
-			}
-			else if (resp.date == "NO_NUMBERS") {
-				console.log(resp.date)
-				await this.get_number(this.opt)
-			}
-			else
-				console.log(resp.date)
-		}
-		catch(e){
-			console.log(e)
-		}
-	}
-	async set_status(status) {
-		try {
-			const resp = await axios.get(this.url + `api_key=${this.api_key}&action=${this.action[1]}&status=${status}&id=${this.id}`)
-			return (resp.data)
-		}
-		catch(e){
-			console.log(e)
-		}
-	}
-	async get_status() {
-		try {
-			const resp = await axios.get(this.url + `api_key=${this.api_key}&action=${this.action[2]}&id=${this.id}`)
-			return (resp.data)
-		}
-		catch(e){
-			console.log(e)
-		}
-	}
-	async get_code() {
-		this.end = Date.now() + 600000
-		await this.set_status(1)
-		await this.sleep(10000)
-		while (await this.get_status() === "STATUS_WAIT_CODE" && Date.now() < this.end)
-			await this.sleep(5000)
-		let re = await this.get_status()
-		if (re === "STATUS_WAIT_CODE") {
-			await this.set_status(8)
-			return (0)
-		}
-		return (re)
-	}
-	async sleep(ms) {
-		return new Promise((resolve) => {
-			setTimeout(resolve, ms);
-		});
-	}
-}
 
 /*
 	PUPPETEER
@@ -108,7 +36,7 @@ async function assign_img(page, user) {
 		page.waitForFileChooser(),
 		page.click('div[aria-label="Add avatar photo"]'),
 	]);
-	await pp_choose.accept([picture.get_pp()])
+	await pp_choose.accept([pic.get_pp()])
 	}
 	catch(e) {
 		console.log(`${user} error add Avatar photo`)
@@ -121,13 +49,13 @@ async function assign_img(page, user) {
 		page.waitForFileChooser(),
 		page.click('div[aria-label="Add banner photo"]'),
 	]);
-	await banner_chooser.accept([picture.get_banner()])
+	await banner_chooser.accept([pic.get_banner()])
 	await page.waitForSelector('div[data-testid="applyButton"]')
 	await page.click('div[data-testid="applyButton"]')
 	await page.click('input[name="displayName"]', {clickCount: 3})
-	await page.type('input[name="displayName"]', picture.get_name())
+	await page.type('input[name="displayName"]', pic.get_name())
 	await page.click('textarea[name="description"]', { clickCount: 3 })
-	await page.type('textarea[name="description"]', picture.get_bio())
+	await page.type('textarea[name="description"]', pic.get_bio())
 	await page.waitForTimeout(2000)
 	await page.click('div[data-testid="Profile_Save_Button"]')
 	await page.waitForTimeout(4000)
@@ -205,15 +133,15 @@ async function init_twitter(account, index) {
 	if (suspended == false) {
 		var tag = await assign_img(page, account.user)
 		if (account.tag == "") {
-			const acc = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
+			const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
 			acc[index].tag = tag
-			fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
+			fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		}
 	}
 	else {
-		const acc = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
+		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
 		acc[index].tag = "SUSPENDED"
-		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
+		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 	}
 	await browser.close()
 }

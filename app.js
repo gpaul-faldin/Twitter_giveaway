@@ -4,6 +4,7 @@
 var chance = require('chance').Chance()
 const {StaticPool} = require("node-worker-threads-pool");
 const fs = require('fs');
+const {twitter} = require('./srcs/twitter_wrapper.js')
 
 
 /*
@@ -23,10 +24,84 @@ class	accounts {
 		else
 			this.proxy = ""
 		this.size = size
-		this.used = 0
+		this.info = {}
 	}
 	async write_file(acc) {
 		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), {flags:"w"});
+	}
+	getRandom(arr, n) {
+		var len = arr.length;
+		if (n > len)
+			n = len
+		var result = new Array(n);
+		var taken = new Array(len);
+		var size = n;
+		while (n--) {
+			var x = Math.floor(Math.random() * len);
+			result[n] = arr[x in taken ? taken[x] : x];
+			taken[x] = --len in taken ? taken[len] : len;
+		}
+		for (let x in result) {
+			result[x].size = size
+		}
+		return result;
+	}
+	username_arr(acc) {
+		var re = []
+		for (let i in acc) {
+			re.push(acc[i].tag.substring(1))
+		}
+		return (re)
+	}
+	async update_info(acc) {
+		var nfo = await twit.re_users_follow(this.username_arr(acc))
+		for (let i in acc) {
+			for (let x in nfo) {
+				if (acc[i].tag.substring(1) == x) {
+					acc[i].info = nfo[x]
+					break ;
+				}
+			}
+		}
+		await this.write_file(acc)
+	}
+	lowest_followers(acc, nbr) {
+		var i = 0
+		var save = []
+		var re = []
+		while (i < nbr) {
+			var n = 0
+			var lowest = 100
+			for (let x in acc) {
+				if (acc[x].info.followers < lowest && save.includes(x) == false) {
+					n = x
+					lowest = acc[x].info.followers
+				}
+			}
+			save.push(n)
+			re.push(acc[n])
+			i++;
+		}
+		return (re)
+	}
+	lowest_following(acc, nbr) {
+		var i = 0
+		var save = []
+		var re = []
+		while (i < nbr) {
+			var n = 0
+			var lowest = 100
+			for (let x in acc) {
+				if (acc[x].info.following < lowest && save.includes(x) == false) {
+					n = x
+					lowest = acc[x].info.following
+				}
+			}
+			save.push(n)
+			re.push(acc[n])
+			i++;
+		}
+		return (re)
 	}
 }
 
@@ -71,7 +146,8 @@ class	actions {
 		}
 		this.info = {
 			'threads': 1,
-			'headless': true
+			'headless': true,
+			'nbr_acc': 0
 		}
 	}
 	handler_tag(nbr) {
@@ -84,7 +160,7 @@ class	actions {
 	}
 }
 
-class rand {
+class	rand {
 	gen_month() {
 		return (chance.integer({min: 1, max: 12}))
 	}
@@ -102,24 +178,100 @@ class rand {
 	}
 }
 
-	//////PROXIES/ACCOUNTS/ACTIONS//////
-
+	//////CREATE CLASS VARIABLE//////
 var acc = create_acc_array()
-acc[0].write_file(acc)
 var proxies = create_proxy_array()
 var action = new actions
 const random = new rand
+const twit = new twitter(require('./tokens/twitter.json')['Bearer'])
 
+	//////MODIFICATION ON CLASS VARIABLE//////
+
+acc[0].write_file(acc)
 
 action.url = ""
 action.rt = true
 action.like = true
-action.info.headless = true
-action.info.threads = 8
-action.handler_follow([`@wungay`])
+action.info.headless = false
+action.info.threads = 3
+action.info.nbr_acc = 43
+//action.handler_follow([`@wungay`])
 action.handler_tag(1)
 
-function	create_acc_array() {
+/*
+	HANDLER
+*/
+
+async function main_handler(arr) {
+	var i = 0
+	var prom = []
+	if (arr.length == -1)
+		arr = acc
+	const pool = new StaticPool({
+		size: action.info.threads,
+		task: "./srcs/main_worker.js"
+	});
+	while (i < arr[0].size) {
+		prom.push(pool.exec({action: action, account: arr[i], array: arr, index: i}))
+		i++;
+	}
+	await Promise.all(prom)
+}
+
+async function init_handler() {
+	var i = 0;
+	var prom = []
+	const pool = new StaticPool({
+		size: action.info.threads,
+		task: "./srcs/new_acc.js"
+	});
+
+	while (i < acc[0].size) {
+		if (acc[i].tag == "" || fs.existsSync(__dirname + `/cookies/${acc[i].user}_cookies.json`) == false) {
+			if (acc[i].proxy == "") {
+				acc[i].proxy = give_proxy()
+			}
+			prom.push(pool.exec({account: acc[i], index: i}))
+		}
+		i++;
+	}
+	acc[0].write_file(acc);
+	await Promise.all(prom)
+}
+
+/*
+	MAIN
+*/
+
+async function main(arr) {
+	rm_useless_cookies()
+	console.log("Check for init")
+	await init_handler()
+	console.log("Remove suspended accounts cookies nor info")
+	await rm_suspended()
+	console.log("Starting the actions")
+	await main_handler(arr)
+	await rm_suspended()
+	process.exit()
+}
+
+(async () => {
+	//await acc[0].update_info(acc)
+	var arr = acc[0].lowest_followers(acc, action.info.nbr_acc)
+	action.handler_follow(acc[0].username_arr(arr))
+	//await main(acc[0].lowest_following(acc, action.info.nbr_acc))
+	await acc[0].update_info(acc)
+})();
+
+
+
+/*
+	UTILS
+*/
+
+	//////INIT UTILS//////
+
+function create_acc_array() {
 	let acc = fs.readFileSync(__dirname + "/db/accounts.txt", 'utf8')
 	let db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
 	let re = new Array
@@ -145,7 +297,7 @@ function	create_acc_array() {
 	return (re);
 }
 
-function	create_proxy_array() {
+function create_proxy_array() {
 	let proxy = fs.readFileSync(__dirname + "/db/proxy.txt", 'utf8')
 	let re = new Array
 	var size = 0
@@ -157,13 +309,12 @@ function	create_proxy_array() {
 	for (let x in proxy) {
 		proxy[x] = proxy[x].trim()
 		if (proxy[x])
-		re.push(new proxy_stat(proxy[x], size))
+			re.push(new proxy_stat(proxy[x], size))
 	}
 	return (re);
 }
 
-function give_proxy()
-{
+function give_proxy() {
 	var tmp = proxies[random.gen_number(0, (proxies[0].size - 1))]
 
 	while (tmp.state != 0 && tmp.max_use() != 0)
@@ -172,67 +323,7 @@ function give_proxy()
 	return (tmp.proxy)
 }
 
-/*
-	HANDLER
-*/
-
-async function main_handler() {
-	var i = 0
-	var prom = []
-	const pool = new StaticPool({
-		size: action.info.threads,
-		task: "./main_worker.js"
-	});
-
-	while (i < acc[0].size) {
-		prom.push(pool.exec({action: action, account: acc[i], array: acc, index: i}))
-		i++;
-	}
-	await Promise.all(prom)
-}
-
-async function init_handler() {
-	var i = 0;
-	var prom = []
-	const pool = new StaticPool({
-		size: action.info.threads,
-		task: "./new_acc.js"
-	});
-
-	while (i < acc[0].size) {
-		if (acc[i].tag == "" || fs.existsSync(__dirname + `/cookies/${acc[i].user}_cookies.json`) == false) {
-			if (acc[i].proxy == "") {
-				acc[i].proxy = give_proxy()
-			}
-			prom.push(pool.exec({account: acc[i], index: i}))
-		}
-		i++;
-	}
-	acc[0].write_file(acc);
-	await Promise.all(prom)
-}
-
-/*
-	MAIN
-*/
-
-async function main() {
-	rm_useless_cookies()
-	console.log("Check for init")
-	await init_handler()
-	console.log("Remove suspended accounts cookies nor info")
-	await rm_suspended()
-	console.log("Starting the actions")
-	//await main_handler()
-	await rm_suspended()
-	process.exit()
-}
-
-main()
-
-/*
-	UTILS
-*/
+	//////MISC//////
 
 function rm_useless_cookies() {
 	var files = fs.readdirSync(__dirname + `/cookies/`)
@@ -278,3 +369,9 @@ function already_in(db, acc) {
 	}
 	return (-1);
 }
+
+/*
+	TEST
+*/
+
+
