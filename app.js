@@ -24,6 +24,7 @@ class	accounts {
 		else
 			this.proxy = ""
 		this.size = size
+		this.timeout = false
 		this.info = {}
 	}
 	async write_file(acc) {
@@ -82,6 +83,8 @@ class	accounts {
 			re.push(acc[n])
 			i++;
 		}
+		for (let x in re)
+			re[x].size = re.length
 		return (re)
 	}
 	lowest_following(acc, nbr) {
@@ -101,6 +104,8 @@ class	accounts {
 			re.push(acc[n])
 			i++;
 		}
+		for (let x in re)
+			re[x].size = re.length
 		return (re)
 	}
 }
@@ -188,13 +193,12 @@ const twit = new twitter(require('./tokens/twitter.json')['Bearer'])
 	//////MODIFICATION ON CLASS VARIABLE//////
 
 acc[0].write_file(acc)
-
 action.url = ""
 action.rt = true
 action.like = true
-action.info.headless = false
-action.info.threads = 3
-action.info.nbr_acc = 43
+action.info.headless = true
+action.info.threads = 
+action.info.nbr_acc = 45
 //action.handler_follow([`@wungay`])
 action.handler_tag(1)
 
@@ -205,12 +209,13 @@ action.handler_tag(1)
 async function main_handler(arr) {
 	var i = 0
 	var prom = []
-	if (arr.length == -1)
-		arr = acc
 	const pool = new StaticPool({
 		size: action.info.threads,
 		task: "./srcs/main_worker.js"
 	});
+
+	if (arr.length == -1)
+		arr = acc
 	while (i < arr[0].size) {
 		prom.push(pool.exec({action: action, account: arr[i], array: arr, index: i}))
 		i++;
@@ -239,15 +244,35 @@ async function init_handler() {
 	await Promise.all(prom)
 }
 
+async function check_pva(arr) {
+	var i = 0
+	var prom = []
+	const pool = new StaticPool({
+		size: action.info.threads,
+		task: "./srcs/check_for_pva.js"
+	});
+
+	if (arr.length == -1)
+		arr = acc
+	while (i < arr[0].size) {
+		prom.push(pool.exec({action: action, account: arr[i], index: i}))
+		i++;
+	}
+	await Promise.all(prom)
+}
+
 /*
 	MAIN
 */
 
 async function main(arr) {
 	rm_useless_cookies()
-	console.log("Check for init")
+	console.log("Check for PVA")
+	await check_pva(arr)
+	await rm_timeout(arr)
+	console.log("Check for INIT")
 	await init_handler()
-	console.log("Remove suspended accounts cookies nor info")
+	console.log("Remove suspended accounts if they exist")
 	await rm_suspended()
 	console.log("Starting the actions")
 	await main_handler(arr)
@@ -256,10 +281,10 @@ async function main(arr) {
 }
 
 (async () => {
-	//await acc[0].update_info(acc)
+	await acc[0].update_info(acc)
 	var arr = acc[0].lowest_followers(acc, action.info.nbr_acc)
 	action.handler_follow(acc[0].username_arr(arr))
-	//await main(acc[0].lowest_following(acc, action.info.nbr_acc))
+	await main(acc[0].lowest_following(acc, action.info.nbr_acc))
 	await acc[0].update_info(acc)
 })();
 
@@ -275,7 +300,6 @@ function create_acc_array() {
 	let acc = fs.readFileSync(__dirname + "/db/accounts.txt", 'utf8')
 	let db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
 	let re = new Array
-	var size = 0
 
 	for (let i in db) {
 		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, 0))
@@ -288,11 +312,8 @@ function create_acc_array() {
 			re.push(new accounts(tmp[0], tmp[1], "", tmp[2], "", 0))
 		}
 	}
-	for (let i in re)
-		size = i
-	size++
 	for (let x in re) {
-		re[x].size = size
+		re[x].size = re.length
 	}
 	return (re);
 }
@@ -300,16 +321,12 @@ function create_acc_array() {
 function create_proxy_array() {
 	let proxy = fs.readFileSync(__dirname + "/db/proxy.txt", 'utf8')
 	let re = new Array
-	var size = 0
 
 	proxy = proxy.split('\r')
 	for (let x in proxy) {
-		size = x
-	}
-	for (let x in proxy) {
 		proxy[x] = proxy[x].trim()
 		if (proxy[x])
-			re.push(new proxy_stat(proxy[x], size))
+			re.push(new proxy_stat(proxy[x], proxy.length))
 	}
 	return (re);
 }
@@ -346,19 +363,32 @@ function rm_useless_cookies() {
 async function rm_suspended() {
 	var db_new = []
 	let db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
-	var size = 0
-
-	for (let x in db)
-		size++
 
 	for (let i in db) {
 		if (db[i].tag != "SUSPENDED") {
-			db[i].size = size
 			db_new.push(db[i])
 		}
 	}
+	for (let x in db_new)
+		db_new[x].size = db_new.length
 	acc[0].write_file(db_new)
 	rm_useless_cookies()
+}
+
+async function rm_timeout(arr) {
+	var db = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
+
+	for (let x in arr) {
+		for (let i in db) {
+			if (arr[x].tag == db[i].tag) {
+				if (db[i].timeout == true)
+					arr.splice(x, 1)
+			}
+		}
+	}
+	for (let x in arr) {
+		arr[x].size = arr.length
+	}
 }
 
 function already_in(db, acc) {

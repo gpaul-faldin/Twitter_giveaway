@@ -62,10 +62,15 @@ async function action_todo(action, page, user, array) {
 			if (action.follow.acc[i] != user) {
 				let url = "https://twitter.com/" + action.follow.acc[i]
 				await page.waitForTimeout(1000)
-				await page.goto(url, { waitUntil: 'networkidle2' });
-				await page.waitForTimeout(1000)
-				if (await page.$(`div[aria-label="Follow @${action.follow.acc[i]}"]`) != null)
-					await page.click(`div[aria-label="Follow @${action.follow.acc[i]}"]`)
+				try {
+					await page.goto(url, { waitUntil: 'networkidle2'})
+					await page.waitForTimeout(1000)
+					if (await page.$(`div[aria-label="Follow @${action.follow.acc[i]}"]`) != null)
+						await page.click(`div[aria-label="Follow @${action.follow.acc[i]}"]`)
+					}
+				catch (e) {
+					console.log(`error follow ${action.follow.acc[i]} by ${user}`)
+				}
 			}
 		}
 	}
@@ -137,8 +142,15 @@ async function log_in_twitter(action, account, array, index) {
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 1280, height: 720 })
 	await page.setCookie(... await cookie_str(account.user));
-	await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
-	await page.waitForTimeout(5000)
+	try {
+		await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
+	}
+	catch (e) {
+		console.log(`${account.user} failed to go /home`)
+		await browser.close()
+		return (0)
+	}
+	//await page.waitForTimeout(5000)
 	if (await page.url() == "https://twitter.com/account/access") {
 		console.log(`PVA for ${account.user}`)
 		if (await pva(page, account.user) == 1)

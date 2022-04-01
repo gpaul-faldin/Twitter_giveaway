@@ -68,7 +68,7 @@ class phone_number {
 			await this.set_status(8)
 			return ("NONE")
 		}
-		await this.set_status(1)
+		await this.set_status(6)
 		return (re)
 	}
 	async sleep(ms) {
