@@ -49,17 +49,20 @@ class unsplash {
 		this.count = count
 	}
 	async retrieve_pic() {
-		var arr = []
 		var prom = []
-		var web = await axios.get(`https://api.unsplash.com/photos/random?client_id${this.key}&query=${this.query}&count=${this.count}`)
-
+		try {var web = await axios.get(`https://api.unsplash.com/photos/random?client_id=${this.key}&query=${this.query}&count=${this.count}`)}
+		catch(e) {
+			console.log("error while retrieving pic")
+			return (1)
+		}
+		web = web.data
 		for (let x in web) {
 			if (this.check_if_exist(web[x].id) == 0) {
-				prom.push(this.download_pic(web[x].urls.small, process.cwd() + `/db/pp`, this.get_name(web[x].id)))
+				prom.push(this.download_pic(web[x].urls['small'], process.cwd() + `/db/pp`, this.get_name(web[x].id)))
 			}
 		}
+		console.log(`${prom.length} pictures retrieved on ${this.count}`)
 		await Promise.all(prom)
-		return (arr)
 	}
 	check_if_exist(id) {
 		var db = JSON.parse(fs.readFileSync(process.cwd() + `/db/unsplash_id.json`, "utf8"))
@@ -80,11 +83,7 @@ class unsplash {
 				url: fileUrl,
 				responseType: 'stream',
 			});
-
-			const w = response.data.pipe(fs.createWriteStream(localFilePath));
-			w.on('finish', () => {
-				console.log('Successfully downloaded file!');
-			});
+		response.data.pipe(fs.createWriteStream(localFilePath));
 		} catch (err) {
 			throw new Error(err);
 		}
@@ -102,7 +101,7 @@ class unsplash {
 
 (async() => {
 
-	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "female portrait", "30", "f")
+	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "teenage girl portrait", "30", "f")
 	await tmp.retrieve_pic()
 
 })();
