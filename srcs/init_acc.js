@@ -31,12 +31,12 @@ parentPort.on("message", async (data) => {
 puppeteer.use(StealthPlugin())
 puppeteer.use(RecaptchaPlugin({ provider: { id: '2captcha', token: '89f71b2cf02b35c6b5c1f8deb9f9161b' }, visualFeedback: true }))
 
-async function assign_img(page, user) {
+async function assign_img(page, user, name) {
 	try {const [pp_choose] = await Promise.all([
 		page.waitForFileChooser(),
 		page.click('div[aria-label="Add avatar photo"]'),
 	]);
-	await pp_choose.accept([pic.get_pp()])
+	await pp_choose.accept([pic.get_pp(name)])
 	}
 	catch(e) {
 		console.log(`${user} error add Avatar photo`)
@@ -53,7 +53,7 @@ async function assign_img(page, user) {
 	await page.waitForSelector('div[data-testid="applyButton"]')
 	await page.click('div[data-testid="applyButton"]')
 	await page.click('input[name="displayName"]', {clickCount: 3})
-	await page.type('input[name="displayName"]', pic.get_name())
+	await page.type('input[name="displayName"]', pic.get_name(name))
 	await page.click('textarea[name="description"]', { clickCount: 3 })
 	await page.type('textarea[name="description"]', pic.get_bio())
 	await page.waitForTimeout(2000)
@@ -131,12 +131,12 @@ async function init_twitter(account, index) {
 	await page.goto("https://twitter.com/settings/profile", { waitUntil: 'networkidle2' })
 	await page.waitForTimeout(2000)
 	if (suspended == false) {
-		var tag = await assign_img(page, account.user)
 		if (account.tag == "") {
 			const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
 			acc[index].tag = tag
 			fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		}
+		var tag = await assign_img(page, account.user, account.tag.substring(1))
 	}
 	else {
 		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))

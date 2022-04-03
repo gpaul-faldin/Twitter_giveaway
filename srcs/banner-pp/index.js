@@ -6,6 +6,8 @@ const chance = require('chance').Chance()
 const fs = require('fs')
 const path = require('path');
 const axios = require('axios').default
+const {getGender} = require('gender-detection-from-name');
+
 
 /*
 	CLASS
@@ -27,8 +29,19 @@ class picture {
 	draw_int(max) {
 		return (chance.integer({min: 0, max: max - 1}))
 	}
-	get_pp() {
-		return (this.pp_path + this.pp_files[this.draw_int(this.pp_size)])
+	get_pp(name) {
+		var sex = "n"
+		var file = ""
+
+		if (getGender(this.get_name_from_tag(name)) == "female")
+			sex = "f"
+		else if (getGender(this.get_name_from_tag(name)) == "male")
+			sex = "m"
+		console.log(`SEX == ${sex}`)
+		while (file[0] != sex && file[0] != "n") {
+			file = this.pp_files[this.draw_int(this.pp_size)]
+		}
+		return (this.pp_path + file)
 	}
 	get_banner() {
 		return (this.banner_path + this.banner_files[this.draw_int(this.banner_size)])
@@ -36,21 +49,38 @@ class picture {
 	get_bio() {
 		return(bio[chance.integer({min: 0, max: bio.length - 1})])
 	}
-	get_name() {
-		return (chance.first())
+	get_name(name) {
+		return (get_name_from_tag(name))
+	}
+	get_name_from_tag(user) {
+		var re = ""
+		for(let i in user) {
+			if ((/^[a-zA-Z]+$/.test(user[i]) && i == 0) || (/^[a-z]+$/.test(user[i])))
+				re += user[i]
+		}
+		return (re)
 	}
 }
 
 class unsplash {
-	constructor(key, query, count, sex) {
+	constructor(key, query, count, sex, orient) {
 		this.key = key,
 		this.query = query,
 		this.sex = sex
 		this.count = count
+		if (orient == 0)
+			this.orient = "portrait"
+		else
+			this.orient = "landscape"
 	}
 	async retrieve_pic() {
 		var prom = []
-		try {var web = await axios.get(`https://api.unsplash.com/photos/random?client_id=${this.key}&query=${this.query}&count=${this.count}`)}
+		var path = process.cwd() + `/db/pp`
+		var size = "small"
+		this.orient == "landscape" ? size = "regular" : 0
+		if (this.sex != 'h' && this.sex != 'f')
+			path = process.cwd() + `/db/banner`
+		try {var web = await axios.get(`https://api.unsplash.com/photos/random?client_id=${this.key}&query=${this.query}&count=${this.count}&orientation=${this.orient}`)}
 		catch(e) {
 			console.log("error while retrieving pic")
 			return (1)
@@ -58,7 +88,7 @@ class unsplash {
 		web = web.data
 		for (let x in web) {
 			if (this.check_if_exist(web[x].id) == 0) {
-				prom.push(this.download_pic(web[x].urls['small'], process.cwd() + `/db/pp`, this.get_name(web[x].id)))
+				prom.push(this.download_pic(web[x].urls[size], path, this.get_name(web[x].id)))
 			}
 		}
 		console.log(`${prom.length} pictures retrieved on ${this.count}`)
@@ -91,7 +121,10 @@ class unsplash {
 	get_name(id) {
 		if (this.sex == 'f')
 			return ("f-" + id + ".png")
-		return ("h-" + id + ".png")
+		if (this.sex == 'h')
+			return ("h-" + id + ".png")
+		else
+			return ("b-" + id + ".png")
 	}
 }
 
@@ -99,12 +132,11 @@ class unsplash {
 	UNSPLASH
 */
 
-(async() => {
+// (async() => {
 
-	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "teenage girl portrait", "30", "f")
-	await tmp.retrieve_pic()
-
-})();
+// 	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "background", "30", "b", 1)
+// 	await tmp.retrieve_pic()
+// })();
 
 /*
 	EXPORT

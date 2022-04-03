@@ -4,7 +4,7 @@
 var chance = require('chance').Chance()
 const {StaticPool} = require("node-worker-threads-pool");
 const fs = require('fs');
-const {twitter} = require('./srcs/twitter_wrapper.js')
+const {follow} = require('./srcs/twitter_wrapper.js')
 
 
 /*
@@ -14,7 +14,7 @@ const {twitter} = require('./srcs/twitter_wrapper.js')
 	//////CLASS//////
 
 class	accounts {
-	constructor(user, pass, tag, mail, proxy, size) {
+	constructor(user, pass, tag, mail, proxy, size, info) {
 		this.user = user
 		this.pass = pass
 		this.tag = tag
@@ -25,7 +25,8 @@ class	accounts {
 			this.proxy = ""
 		this.size = size
 		this.timeout = false
-		this.info = {}
+		this.init = false
+		this.info = info
 	}
 	async write_file(acc) {
 		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), {flags:"w"});
@@ -188,7 +189,7 @@ var acc = create_acc_array()
 var proxies = create_proxy_array()
 var action = new actions
 const random = new rand
-const twit = new twitter(require('./tokens/twitter.json')['Bearer'])
+const twit = new follow(require('./tokens/twitter.json')['Bearer'])
 
 	//////MODIFICATION ON CLASS VARIABLE//////
 
@@ -197,8 +198,8 @@ action.url = ""
 action.rt = true
 action.like = true
 action.info.headless = true
-action.info.threads = 
-action.info.nbr_acc = 45
+action.info.threads = 15
+action.info.nbr_acc = 30
 //action.handler_follow([`@wungay`])
 action.handler_tag(1)
 
@@ -228,11 +229,11 @@ async function init_handler() {
 	var prom = []
 	const pool = new StaticPool({
 		size: action.info.threads,
-		task: "./srcs/new_acc.js"
+		task: "./srcs/init_acc.js"
 	});
 
 	while (i < acc[0].size) {
-		if (acc[i].tag == "" || fs.existsSync(__dirname + `/cookies/${acc[i].user}_cookies.json`) == false) {
+		if (acc[i].tag == "" || fs.existsSync(__dirname + `/cookies/${acc[i].user}_cookies.json`) == false || acc[i].init == true) {
 			if (acc[i].proxy == "") {
 				acc[i].proxy = give_proxy()
 			}
@@ -275,7 +276,7 @@ async function main(arr) {
 	console.log("Remove suspended accounts if they exist")
 	await rm_suspended()
 	console.log("Starting the actions")
-	await main_handler(arr)
+	//await main_handler(arr)
 	await rm_suspended()
 	process.exit()
 }
@@ -302,14 +303,14 @@ function create_acc_array() {
 	let re = new Array
 
 	for (let i in db) {
-		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, 0))
+		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, 0, db[i].info))
 	}
 	acc = acc.split('\n')
 	for (let x in acc) {
 		acc[x] = acc[x].trim()
 		if (acc[x] && already_in(db, acc[x]) == -1) {
 			let tmp = acc[x].split(':')
-			re.push(new accounts(tmp[0], tmp[1], "", tmp[2], "", 0))
+			re.push(new accounts(tmp[0], tmp[1], "", tmp[2], "", 0, {}))
 		}
 	}
 	for (let x in re) {

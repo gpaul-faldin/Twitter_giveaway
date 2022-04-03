@@ -7,9 +7,10 @@
 		"proxy": "142.252.26.221:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1416866793352794113",
-			"followers": 9,
+			"followers": 52,
 			"following": 119
 		}
 	},
@@ -21,9 +22,10 @@
 		"proxy": "136.0.95.5:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1468546363407351811",
-			"followers": 9,
+			"followers": 52,
 			"following": 68
 		}
 	},
@@ -35,10 +37,11 @@
 		"proxy": "172.121.142.243:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1396786137944006656",
-			"followers": 9,
-			"following": 11
+			"followers": 52,
+			"following": 38
 		}
 	},
 	{
@@ -49,9 +52,10 @@
 		"proxy": "166.88.122.142:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1347975313221963776",
-			"followers": 27,
+			"followers": 50,
 			"following": 58
 		}
 	},
@@ -63,9 +67,10 @@
 		"proxy": "23.94.59.75:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1364916591310364672",
-			"followers": 9,
+			"followers": 52,
 			"following": 51
 		}
 	},
@@ -77,10 +82,11 @@
 		"proxy": "192.177.188.115:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505529240631996417",
 			"followers": 28,
-			"following": 9
+			"following": 37
 		}
 	},
 	{
@@ -91,10 +97,11 @@
 		"proxy": "192.177.188.37:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505530164943499268",
 			"followers": 28,
-			"following": 7
+			"following": 50
 		}
 	},
 	{
@@ -105,10 +112,11 @@
 		"proxy": "45.146.131.137:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505530027596726277",
 			"followers": 28,
-			"following": 7
+			"following": 50
 		}
 	},
 	{
@@ -119,9 +127,10 @@
 		"proxy": "23.95.201.14:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505908262939820039",
-			"followers": 25,
+			"followers": 65,
 			"following": 49
 		}
 	},
@@ -133,10 +142,11 @@
 		"proxy": "45.199.132.236:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505901625730338821",
 			"followers": 35,
-			"following": 6
+			"following": 49
 		}
 	},
 	{
@@ -147,6 +157,7 @@
 		"proxy": "192.177.160.114:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505905558553083911",
 			"followers": 35,
@@ -161,10 +172,11 @@
 		"proxy": "23.95.183.96:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505915084270620673",
 			"followers": 36,
-			"following": 5
+			"following": 48
 		}
 	},
 	{
@@ -175,10 +187,11 @@
 		"proxy": "23.95.16.38:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505902466902249476",
 			"followers": 36,
-			"following": 5
+			"following": 48
 		}
 	},
 	{
@@ -189,6 +202,7 @@
 		"proxy": "166.88.122.76:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505915528719831042",
 			"followers": 35,
@@ -203,6 +217,7 @@
 		"proxy": "23.95.49.227:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505893517612265479",
 			"followers": 35,
@@ -217,6 +232,7 @@
 		"proxy": "45.146.131.119:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505922173684563969",
 			"followers": 36,
@@ -231,6 +247,7 @@
 		"proxy": "192.177.186.56:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505926569101246468",
 			"followers": 36,
@@ -245,10 +262,11 @@
 		"proxy": "23.94.73.118:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505922942882005001",
 			"followers": 35,
-			"following": 46
+			"following": 58
 		}
 	},
 	{
@@ -259,10 +277,11 @@
 		"proxy": "23.94.73.106:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505919761875709955",
 			"followers": 35,
-			"following": 46
+			"following": 58
 		}
 	},
 	{
@@ -273,10 +292,11 @@
 		"proxy": "166.88.122.4:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505934582050402311",
 			"followers": 35,
-			"following": 46
+			"following": 58
 		}
 	},
 	{
@@ -287,10 +307,11 @@
 		"proxy": "23.95.201.44:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505922919372886019",
-			"followers": 9,
-			"following": 48
+			"followers": 52,
+			"following": 47
 		}
 	},
 	{
@@ -301,10 +322,11 @@
 		"proxy": "192.177.163.143:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505923310198079491",
-			"followers": 9,
-			"following": 7
+			"followers": 52,
+			"following": 35
 		}
 	},
 	{
@@ -315,6 +337,7 @@
 		"proxy": "23.94.247.249:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505921974132166656",
 			"followers": 36,
@@ -329,6 +352,7 @@
 		"proxy": "192.177.163.89:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505924852724768775",
 			"followers": 36,
@@ -343,10 +367,11 @@
 		"proxy": "156.227.14.246:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505927822568988673",
 			"followers": 35,
-			"following": 46
+			"following": 58
 		}
 	},
 	{
@@ -357,10 +382,11 @@
 		"proxy": "104.252.179.104:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505926516839956480",
 			"followers": 35,
-			"following": 46
+			"following": 58
 		}
 	},
 	{
@@ -371,10 +397,11 @@
 		"proxy": "23.94.73.46:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505926592438091782",
 			"followers": 34,
-			"following": 46
+			"following": 58
 		}
 	},
 	{
@@ -385,6 +412,7 @@
 		"proxy": "45.199.132.20:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505924159594979330",
 			"followers": 35,
@@ -399,10 +427,11 @@
 		"proxy": "172.121.142.147:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505929724144799744",
 			"followers": 35,
-			"following": 44
+			"following": 62
 		}
 	},
 	{
@@ -413,10 +442,11 @@
 		"proxy": "172.121.142.27:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505920251493453826",
 			"followers": 34,
-			"following": 44
+			"following": 56
 		}
 	},
 	{
@@ -427,6 +457,7 @@
 		"proxy": "156.227.14.96:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505857794968211460",
 			"followers": 35,
@@ -441,10 +472,11 @@
 		"proxy": "45.146.131.209:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505906568277024771",
 			"followers": 34,
-			"following": 46
+			"following": 58
 		}
 	},
 	{
@@ -455,6 +487,7 @@
 		"proxy": "23.95.69.235:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505919812534697988",
 			"followers": 36,
@@ -469,6 +502,7 @@
 		"proxy": "23.95.16.50:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505856848343277574",
 			"followers": 36,
@@ -483,6 +517,7 @@
 		"proxy": "192.177.186.104:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505930647201738761",
 			"followers": 34,
@@ -497,6 +532,7 @@
 		"proxy": "23.94.73.124:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505927669980233732",
 			"followers": 35,
@@ -511,6 +547,7 @@
 		"proxy": "192.177.188.79:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505923188722708491",
 			"followers": 29,
@@ -525,9 +562,10 @@
 		"proxy": "23.95.49.161:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505938234773319684",
-			"followers": 26,
+			"followers": 45,
 			"following": 46
 		}
 	},
@@ -539,9 +577,10 @@
 		"proxy": "45.146.131.209:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505924490798452744",
-			"followers": 26,
+			"followers": 45,
 			"following": 47
 		}
 	},
@@ -553,9 +592,10 @@
 		"proxy": "23.95.183.36:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505927071146684416",
-			"followers": 25,
+			"followers": 68,
 			"following": 46
 		}
 	},
@@ -567,10 +607,11 @@
 		"proxy": "23.95.16.2:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505935380671242241",
-			"followers": 25,
-			"following": 45
+			"followers": 44,
+			"following": 57
 		}
 	},
 	{
@@ -581,9 +622,10 @@
 		"proxy": "142.252.26.71:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505946853875261446",
-			"followers": 26,
+			"followers": 45,
 			"following": 47
 		}
 	},
@@ -595,9 +637,10 @@
 		"proxy": "192.177.188.73:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505941703215263759",
-			"followers": 25,
+			"followers": 44,
 			"following": 46
 		}
 	},
@@ -609,9 +652,10 @@
 		"proxy": "23.95.63.124:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505927888180494340",
-			"followers": 26,
+			"followers": 45,
 			"following": 47
 		}
 	},
@@ -623,10 +667,11 @@
 		"proxy": "23.95.16.38:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505942559721684994",
-			"followers": 26,
-			"following": 4
+			"followers": 45,
+			"following": 47
 		}
 	},
 	{
@@ -637,9 +682,10 @@
 		"proxy": "23.95.63.100:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505931495181103104",
-			"followers": 25,
+			"followers": 44,
 			"following": 46
 		}
 	},
@@ -651,10 +697,11 @@
 		"proxy": "45.199.132.236:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505935523986423809",
-			"followers": 26,
-			"following": 6
+			"followers": 45,
+			"following": 48
 		}
 	},
 	{
@@ -665,10 +712,11 @@
 		"proxy": "23.95.190.73:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505933345019994114",
-			"followers": 26,
-			"following": 4
+			"followers": 45,
+			"following": 47
 		}
 	},
 	{
@@ -679,10 +727,11 @@
 		"proxy": "142.252.223.168:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505930398886469635",
-			"followers": 26,
-			"following": 5
+			"followers": 45,
+			"following": 47
 		}
 	},
 	{
@@ -693,10 +742,11 @@
 		"proxy": "172.121.142.201:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505931625292464133",
-			"followers": 26,
-			"following": 4
+			"followers": 45,
+			"following": 47
 		}
 	},
 	{
@@ -707,10 +757,11 @@
 		"proxy": "192.177.163.23:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505939414169841665",
-			"followers": 26,
-			"following": 4
+			"followers": 45,
+			"following": 46
 		}
 	},
 	{
@@ -721,10 +772,11 @@
 		"proxy": "45.146.131.173:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505936213861367809",
-			"followers": 26,
-			"following": 4
+			"followers": 45,
+			"following": 46
 		}
 	},
 	{
@@ -735,9 +787,10 @@
 		"proxy": "23.95.190.61:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505940158553608195",
-			"followers": 26,
+			"followers": 45,
 			"following": 46
 		}
 	},
@@ -749,10 +802,11 @@
 		"proxy": "23.95.190.109:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505936120764194817",
-			"followers": 26,
-			"following": 4
+			"followers": 45,
+			"following": 47
 		}
 	},
 	{
@@ -763,9 +817,10 @@
 		"proxy": "23.95.190.13:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505943420833263616",
-			"followers": 8,
+			"followers": 50,
 			"following": 47
 		}
 	},
@@ -777,10 +832,11 @@
 		"proxy": "23.94.73.88:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505938892175912964",
-			"followers": 8,
-			"following": 4
+			"followers": 48,
+			"following": 46
 		}
 	},
 	{
@@ -791,9 +847,10 @@
 		"proxy": "142.252.223.150:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505936084202668033",
-			"followers": 27,
+			"followers": 47,
 			"following": 47
 		}
 	},
@@ -805,10 +862,11 @@
 		"proxy": "45.146.131.53:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505943758239682566",
-			"followers": 26,
-			"following": 45
+			"followers": 47,
+			"following": 61
 		}
 	},
 	{
@@ -819,10 +877,11 @@
 		"proxy": "23.95.49.251:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505938353530994688",
-			"followers": 27,
-			"following": 39
+			"followers": 46,
+			"following": 59
 		}
 	},
 	{
@@ -833,10 +892,11 @@
 		"proxy": "156.227.14.240:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505946310024650762",
-			"followers": 24,
-			"following": 45
+			"followers": 65,
+			"following": 61
 		}
 	},
 	{
@@ -847,10 +907,11 @@
 		"proxy": "166.88.122.220:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505923957509304328",
-			"followers": 25,
-			"following": 4
+			"followers": 48,
+			"following": 47
 		}
 	},
 	{
@@ -861,10 +922,11 @@
 		"proxy": "156.227.14.132:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505954504235233290",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -875,10 +937,11 @@
 		"proxy": "136.0.95.77:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505926456417079304",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -889,10 +952,11 @@
 		"proxy": "192.177.188.73:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505949826252689408",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -903,10 +967,11 @@
 		"proxy": "23.94.23.97:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505954675962617857",
-			"followers": 27,
-			"following": 44
+			"followers": 46,
+			"following": 62
 		}
 	},
 	{
@@ -917,10 +982,11 @@
 		"proxy": "23.95.16.50:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505943682054504452",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -931,10 +997,11 @@
 		"proxy": "156.227.14.198:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505941449359122432",
-			"followers": 23,
-			"following": 45
+			"followers": 66,
+			"following": 61
 		}
 	},
 	{
@@ -945,9 +1012,10 @@
 		"proxy": "142.252.223.36:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505934291238281219",
-			"followers": 8,
+			"followers": 51,
 			"following": 47
 		}
 	},
@@ -959,10 +1027,11 @@
 		"proxy": "23.95.183.18:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505944157650628614",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -973,10 +1042,11 @@
 		"proxy": "172.121.142.207:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505950677419315201",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -987,10 +1057,11 @@
 		"proxy": "45.199.132.8:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505944212847546368",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -1001,9 +1072,10 @@
 		"proxy": "23.94.73.28:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505945959485878275",
-			"followers": 8,
+			"followers": 51,
 			"following": 47
 		}
 	},
@@ -1015,10 +1087,11 @@
 		"proxy": "142.252.26.143:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505950279337873410",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -1029,10 +1102,11 @@
 		"proxy": "142.252.26.185:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505947421687177219",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -1043,10 +1117,11 @@
 		"proxy": "23.95.16.56:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505955916184756227",
-			"followers": 8,
-			"following": 5
+			"followers": 50,
+			"following": 70
 		}
 	},
 	{
@@ -1057,10 +1132,11 @@
 		"proxy": "142.252.198.175:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506906052734099471",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -1071,10 +1147,11 @@
 		"proxy": "192.177.160.204:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506906539269173251",
-			"followers": 24,
-			"following": 7
+			"followers": 67,
+			"following": 35
 		}
 	},
 	{
@@ -1085,10 +1162,11 @@
 		"proxy": "192.177.160.36:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506908522029625344",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -1099,10 +1177,11 @@
 		"proxy": "45.146.131.89:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506905618153885696",
-			"followers": 25,
-			"following": 19
+			"followers": 43,
+			"following": 46
 		}
 	},
 	{
@@ -1113,10 +1192,11 @@
 		"proxy": "192.177.188.25:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506908524353589251",
-			"followers": 23,
-			"following": 46
+			"followers": 65,
+			"following": 61
 		}
 	},
 	{
@@ -1127,10 +1207,11 @@
 		"proxy": "23.94.247.171:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506915342810972160",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -1141,6 +1222,7 @@
 		"proxy": "142.252.26.77:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909386752794624",
 			"followers": 0,
@@ -1155,10 +1237,11 @@
 		"proxy": "142.252.198.97:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909495410425857",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -1169,10 +1252,11 @@
 		"proxy": "23.94.59.33:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506910510473641986",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -1183,10 +1267,11 @@
 		"proxy": "23.95.49.173:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506905296098443266",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -1197,10 +1282,11 @@
 		"proxy": "23.95.201.38:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909648833908736",
-			"followers": 24,
-			"following": 4
+			"followers": 66,
+			"following": 46
 		}
 	},
 	{
@@ -1211,10 +1297,11 @@
 		"proxy": "104.252.179.110:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909581842264069",
-			"followers": 24,
-			"following": 44
+			"followers": 67,
+			"following": 62
 		}
 	},
 	{
@@ -1225,10 +1312,11 @@
 		"proxy": "192.177.160.132:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506912690148884481",
-			"followers": 24,
-			"following": 30
+			"followers": 67,
+			"following": 58
 		}
 	},
 	{
@@ -1239,10 +1327,11 @@
 		"proxy": "172.121.142.105:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506912528118341636",
-			"followers": 24,
-			"following": 31
+			"followers": 67,
+			"following": 58
 		}
 	},
 	{
@@ -1253,10 +1342,11 @@
 		"proxy": "142.252.198.127:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909826215202816",
-			"followers": 24,
-			"following": 29
+			"followers": 67,
+			"following": 57
 		}
 	},
 	{
@@ -1267,9 +1357,10 @@
 		"proxy": "23.95.63.16:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506910310065905664",
-			"followers": 24,
+			"followers": 67,
 			"following": 60
 		}
 	},
@@ -1281,9 +1372,10 @@
 		"proxy": "192.177.160.90:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506910607236218881",
-			"followers": 24,
+			"followers": 67,
 			"following": 64
 		}
 	},
@@ -1295,10 +1387,11 @@
 		"proxy": "192.177.160.246:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506914528814301187",
-			"followers": 27,
-			"following": 5
+			"followers": 46,
+			"following": 47
 		}
 	},
 	{
@@ -1309,9 +1402,10 @@
 		"proxy": "104.252.179.230:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506914325600305156",
-			"followers": 27,
+			"followers": 46,
 			"following": 61
 		}
 	},
@@ -1323,10 +1417,11 @@
 		"proxy": "45.146.131.167:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506910345574567937",
-			"followers": 27,
-			"following": 4
+			"followers": 46,
+			"following": 47
 		}
 	},
 	{
@@ -1337,10 +1432,11 @@
 		"proxy": "192.177.165.70:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909257371099136",
-			"followers": 8,
-			"following": 29
+			"followers": 51,
+			"following": 57
 		}
 	},
 	{
@@ -1351,10 +1447,11 @@
 		"proxy": "142.252.223.54:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506910964889034752",
 			"followers": 27,
-			"following": 4
+			"following": 47
 		}
 	},
 	{
@@ -1365,10 +1462,11 @@
 		"proxy": "23.94.73.124:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909166614421509",
 			"followers": 27,
-			"following": 4
+			"following": 47
 		}
 	},
 	{
@@ -1379,10 +1477,11 @@
 		"proxy": "142.252.223.78:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506909517099200515",
 			"followers": 27,
-			"following": 5
+			"following": 47
 		}
 	},
 	{
@@ -1393,9 +1492,10 @@
 		"proxy": "23.95.63.16:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506914182427742213",
-			"followers": 26,
+			"followers": 45,
 			"following": 64
 		}
 	},
@@ -1407,9 +1507,10 @@
 		"proxy": "156.227.14.54:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506912134667530241",
-			"followers": 26,
+			"followers": 45,
 			"following": 65
 		}
 	},
@@ -1421,6 +1522,7 @@
 		"proxy": "23.94.247.201:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506907639183159296",
 			"followers": 0,
@@ -1435,10 +1537,11 @@
 		"proxy": "142.252.26.71:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506912633186025477",
 			"followers": 27,
-			"following": 4
+			"following": 47
 		}
 	},
 	{
@@ -1449,10 +1552,11 @@
 		"proxy": "23.95.63.58:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506913440891572229",
 			"followers": 27,
-			"following": 4
+			"following": 47
 		}
 	},
 	{
@@ -1463,10 +1567,11 @@
 		"proxy": "192.177.186.254:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506911015107186691",
 			"followers": 27,
-			"following": 4
+			"following": 47
 		}
 	},
 	{
@@ -1477,10 +1582,11 @@
 		"proxy": "192.177.165.40:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506912213055205377",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -1491,10 +1597,11 @@
 		"proxy": "23.94.73.10:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506912734994395140",
 			"followers": 27,
-			"following": 4
+			"following": 47
 		}
 	},
 	{
@@ -1505,10 +1612,11 @@
 		"proxy": "23.95.16.20:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506898918717952004",
 			"followers": 27,
-			"following": 41
+			"following": 62
 		}
 	},
 	{
@@ -1519,10 +1627,11 @@
 		"proxy": "166.88.122.166:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1506912007634952196",
-			"followers": 8,
-			"following": 4
+			"followers": 50,
+			"following": 46
 		}
 	},
 	{
@@ -1533,9 +1642,10 @@
 		"proxy": "45.199.132.122:3128",
 		"size": 110,
 		"timeout": false,
+		"init": true,
 		"info": {
 			"id": "1505946394250682373",
-			"followers": 8,
+			"followers": 51,
 			"following": 46
 		}
 	}
