@@ -4,6 +4,8 @@
 
 const chance = require('chance').Chance()
 const fs = require('fs')
+const path = require('path');
+const axios = require('axios').default
 
 /*
 	CLASS
@@ -38,6 +40,72 @@ class picture {
 		return (chance.first())
 	}
 }
+
+class unsplash {
+	constructor(key, query, count, sex) {
+		this.key = key,
+		this.query = query,
+		this.sex = sex
+		this.count = count
+	}
+	async retrieve_pic() {
+		var arr = []
+		var prom = []
+		var web = await axios.get(`https://api.unsplash.com/photos/random?client_id${this.key}&query=${this.query}&count=${this.count}`)
+
+		for (let x in web) {
+			if (this.check_if_exist(web[x].id) == 0) {
+				prom.push(this.download_pic(web[x].urls.small, process.cwd() + `/db/pp`, this.get_name(web[x].id)))
+			}
+		}
+		await Promise.all(prom)
+		return (arr)
+	}
+	check_if_exist(id) {
+		var db = JSON.parse(fs.readFileSync(process.cwd() + `/db/unsplash_id.json`, "utf8"))
+
+		if (db.includes(id) == false) {
+			db.push(id)
+			fs.writeFileSync(process.cwd() + `/db/unsplash_id.json`, JSON.stringify(db, null, '	'), {flags:"w"});
+			return (0)
+		}
+		return (1)
+	}
+	async download_pic(fileUrl, downloadFolder, name) {
+		const localFilePath = path.resolve(__dirname, downloadFolder, name);
+
+		try {
+			const response = await axios({
+				method: 'GET',
+				url: fileUrl,
+				responseType: 'stream',
+			});
+
+			const w = response.data.pipe(fs.createWriteStream(localFilePath));
+			w.on('finish', () => {
+				console.log('Successfully downloaded file!');
+			});
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
+	get_name(id) {
+		if (this.sex == 'f')
+			return ("f-" + id + ".png")
+		return ("h-" + id + ".png")
+	}
+}
+
+/*
+	UNSPLASH
+*/
+
+(async() => {
+
+	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "female portrait", "30", "f")
+	await tmp.retrieve_pic()
+
+})();
 
 /*
 	EXPORT
