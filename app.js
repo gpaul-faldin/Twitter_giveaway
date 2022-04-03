@@ -109,6 +109,11 @@ class	accounts {
 			re[x].size = re.length
 		return (re)
 	}
+	set_init_true(acc) {
+		for (let x in acc) {
+			acc[x].init = true
+		}
+	}
 }
 
 class	proxy_stat {
@@ -199,9 +204,9 @@ action.rt = true
 action.like = true
 action.info.headless = true
 action.info.threads = 15
-action.info.nbr_acc = 30
+//action.info.nbr_acc = 30
 //action.handler_follow([`@wungay`])
-action.handler_tag(1)
+//action.handler_tag(1)
 
 /*
 	HANDLER
@@ -253,7 +258,7 @@ async function check_pva(arr) {
 		task: "./srcs/check_for_pva.js"
 	});
 
-	if (arr.length == -1)
+	if (arr.length == 0)
 		arr = acc
 	while (i < arr[0].size) {
 		prom.push(pool.exec({action: action, account: arr[i], index: i}))
@@ -269,7 +274,7 @@ async function check_pva(arr) {
 async function main(arr) {
 	rm_useless_cookies()
 	console.log("Check for PVA")
-	await check_pva(arr)
+	//await check_pva(arr)
 	await rm_timeout(arr)
 	console.log("Check for INIT")
 	await init_handler()
@@ -283,9 +288,10 @@ async function main(arr) {
 
 (async () => {
 	await acc[0].update_info(acc)
+	acc[0].set_init_true(acc)
 	var arr = acc[0].lowest_followers(acc, action.info.nbr_acc)
 	action.handler_follow(acc[0].username_arr(arr))
-	await main(acc[0].lowest_following(acc, action.info.nbr_acc))
+	await main("")
 	await acc[0].update_info(acc)
 })();
 

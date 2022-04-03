@@ -31,6 +31,12 @@ parentPort.on("message", async (data) => {
 puppeteer.use(StealthPlugin())
 puppeteer.use(RecaptchaPlugin({ provider: { id: '2captcha', token: '89f71b2cf02b35c6b5c1f8deb9f9161b' }, visualFeedback: true }))
 
+async function cookie_str(user) {
+	const cookiesString = fs.readFileSync(process.cwd() + `/cookies/${user}_cookies.json`);
+	const cookies = JSON.parse(cookiesString);
+	return (cookies)
+}
+
 async function assign_img(page, user, name) {
 	try {const [pp_choose] = await Promise.all([
 		page.waitForFileChooser(),
@@ -40,7 +46,7 @@ async function assign_img(page, user, name) {
 	}
 	catch(e) {
 		console.log(`${user} error add Avatar photo`)
-		await page.screenshot({ path: __dirname + `/debug_screenshot/${user}.jpg`})
+		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
 	}
 	await page.waitForSelector('div[data-testid="applyButton"]')
 	await page.click('div[data-testid="applyButton"]')
@@ -54,6 +60,7 @@ async function assign_img(page, user, name) {
 	await page.click('div[data-testid="applyButton"]')
 	await page.click('input[name="displayName"]', {clickCount: 3})
 	await page.type('input[name="displayName"]', pic.get_name(name))
+	await page.waitForTimeout(1000)
 	await page.click('textarea[name="description"]', { clickCount: 3 })
 	await page.type('textarea[name="description"]', pic.get_bio())
 	await page.waitForTimeout(2000)
@@ -69,7 +76,7 @@ async function assign_img(page, user, name) {
 async function init_twitter(account, index) {
 	var suspended = false
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: true,
 		args: [`--proxy-server=${account.proxy}`]
 	});
 	const page = await browser.newPage();
@@ -80,11 +87,8 @@ async function init_twitter(account, index) {
 	})
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 800, height: 600 })
-	if (fs.existsSync(__dirname + `/cookies/${account.user}_cookies.json`)) {
-		const cookiesString = fs.readFileSync(__dirname + `/cookies/${account.user}_cookies.json`);
-		const cookies = JSON.parse(cookiesString);
-		await page.setCookie(...cookies);
-		await page.waitForTimeout(2000)
+	if (fs.existsSync(process.cwd() + `/cookies/${account.user}_cookies.json`)) {
+		await page.setCookie(... await cookie_str(account.user));
 	}
 	else {
 		await page.goto('https://twitter.com/i/flow/login', { waitUntil: 'networkidle0' });
@@ -123,10 +127,10 @@ async function init_twitter(account, index) {
 		}
 	}
 	if (await page.url() == "https://twitter.com/account/access") {
-		await page.waitForTimeout(5000)
+		await page.waitForTimeout(2000)
 		console.log(`PVA for ${account.user}`)
-		if (await pva(page, account.user) == 1)
-			suspended = true
+		await browser.close()
+		return (0)
 	}
 	await page.goto("https://twitter.com/settings/profile", { waitUntil: 'networkidle2' })
 	await page.waitForTimeout(2000)
@@ -143,6 +147,7 @@ async function init_twitter(account, index) {
 		acc[index].tag = "SUSPENDED"
 		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 	}
+	console.log(`${account.user} INIT OK`)
 	await browser.close()
 }
 
