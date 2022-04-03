@@ -50,7 +50,7 @@ class picture {
 		return(bio[chance.integer({min: 0, max: bio.length - 1})])
 	}
 	get_name(name) {
-		return (get_name_from_tag(name))
+		return (this.get_name_from_tag(name))
 	}
 	get_name_from_tag(user) {
 		var re = ""
@@ -78,7 +78,7 @@ class unsplash {
 		var path = process.cwd() + `/db/pp`
 		var size = "small"
 		this.orient == "landscape" ? size = "regular" : 0
-		if (this.sex != 'h' && this.sex != 'f')
+		if (this.sex != 'm' && this.sex != 'f' && this.sex != 'n')
 			path = process.cwd() + `/db/banner`
 		try {var web = await axios.get(`https://api.unsplash.com/photos/random?client_id=${this.key}&query=${this.query}&count=${this.count}&orientation=${this.orient}`)}
 		catch(e) {
@@ -121,8 +121,10 @@ class unsplash {
 	get_name(id) {
 		if (this.sex == 'f')
 			return ("f-" + id + ".png")
-		if (this.sex == 'h')
-			return ("h-" + id + ".png")
+		if (this.sex == 'm')
+			return ("m-" + id + ".png")
+		if (this.sex == 'n')
+			return ("n-" + id + ".png")
 		else
 			return ("b-" + id + ".png")
 	}
@@ -132,10 +134,11 @@ class unsplash {
 	UNSPLASH
 */
 
-// (async() => {
+//  (async() => {
 
-// 	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "background", "30", "b", 1)
+// 	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "nature", "30", "n", 0)
 // 	await tmp.retrieve_pic()
+
 // })();
 
 /*
