@@ -4,17 +4,20 @@
 
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const {picture} = require('./banner-pp/index.js')
+const {picture, legit_at} = require('./banner-pp/index.js')
 const {phone_number} = require('./sms_wrapper.js')
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 const fs = require('fs');
 const {parentPort} = require("worker_threads");
+const legit_json = require('../db/legit.json')
+
 
 /*
 	INIT
 */
 
 const pic = new picture
+const legit = new legit_at(legit_json)
 
 /*
 	THREADS
@@ -37,19 +40,29 @@ async function cookie_str(user) {
 	return (cookies)
 }
 
+async function delete_str_in_selec(page, selector) {
+	await page.focus(selector);
+	await page.keyboard.down('Control');
+	await page.keyboard.press('A');
+	await page.keyboard.up('Control');
+	await page.keyboard.press('Backspace');
+}
+
 async function assign_img(page, user, name) {
+	while (await page.$('input[name="displayName"]') == null)
+		await page.waitForTimeout(500)
 	try {const [pp_choose] = await Promise.all([
 		page.waitForFileChooser(),
 		page.click('div[aria-label="Add avatar photo"]'),
 	]);
-	await pp_choose.accept([pic.get_pp(name)])
+		await pp_choose.accept([pic.get_pp(name)])
+		await page.waitForSelector('div[data-testid="applyButton"]')
+		await page.click('div[data-testid="applyButton"]')
 	}
 	catch(e) {
 		console.log(`${user} error add Avatar photo`)
 		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
 	}
-	await page.waitForSelector('div[data-testid="applyButton"]')
-	await page.click('div[data-testid="applyButton"]')
 	await page.waitForTimeout(1000)
 	const [banner_chooser] = await Promise.all([
 		page.waitForFileChooser(),
@@ -58,10 +71,11 @@ async function assign_img(page, user, name) {
 	await banner_chooser.accept([pic.get_banner()])
 	await page.waitForSelector('div[data-testid="applyButton"]')
 	await page.click('div[data-testid="applyButton"]')
-	await page.click('input[name="displayName"]', {clickCount: 3})
+	await delete_str_in_selec(page, 'input[name="displayName"]')
+	await delete_str_in_selec(page, 'input[name="displayName"]')
 	await page.type('input[name="displayName"]', pic.get_name(name))
-	await page.waitForTimeout(1000)
-	await page.click('textarea[name="description"]', { clickCount: 3 })
+	await delete_str_in_selec(page, 'textarea[name="description"]')
+	await delete_str_in_selec(page, 'textarea[name="description"]')
 	await page.type('textarea[name="description"]', pic.get_bio())
 	await page.waitForTimeout(2000)
 	await page.click('div[data-testid="Profile_Save_Button"]')
@@ -73,10 +87,27 @@ async function assign_img(page, user, name) {
 	return (name)
 }
 
+async function follow(page, user) {
+
+	var arr = legit.give_arr()
+	for (let x in arr) {
+		var url = "https://twitter.com/" + arr[x]
+		try {
+			await page.goto(url, { waitUntil: 'networkidle2' })
+			await page.waitForTimeout(1000)
+			if (await page.$(`div[aria-label="Follow @${arr[x]}"]`) != null)
+				await page.click(`div[aria-label="Follow @${arr[x]}"]`)
+		}
+		catch (e) {
+			console.log(`error follow ${arr[x]} by ${user}`)
+		}
+	}
+}
+
 async function init_twitter(account, index) {
 	var suspended = false
 	const browser = await puppeteer.launch({
-		headless: true,
+		headless: false,
 		args: [`--proxy-server=${account.proxy}`]
 	});
 	const page = await browser.newPage();
@@ -132,7 +163,10 @@ async function init_twitter(account, index) {
 		await browser.close()
 		return (0)
 	}
-	await page.goto("https://twitter.com/settings/profile", { waitUntil: 'networkidle2' })
+	try {await page.goto("https://twitter.com/settings/profile", { waitUntil: 'domcontentloaded' })}
+	catch(e) {
+		console.log(`${account.user} error while loading`)
+	}
 	await page.waitForTimeout(2000)
 	if (suspended == false) {
 		if (account.tag == "") {
@@ -147,6 +181,7 @@ async function init_twitter(account, index) {
 		acc[index].tag = "SUSPENDED"
 		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 	}
+	await follow(page, user)
 	console.log(`${account.user} INIT OK`)
 	await browser.close()
 }

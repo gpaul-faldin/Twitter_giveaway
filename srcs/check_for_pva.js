@@ -117,7 +117,7 @@ async function check_pva(action, account, index) {
 	await page.setViewport({ width: 1280, height: 720 })
 	await page.setCookie(... await cookie_str(account.user));
 	await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
-	//await page.waitForTimeout(5000)
+	await page.waitForTimeout(3000)
 	if (await page.url() == "https://twitter.com/account/access") {
 		console.log(`PVA for ${account.user}`)
 		var status = await pva(page, account.user)

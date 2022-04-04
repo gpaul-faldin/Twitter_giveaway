@@ -56,6 +56,8 @@ class picture {
 		for(let i in user) {
 			if ((/^[a-zA-Z]+$/.test(user[i]) && i == 0) || (/^[a-z]+$/.test(user[i])))
 				re += user[i]
+			else
+				break ;
 		}
 		return (re)
 	}
@@ -129,28 +131,74 @@ class unsplash {
 	}
 }
 
+class legit_at {
+	constructor(legit) {
+		this.size_csgo = this.draw_int(8),
+		this.csgo = Object.keys(legit.csgo)
+		this.size_news = this.draw_int(2),
+		this.news = Object.keys(legit.news)
+		this.size_crypto = this.draw_int(10),
+		this.crypto = Object.keys(legit.crypto)
+		this.size_giveaway = this.draw_int(5)
+		this.giveaway = Object.keys(legit.giveaway)
+	}
+	draw_int(max) {
+		return (chance.integer({min: 1, max: max}))
+	}
+	size_arr(arr) {
+		var i = 0
+		for (let x in arr) {
+			i++;
+		}
+		return (i)
+	}
+	give_arr() {
+		var re = []
+		var	i = 0
+
+		while (i < this.size_csgo) {
+			var rand = this.draw_int(this.csgo.length)
+			if (re.includes(this.csgo[rand]) == false) {
+				re.push(this.csgo[rand])
+			}
+			i++;
+		}
+		i = 0
+		while (i < this.size_news) {
+			var rand = this.draw_int(this.news.length)
+			if (re.includes(this.news[rand]) == false) {
+				re.push(this.news[rand])
+			}
+			i++;
+		}
+		i = 0
+		while (i < this.size_crypto) {
+			var rand = this.draw_int(this.crypto.length)
+			if (re.includes(this.crypto[rand]) == false) {
+				re.push(this.crypto[rand])
+			}
+			i++;
+		}
+		i = 0
+		while (i < this.size_giveaway) {
+			var rand = this.draw_int(this.giveaway.length)
+			if (re.includes(this.giveaway[rand]) == false) {
+				re.push(this.giveaway[rand])
+			}
+			i++;
+		}
+		return (re)
+	}
+}
+
 /*
 	UNSPLASH
 */
 
-//  (async() => {
+// (async() => {
 
-	//var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "nature", "30", "n", 0)
-	//await tmp.retrieve_pic()
-	// var tmp = []
-	// var re = []
-	// var i = 0
-
-	// while (i < 500) {
-	// 	let web = await axios.get(`https://api.quotable.io/random?maxLength=160`)
-	// 	web = web.data
-	// 	if (tmp.includes(web._id) == false) {
-	// 		tmp.push(web._id)
-	// 		re.push(web.content)
-	// 	}
-	// 	i++;
-	// }
-	// fs.writeFileSync(process.cwd() + `/db/quotes.json`, JSON.stringify(re, null, '	'), {flags:"w"});
+//	var tmp = new unsplash(require('../../tokens/unsplash.json')["client_id"], "nature", "30", "n", 0)
+//	await tmp.retrieve_pic()
 
 // })();
 
@@ -158,7 +206,7 @@ class unsplash {
 	EXPORT
 */
 
-module.exports = {picture}
+module.exports = {picture, legit_at}
 
 /*
 	QUOTES
@@ -523,7 +571,6 @@ let bio = [
 	"Live in the sunshine where you belong",
 	"My life is better than my daydreams",
 	"Sprinkling kindness everywhere I go",
-	"I love my followers more than life itself",
 	"Don't regret the opportunities you were too afraid to take",
 	"Sometimes we could always use a little magic - don't hide the magic within you",
 	"Every day might not be a good day but there is good in every day",
