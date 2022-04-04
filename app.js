@@ -60,12 +60,24 @@ class	accounts {
 		for (let i in acc) {
 			for (let x in nfo) {
 				if (acc[i].tag.substring(1) == x) {
+					nfo[x].followers.arr = acc[i].info.followers.arr
 					acc[i].info = nfo[x]
 					break ;
 				}
 			}
 		}
 		await this.write_file(acc)
+	}
+	async update_follow_list(acc) {
+		for (let x in acc) {
+			if (acc[x].info.followers.arr.length == 0 && acc[x].info.followers.nbr != 0) {
+				let re = await twit.get_followers(acc[x].info.id)
+				if (re.length != 0)
+					acc[x].info.followers.arr = re
+				else
+					break ;
+			}
+		}
 	}
 	lowest_followers(acc, nbr) {
 		var i = 0
@@ -199,14 +211,14 @@ const twit = new follow(require('./tokens/twitter.json')['Bearer'])
 	//////MODIFICATION ON CLASS VARIABLE//////
 
 acc[0].write_file(acc)
-action.url = ""
+action.url = "https://twitter.com/skinclubmedia/status/1510998837611143177"
 action.rt = true
 action.like = true
 action.info.headless = true
-action.info.threads = 2
+action.info.threads = 10
 //action.info.nbr_acc = 30
-//action.handler_follow([`@wungay`])
-//action.handler_tag(1)
+action.handler_follow([`@skinclubmedia`])
+action.handler_tag(1)
 
 /*
 	HANDLER
@@ -220,7 +232,7 @@ async function main_handler(arr) {
 		task: "./srcs/main_worker.js"
 	});
 
-	if (arr.length == -1)
+	if (arr.length == 0)
 		arr = acc
 	while (i < arr[0].size) {
 		prom.push(pool.exec({action: action, account: arr[i], array: arr, index: i}))
@@ -254,7 +266,7 @@ async function check_pva(arr) {
 	var i = 0
 	var prom = []
 	const pool = new StaticPool({
-		size: action.info.threads,
+		size: 15, //action.info.threads,
 		task: "./srcs/check_for_pva.js"
 	});
 
@@ -281,14 +293,13 @@ async function main(arr) {
 	console.log("Remove suspended accounts if they exist")
 	await rm_suspended()
 	console.log("Starting the actions")
-	//await main_handler(arr)
+	await main_handler(arr)
 	await rm_suspended()
 	process.exit()
 }
 
 (async () => {
-	await acc[0].update_info(acc)
-	acc[0].set_init_true(acc)
+	await acc[0].update_follow_list(acc)
 	var arr = acc[0].lowest_followers(acc, action.info.nbr_acc)
 	action.handler_follow(acc[0].username_arr(arr))
 	await main("")

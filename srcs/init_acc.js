@@ -106,6 +106,7 @@ async function follow(page, user) {
 
 async function init_twitter(account, index) {
 	var suspended = false
+	var stop = false
 	const browser = await puppeteer.launch({
 		headless: true,
 		args: [`--proxy-server=${account.proxy}`]
@@ -163,9 +164,11 @@ async function init_twitter(account, index) {
 		await browser.close()
 		return (0)
 	}
-	try {await page.goto("https://twitter.com/settings/profile", { waitUntil: 'domcontentloaded' })}
+	try {await page.goto("https://twitter.com/settings/profile", { waitUntil: 'networkidle2', timeout: 0})}
 	catch(e) {
 		console.log(`${account.user} error while loading`)
+		stop = true
+		suspended = true
 	}
 	await page.waitForTimeout(2000)
 	if (suspended == false) {
@@ -175,13 +178,16 @@ async function init_twitter(account, index) {
 			fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		}
 		var tag = await assign_img(page, account.user, account.tag.substring(1))
+		await follow(page, account.user)
 	}
-	else {
+	else if (stop == false) {
 		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
 		acc[index].tag = "SUSPENDED"
 		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 	}
-	await follow(page, account.user)
-	console.log(`${account.user} INIT OK`)
+	if (stop || suspended)
+		console.log(`${account.user} NOT OK`)
+	else
+		console.log(`${account.user} INIT OK`)
 	await browser.close()
 }

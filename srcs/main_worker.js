@@ -49,10 +49,10 @@ async function action_todo(action, page, user, array) {
 			await page.waitForTimeout(50)
 		await page.click('div[data-testid="reply"]')
 		while (await page.$('div[data-testid="tweetTextarea_0"]') == null);
-			await page.waitForTimeout(50)
+			await page.waitForTimeout(500)
 		await page.type('div[data-testid="tweetTextarea_0"]', get_random_at(user, action.tag.nbr, array))
 		await page.waitForTimeout(500)
-		await page.screenshot({ path: __dirname + `/debug_screenshot/${user}.jpg` });
+		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg` });
 		await page.click('div[data-testid="tweetButton"]')
 		await page.click('div[data-testid="tweetButton"]')
 		await page.waitForTimeout(2000)
@@ -182,22 +182,27 @@ async function log_in_twitter(action, account, array, index) {
 var chance = new Chance();
 
 	//////TWITTER//////
+
 function get_random_at(user, nbr, array) {
 
 	var re = "";
 	var i = 0;
 	var mem = [];
+	var index = 0
+
+	for (let x in array) {
+		if (array[x].user == user)
+			index = x
+	}
+	var arr = array[index].info.followers.arr
 
 	while (i < nbr) {
-		let tmp = -1;
-		while (tmp == -1) {
-			tmp = chance.integer({ min: 0, max: (array.length - 1) })
-			if (array[tmp].user == user || mem.indexOf(tmp) != -1 || array[tmp].tag == undefined)
-				tmp = -1
+		var tmp = chance.integer({ min: 0, max: (arr.length - 1) })
+		if (mem.includes(arr[tmp]) == false) {
+			re = re.length == 0 ? re.concat(arr[tmp]) : re.concat(" " + arr[tmp])
+			mem.push(arr[tmp])
+			i++
 		}
-		mem.push(tmp)
-		re = re.length == 0 ? re.concat(array[tmp].tag) : re.concat(" " + array[tmp].tag)
-		i++;
 	}
 	return (re)
 }

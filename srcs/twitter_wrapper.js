@@ -7,7 +7,10 @@ class twitter {
 	add_info(re, user, id, metrics) {
 		re[`${user}`] = {
 			id: id,
-			followers: metrics.followers_count,
+			followers: {
+				nbr: metrics.followers_count,
+				arr: []
+				},
 			following: metrics.following_count
 		}
 		return (re)
@@ -40,6 +43,17 @@ class follow extends twitter {
 		}
 		return (re)
 	}
+	async get_followers(id) {
+		var re = []
+		try {
+			var web = await this.client.v2.followers(id)
+			for (let x in web.data) {
+				re.push("@" + web.data[x].username)
+			}
+		}
+		catch (e) {}
+		return (re)
+	}
 }
 
 class search extends twitter {
@@ -57,6 +71,15 @@ class search extends twitter {
 			}
 		}
 	}
+
 }
+
+// (async() => {
+
+// 	var tmp = new search(require('../tokens/twitter.json')['Bearer'])
+// 	console.log(await tmp.get_followers('1506909517099200515'))
+
+// })();
+
 
 module.exports = {follow, search}

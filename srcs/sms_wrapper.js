@@ -65,7 +65,7 @@ class phone_number {
 		let re = await this.get_status()
 		console.log(`${user} code : ${re}`)
 		if (re === "NO") {
-			await this.set_status(8)
+			//await this.set_status(8)
 			return ("NONE")
 		}
 		await this.set_status(6)
