@@ -203,7 +203,7 @@ action.url = ""
 action.rt = true
 action.like = true
 action.info.headless = true
-action.info.threads = 5
+action.info.threads = 2
 //action.info.nbr_acc = 30
 //action.handler_follow([`@wungay`])
 //action.handler_tag(1)

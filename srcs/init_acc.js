@@ -107,7 +107,7 @@ async function follow(page, user) {
 async function init_twitter(account, index) {
 	var suspended = false
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: true,
 		args: [`--proxy-server=${account.proxy}`]
 	});
 	const page = await browser.newPage();
@@ -181,30 +181,7 @@ async function init_twitter(account, index) {
 		acc[index].tag = "SUSPENDED"
 		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 	}
-	await follow(page, user)
+	await follow(page, account.user)
 	console.log(`${account.user} INIT OK`)
 	await browser.close()
-}
-
-async function pva(page, user) {
-	if (await page.$('input[value="Start"]'))
-		await page.click('input[value="Start"]')
-	await page.waitForSelector('#country_code')
-	await page.select('#country_code', "84")
-	let phone = new phone_number(10, 'tw', 2)
-	await phone.get_number()
-	await page.type('#phone_number', phone.nbr)
-	await page.click('input[name="discoverable_by_mobile_phone"]')
-	await page.waitForTimeout(500)
-	await page.click('input[type="submit"]')
-	let code = await phone.get_code()
-	console.log(user + ": " + code)
-	if (code == "NONE")
-		return (1)
-	await page.type('#code', code)
-	await page.waitForTimeout(2000)
-	await page.click('input[value="Next"]')
-	await page.waitForSelector('input[value="Continue to Twitter"]')
-	await page.click('input[value="Continue to Twitter"]')
-	await page.waitForTimeout(5000)
 }

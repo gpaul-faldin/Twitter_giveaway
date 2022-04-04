@@ -187,6 +187,7 @@ class legit_at {
 			}
 			i++;
 		}
+		re.push('CSGO')
 		return (re)
 	}
 }
