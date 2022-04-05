@@ -51,7 +51,8 @@ class	accounts {
 	username_arr(acc) {
 		var re = []
 		for (let i in acc) {
-			re.push(acc[i].tag.substring(1))
+			if (acc[i].tag.length != 0)
+				re.push(acc[i].tag.substring(1))
 		}
 		return (re)
 	}
@@ -125,6 +126,19 @@ class	accounts {
 		for (let x in acc) {
 			acc[x].init = true
 		}
+	}
+	acc_from_user(user) {
+		var re = []
+		for (let x in acc) {
+			for (let w in user) {
+				if (acc[x].user == user[w]) {
+					if (re.includes(acc[x]) == false)
+						re.push(acc[x])
+					break ;
+				}
+			}
+		}
+		return (re)
 	}
 }
 
@@ -211,14 +225,14 @@ const twit = new follow(require('./tokens/twitter.json')['Bearer'])
 	//////MODIFICATION ON CLASS VARIABLE//////
 
 acc[0].write_file(acc)
-action.url = "https://twitter.com/skinclubmedia/status/1510998837611143177"
+//action.url = "https://twitter.com/ignxred/status/1510728821003198466"
 action.rt = true
 action.like = true
 action.info.headless = true
-action.info.threads = 10
+action.info.threads = 15
 //action.info.nbr_acc = 30
-action.handler_follow([`@skinclubmedia`])
-action.handler_tag(1)
+action.handler_follow([`wungay`])
+action.handler_tag(2)
 
 /*
 	HANDLER
@@ -293,17 +307,19 @@ async function main(arr) {
 	console.log("Remove suspended accounts if they exist")
 	await rm_suspended()
 	console.log("Starting the actions")
-	await main_handler(arr)
+	//await main_handler(arr)
 	await rm_suspended()
 	process.exit()
 }
 
 (async () => {
-	await acc[0].update_follow_list(acc)
-	var arr = acc[0].lowest_followers(acc, action.info.nbr_acc)
-	action.handler_follow(acc[0].username_arr(arr))
-	await main("")
+	//await acc[0].update_follow_list(acc)
 	await acc[0].update_info(acc)
+	await acc[0].set_init_true(acc[0].acc_from_user(['TyraAleksyeyen7', 'LisaMar92322246']))
+	//var arr = acc[0].lowest_followers(acc, action.info.nbr_acc)
+	//action.handler_follow(acc[0].username_arr(arr))
+	await main(acc[0].getRandom(acc, acc.length))
+	//await acc[0].update_info(acc)
 })();
 
 
@@ -327,7 +343,7 @@ function create_acc_array() {
 		acc[x] = acc[x].trim()
 		if (acc[x] && already_in(db, acc[x]) == -1) {
 			let tmp = acc[x].split(':')
-			re.push(new accounts(tmp[0], tmp[1], "", tmp[2], "", 0, {}))
+			re.push(new accounts(tmp[0], tmp[1], "", tmp[2], "", 0, {id: "", followers: {nbr: 0, arr: []}, following: 0}))
 		}
 	}
 	for (let x in re) {
@@ -340,7 +356,7 @@ function create_proxy_array() {
 	let proxy = fs.readFileSync(__dirname + "/db/proxy.txt", 'utf8')
 	let re = new Array
 
-	proxy = proxy.split('\r')
+	proxy = proxy.split('\n')
 	for (let x in proxy) {
 		proxy[x] = proxy[x].trim()
 		if (proxy[x])
@@ -351,10 +367,6 @@ function create_proxy_array() {
 
 function give_proxy() {
 	var tmp = proxies[random.gen_number(0, (proxies[0].size - 1))]
-
-	while (tmp.state != 0 && tmp.max_use() != 0)
-		tmp = proxies[random.gen_number(0, proxies[0].size)]
-	tmp.status()
 	return (tmp.proxy)
 }
 

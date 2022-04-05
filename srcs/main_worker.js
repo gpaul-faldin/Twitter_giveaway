@@ -46,13 +46,30 @@ async function action_todo(action, page, user, array) {
 	}
 	if (action.tag.on == true && action.url != '') {
 		while (await page.$('div[data-testid="reply"]') == null);
-			await page.waitForTimeout(50)
+		await page.waitForTimeout(50)
 		await page.click('div[data-testid="reply"]')
+		await page.waitForTimeout(2000)
+		await page.evaluate(`
+			var tmp = document.querySelectorAll('span')
+			function swag() {
+				for (let x in tmp) {
+					if (tmp[x].innerHTML == 'Got it')
+						return (tmp[x])
+				}
+				return ('')
+			}
+			function res() {
+				var re = swag()
+				if (re.length != 0)
+					re.parentNode.parentNode.parentNode.click()
+				return (0)
+			}
+			res()
+		`)
 		while (await page.$('div[data-testid="tweetTextarea_0"]') == null);
-			await page.waitForTimeout(500)
+		await page.waitForTimeout(500)
 		await page.type('div[data-testid="tweetTextarea_0"]', get_random_at(user, action.tag.nbr, array))
 		await page.waitForTimeout(500)
-		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg` });
 		await page.click('div[data-testid="tweetButton"]')
 		await page.click('div[data-testid="tweetButton"]')
 		await page.waitForTimeout(2000)
@@ -60,16 +77,17 @@ async function action_todo(action, page, user, array) {
 	if (action.follow.on == true) {
 		for (let i in action.follow.acc) {
 			if (action.follow.acc[i] != user) {
-				let url = "https://twitter.com/" + action.follow.acc[i]
+				let url = "https://twitter.com/" + action.follow.acc[i][0] == '@' ? action.follow.acc[i].substring(1) : action.follow.acc[i]
 				await page.waitForTimeout(1000)
 				try {
 					await page.goto(url, { waitUntil: 'networkidle2'})
 					await page.waitForTimeout(1000)
-					if (await page.$(`div[aria-label="Follow @${action.follow.acc[i]}"]`) != null)
-						await page.click(`div[aria-label="Follow @${action.follow.acc[i]}"]`)
+					var acc = action.follow.acc[i][0] == '@' ? action.follow.acc[i] : '@' + action.follow.acc[i]
+					if (await page.$(`div[aria-label="Follow @${acc}"]`) != null)
+						await page.click(`div[aria-label="Follow @${acc}"]`)
 					}
 				catch (e) {
-					console.log(`error follow ${action.follow.acc[i]} by ${user}`)
+					console.log(`error follow ${acc} by ${user}`)
 				}
 			}
 		}
@@ -147,16 +165,14 @@ async function log_in_twitter(action, account, array, index) {
 	}
 	catch (e) {
 		console.log(`${account.user} failed to go /home`)
+		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${account.user}_ERROR.jpg`})
 		await browser.close()
 		return (0)
 	}
-	//await page.waitForTimeout(5000)
+	await page.waitForTimeout(3000)
 	if (await page.url() == "https://twitter.com/account/access") {
 		console.log(`PVA for ${account.user}`)
-		if (await pva(page, account.user) == 1)
-			stop = true
-		else
-			await page.setCookie(... await cookie_str(account.user));
+		stop = true
 	}
 	if (stop == false && suspended == false) {
 		if (action.url != '') {

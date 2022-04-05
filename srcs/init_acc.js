@@ -4,8 +4,7 @@
 
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const {picture, legit_at} = require('./banner-pp/index.js')
-const {phone_number} = require('./sms_wrapper.js')
+const {picture, legit_at} = require('./banner-pp')
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 const fs = require('fs');
 const {parentPort} = require("worker_threads");
@@ -51,17 +50,19 @@ async function delete_str_in_selec(page, selector) {
 async function assign_img(page, user, name) {
 	while (await page.$('input[name="displayName"]') == null)
 		await page.waitForTimeout(500)
-	try {const [pp_choose] = await Promise.all([
-		page.waitForFileChooser(),
-		page.click('div[aria-label="Add avatar photo"]'),
-	]);
+	try {
+		const [pp_choose] = await Promise.all([
+			page.waitForFileChooser(),
+			page.click('div[aria-label="Add avatar photo"]'),
+		]);
+		await page.waitForTimeout(1000)
 		await pp_choose.accept([pic.get_pp(name)])
 		await page.waitForSelector('div[data-testid="applyButton"]')
 		await page.click('div[data-testid="applyButton"]')
 	}
 	catch(e) {
 		console.log(`${user} error add Avatar photo`)
-		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
+		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_ERROR.jpg`})
 	}
 	await page.waitForTimeout(1000)
 	const [banner_chooser] = await Promise.all([
@@ -78,13 +79,9 @@ async function assign_img(page, user, name) {
 	await delete_str_in_selec(page, 'textarea[name="description"]')
 	await page.type('textarea[name="description"]', pic.get_bio())
 	await page.waitForTimeout(2000)
+	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
 	await page.click('div[data-testid="Profile_Save_Button"]')
-	await page.waitForTimeout(4000)
-	var name = await page.evaluate(`
-		var name = document.querySelector('a[aria-label="Profile"]').href.split('/')[3]
-		'@' + name
-	`)
-	return (name)
+	await page.waitForTimeout(5000)
 }
 
 async function follow(page, user) {
@@ -123,17 +120,26 @@ async function init_twitter(account, index) {
 		await page.setCookie(... await cookie_str(account.user));
 	}
 	else {
-		await page.goto('https://twitter.com/i/flow/login', { waitUntil: 'networkidle0' });
+		await page.goto('https://twitter.com/i/flow/login', { waitUntil: 'networkidle2' });
+		while (await page.$('input[autocomplete="username"]') == null)
+			await page.waitForTimeout(50)
 		await page.type('input[autocomplete="username"]', account.user)
 		await page.evaluate(`document.querySelectorAll('div[role="button"]')[2].click()`)
 		await page.waitForTimeout(1000)
+		while (await page.$('div[data-testid="OCF_CallToAction_Button"]') == null)
+			await page.waitForTimeout(50)
 		await page.click('div[data-testid="OCF_CallToAction_Button"]')
-		await page.solveRecaptchas()
-		await page.waitForSelector('input[name="password"]', {timeout: 0})
-		await page.type('input[name="password"]', account.pass)
-		await page.waitForTimeout(1000)
-		await page.click('div[data-testid="LoginForm_Login_Button"]')
-		if (suspended == false) {
+		try {
+			await page.solveRecaptchas()
+			await page.waitForSelector('input[name="password"]', {timeout: 0})
+			await page.type('input[name="password"]', account.pass)
+			await page.waitForTimeout(1000)
+			await page.click('div[data-testid="LoginForm_Login_Button"]')
+		}
+		catch(e) {
+			stop = true
+		}
+		if (suspended == false && stop == false) {
 			await page.waitForTimeout(2000)
 			if (await page.$('input[type="email"]')) {
 				await page.type('input[type="email"]', account.mail)
@@ -155,7 +161,7 @@ async function init_twitter(account, index) {
 				accept_cookies()
 			`)
 			let cookie = await page.cookies()
-			fs.writeFileSync(__dirname + `/cookies/${account.user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
+			fs.writeFileSync(process.cwd() + `/cookies/${account.user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
 		}
 	}
 	if (await page.url() == "https://twitter.com/account/access") {
@@ -171,16 +177,22 @@ async function init_twitter(account, index) {
 		suspended = true
 	}
 	await page.waitForTimeout(2000)
-	if (suspended == false) {
+	if (suspended == false && stop == false) {
 		if (account.tag == "") {
+			var tag = await page.evaluate(`
+			var name = document.querySelector('a[aria-label="Profile"]').href.split('/')[3]
+			'@' + name
+			`)
 			const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
 			acc[index].tag = tag
+			account.tag = tag
 			fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		}
-		var tag = await assign_img(page, account.user, account.tag.substring(1))
-		await follow(page, account.user)
+		await assign_img(page, account.user, account.tag.substring(1))
+		if (account.init == false)
+			await follow(page, account.user)
 	}
-	else if (stop == false) {
+	else if (suspended == true) {
 		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
 		acc[index].tag = "SUSPENDED"
 		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
@@ -190,4 +202,5 @@ async function init_twitter(account, index) {
 	else
 		console.log(`${account.user} INIT OK`)
 	await browser.close()
+	return (0)
 }
