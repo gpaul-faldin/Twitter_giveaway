@@ -37,7 +37,7 @@ class picture {
 			sex = "f"
 		else if (getGender(this.get_name_from_tag(name)) == "male")
 			sex = "m"
-		while (file[0] != sex) {
+		while (file[0] != sex && file[0] != 'n') {
 			file = this.pp_files[this.draw_int(this.pp_size)]
 		}
 		return (this.pp_path + file)
@@ -130,6 +130,7 @@ class unsplash {
 			return ("b-" + id + ".png")
 	}
 }
+
 
 class legit_at {
 	constructor(legit) {

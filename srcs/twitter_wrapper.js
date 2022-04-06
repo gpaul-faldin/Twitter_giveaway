@@ -1,4 +1,7 @@
 const { TwitterApi } = require('twitter-api-v2');
+const path = require('path');
+const axios = require('axios').default
+const fs = require('fs')
 
 class twitter {
 	constructor(token) {
@@ -71,15 +74,55 @@ class search extends twitter {
 			}
 		}
 	}
+	async scrape_profileP(id) {
+		var re = []
+		var web = await this.client.v2.followers(id, {"user.fields": "profile_image_url", max_results: 1000})
+		//var prom = []
+		web = web.data
+		for (let x in web) {
+			if (web[x].profile_image_url !== 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png') {
+				let tmp = web[x].profile_image_url.split('_normal')[0]
+				re.push(tmp + '.jpg')
+			}
+		}
+		console.log(web)
+		for (let i in re) {
+			let name = 'n-' + re[i].substring(37)
+			name = name.replaceAll('/', '_')
+			if (fs.existsSync(`./banner-pp/db/pp/${name}`) == false) {
+				try {await this.download_pic(re[i], './banner-pp/db/pp', name)}
+				catch(e) {
+					console.log(re[i])
+				}
 
+			}
+		}
+		//await Promise.all(prom)
+		
+		//console.log('https://pbs.twimg.com/profile_images/1511441890016702465/Z2LYR5SB.jpg'.substring(37))
+	}
+	async download_pic(fileUrl, downloadFolder, name) {
+		const localFilePath = path.resolve(__dirname, downloadFolder, name);
+
+		try {
+			const response = await axios({
+				method: 'GET',
+				url: fileUrl,
+				responseType: 'stream',
+			});
+		response.data.pipe(fs.createWriteStream(localFilePath));
+		} catch (err) {
+			throw new Error(err);
+		}
+	}
 }
 
-// (async() => {
+(async() => {
 
-// 	var tmp = new search(require('../tokens/twitter.json')['Bearer'])
-// 	console.log(await tmp.get_followers('1506909517099200515'))
+	var tmp = new search(require('../tokens/twitter.json')['Bearer'])
+	//console.log(await tmp.get_followers('1506909517099200515'))
+	await tmp.scrape_profileP('1371889652584562689')
 
-// })();
-
+})();
 
 module.exports = {follow, search}
