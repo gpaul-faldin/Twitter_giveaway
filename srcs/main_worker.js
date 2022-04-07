@@ -23,9 +23,9 @@ parentPort.on("message", async (data) => {
 
 puppeteer.use(StealthPlugin())
 
-async function cookie_str(user) {
-	const cookiesString = fs.readFileSync(process.cwd() + `/cookies/${user}_cookies.json`);
-	const cookies = JSON.parse(cookiesString);
+async function cookie_str(account) {
+	console.log( await account.populate("cookies"))
+
 	return (cookies)
 }
 
@@ -147,6 +147,9 @@ async function pva(page, user) {
 async function log_in_twitter(action, account, array, index) {
 	var stop = false
 	var suspended = false
+
+	await cookie_str(account)
+
 	const browser = await puppeteer.launch({
 		headless: action.info.headless,
 		args: [`--proxy-server=${account.proxy}`]
@@ -159,7 +162,7 @@ async function log_in_twitter(action, account, array, index) {
 	})
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 1280, height: 720 })
-	await page.setCookie(... await cookie_str(account.user));
+	await page.setCookie(... account.cookies);
 	try {
 		await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
 	}

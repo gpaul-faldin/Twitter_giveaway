@@ -5,6 +5,8 @@ var chance = require('chance').Chance()
 const {StaticPool} = require("node-worker-threads-pool");
 const fs = require('fs');
 const {follow} = require('./srcs/twitter_wrapper.js')
+var common = require('./events/common');
+var commonEmitter = common.commonEmitter;
 
 
 /*
@@ -14,7 +16,7 @@ const {follow} = require('./srcs/twitter_wrapper.js')
 	//////CLASS//////
 
 class	accounts {
-	constructor(user, pass, tag, mail, proxy, size, info) {
+	constructor(user, pass, tag, mail, proxy, info, cookies) {
 		this.user = user
 		this.pass = pass
 		this.tag = tag
@@ -23,10 +25,10 @@ class	accounts {
 			this.proxy = proxy
 		else
 			this.proxy = ""
-		this.size = size
 		this.timeout = false
 		this.init = false
 		this.info = info
+		this.cookies = cookies
 	}
 	async write_file(acc) {
 		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), {flags:"w"});
@@ -216,46 +218,48 @@ class	rand {
 }
 
 	//////CREATE CLASS VARIABLE//////
-var acc = create_acc_array()
-var proxies = create_proxy_array()
-var action = new actions
+
+//var proxies = create_proxy_array()
+//var action = new actions
 const random = new rand
 const twit = new follow(require('./tokens/twitter.json')['Bearer'])
 
 	//////MODIFICATION ON CLASS VARIABLE//////
 
-acc[0].write_file(acc)
-//action.url = "https://twitter.com/ignxred/status/1510728821003198466"
-action.rt = true
-action.like = true
-action.info.headless = true
-action.info.threads = 15
-//action.info.nbr_acc = 30
-action.handler_follow([`wungay`])
-action.handler_tag(2)
+// acc[0].write_file(acc)
+// //action.url = "https://twitter.com/ignxred/status/1510728821003198466"
+// action.rt = true
+// action.like = true
+// action.info.headless = true
+// action.info.threads = 15
+// //action.info.nbr_acc = 30
+// action.handler_follow([`wungay`])
+// action.handler_tag(2)
 
 /*
 	HANDLER
 */
 
-async function main_handler(arr) {
+async function main_handler(acc, action) {
 	var i = 0
 	var prom = []
+	var size = await acc[0].populate('info')
+	console.log(size)
 	const pool = new StaticPool({
 		size: action.info.threads,
-		task: "./srcs/main_worker.js"
+		task: process.cwd() + "/srcs/main_worker.js"
 	});
-
-	if (arr.length == 0)
-		arr = acc
-	while (i < arr[0].size) {
-		prom.push(pool.exec({action: action, account: arr[i], array: arr, index: i}))
+	if (acc.length == 0)
+		return (1)
+	while (i < action.info.nbr_acc) {
+		prom.push(pool.exec({action: action, account: acc[i], array: acc, index: i}))
 		i++;
 	}
 	await Promise.all(prom)
+	return (0)
 }
 
-async function init_handler() {
+async function init_handler(action) {
 	var i = 0;
 	var prom = []
 	const pool = new StaticPool({
@@ -274,9 +278,10 @@ async function init_handler() {
 	}
 	acc[0].write_file(acc);
 	await Promise.all(prom)
+	return (0)
 }
 
-async function check_pva(arr) {
+async function check_pva(acc) {
 	var i = 0
 	var prom = []
 	const pool = new StaticPool({
@@ -297,32 +302,23 @@ async function check_pva(arr) {
 	MAIN
 */
 
-async function main(arr) {
-	rm_useless_cookies()
-	console.log("Check for PVA")
-	//await check_pva(arr)
-	await rm_timeout(arr)
-	console.log("Check for INIT")
-	await init_handler()
-	console.log("Remove suspended accounts if they exist")
-	await rm_suspended()
+async function main(arr, action) {
+	//var acc = create_acc_array(arr)
+	console.log(arr)
+	if (action.info.pva) {
+		console.log("Check for PVA")
+		await check_pva(arr)
+	}
+	if (action.info.init) {
+		console.log("Check for INIT")
+		await init_handler(action)
+	}
 	console.log("Starting the actions")
-	//await main_handler(arr)
-	await rm_suspended()
-	process.exit()
+	await main_handler(arr, action)
+	commonEmitter.emit("finish")
+	return (0)
+
 }
-
-(async () => {
-	//await acc[0].update_follow_list(acc)
-	await acc[0].update_info(acc)
-	await acc[0].set_init_true(acc[0].acc_from_user(['TyraAleksyeyen7', 'LisaMar92322246']))
-	//var arr = acc[0].lowest_followers(acc, action.info.nbr_acc)
-	//action.handler_follow(acc[0].username_arr(arr))
-	await main(acc[0].getRandom(acc, acc.length))
-	//await acc[0].update_info(acc)
-})();
-
-
 
 /*
 	UTILS
@@ -330,25 +326,13 @@ async function main(arr) {
 
 	//////INIT UTILS//////
 
-function create_acc_array() {
-	let acc = fs.readFileSync(__dirname + "/db/accounts.txt", 'utf8')
-	let db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
+function create_acc_array(db) {
 	let re = new Array
 
 	for (let i in db) {
-		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, 0, db[i].info))
+		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, "", db[i].cookies.cookies))
 	}
-	acc = acc.split('\n')
-	for (let x in acc) {
-		acc[x] = acc[x].trim()
-		if (acc[x] && already_in(db, acc[x]) == -1) {
-			let tmp = acc[x].split(':')
-			re.push(new accounts(tmp[0], tmp[1], "", tmp[2], "", 0, {id: "", followers: {nbr: 0, arr: []}, following: 0}))
-		}
-	}
-	for (let x in re) {
-		re[x].size = re.length
-	}
+	console.log(re[0])
 	return (re);
 }
 
@@ -434,4 +418,4 @@ function already_in(db, acc) {
 	TEST
 */
 
-
+module.exports = {main}

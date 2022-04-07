@@ -117,12 +117,12 @@ class search extends twitter {
 	}
 }
 
-(async() => {
+// (async() => {
 
-	var tmp = new search(require('../tokens/twitter.json')['Bearer'])
-	//console.log(await tmp.get_followers('1506909517099200515'))
-	await tmp.scrape_profileP('1371889652584562689')
+// 	var tmp = new search(require('../tokens/twitter.json')['Bearer'])
+// 	//console.log(await tmp.get_followers('1506909517099200515'))
+// 	await tmp.scrape_profileP('1371889652584562689')
 
-})();
+// })();
 
 module.exports = {follow, search}
