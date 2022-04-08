@@ -1,5 +1,5 @@
-const user = require('./../mongo/User.js')
-const info = require('./../mongo/twitter_info.js')
+const user = require('./mongo/User.js')
+const info = require('./mongo/twitter_info.js')
 
 class	actions {
 	constructor(MAX_THREAD) {

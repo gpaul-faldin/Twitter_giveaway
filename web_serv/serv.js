@@ -5,11 +5,9 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
-const user = require('./../mongo/User.js')
-const cookies = require('./../mongo/cookies.js')
 const { actions, acc_manip } = require('./../srcs/class')
-const {main} = require('../main.js')
-var common = require('../events/common');
+var common = require('../srcs/events/common');
+var handler = require('./routes.js')
 
 
 /*
@@ -18,7 +16,6 @@ var common = require('../events/common');
 
 //////DB//////
 global.db = (global.db ? global.db : mongoose.connect('mongodb://192.168.0.23:27017/Twitter'));
-
 
 //////CLASS//////
 
@@ -109,23 +106,9 @@ class accounts extends acc_manip {
 	}
 }
 
-//////GLOBAL//////
-var IN_USE = false
-var MAX_THREAD = 15
-
 //////MISC//////
 const app = express()
 app.use(bodyParser.json());
-var action = new actions(MAX_THREAD)
-
-
-/*
-	EVENTS
-*/
-var commonEmitter = common.commonEmitter;
-commonEmitter.on("finish", data => {
-	IN_USE == true ? IN_USE = false : 0
-});
 
 /*
 	EXPRESS
@@ -135,96 +118,15 @@ app.get('/', (req, res) => {
 	res.status(418).send("Lost ?")
 })
 
-app.post('/api/action', async (req, res) => {
-	if (IN_USE == false) {
+//////ACTION RELATED//////
 
-		try {
-			await action.parse_query(req.query, req.body)
-		} catch (e) {
-			return (res.status(400).send(e.message))
+app.post('/api/action', handler.action_handler)
+app.post('/api/start', handler.start_handler)
 
-		}
-		action.info.ready = true
-		res.send(`Action is ready`)
-	}
-	else {
-		res.status(503).send(`Service already in use`)
-	}
-})
+//////RETRIEVE DATA RELATED//////
 
-app.post('/api/start', async (req, res) => {
-	var body = req.body
-	var manip = new acc_manip
+app.get('/api/retrieve/lowest', handler.retrieve_lowest_handler)
+app.get('/api/retrieve/random', handler.retrieve_random_handler)
+app.get('/api/retrieve/specific', handler.retrieve_spe_handler)
 
-	if (IN_USE == false) {
-		if (Object.keys(body).length === 0)
-			return (res.status(400).send("No body found"))
-		if (!body.mode)
-			return (res.status(400).send("Missing mode field in body"))
-		if (action.info.ready == false)
-			return (res.status(400).send("Actions are not setup"))
-		switch (body.mode) {
-			case 'rand':
-				var arr = await manip.getRandom(action.info.nbr_acc).then(async (arr) => await manip.id_array_to_acc(arr))
-				break;
-			case 'lowest':
-				if (body.opt != "1" && body.opt != "2")
-					return res.status(400).send(`opt must be 1 (following) or 2 (followers) for mode lowest`)
-				body.opt == 1 ? body.opt = "following" : body.opt = "followers"
-				var arr = await manip.lowest(action.info.nbr_acc, body.opt).then(async (arr) => await manip.id_array_to_acc(arr))
-				break;
-			case 'spe':
-				var arr = await manip.get_spe(body.opt).then(async (arr) => await manip.id_array_to_acc(arr))
-				break;
-		}
-		IN_USE = true
-		main(arr, action)
-		action = new actions(MAX_THREAD)
-		return (res.send("OK"))
-	}
-	return (res.status(503).send('Bot already in use'))
-})
-
-app.get('/api/retrieve/lowest', async (req, res) => {
-	if (!req.query.opt)
-		return res.status(400).send(`opt must be specified`)
-	var manip = new acc_manip
-	var qty = await manip.get_size()
-	var opt = ""
-	if (req.query.qty) {
-		if (!Number(req.query.qty))
-			return res.status(400).send(`qty type must be Number`)
-		qty = req.query.qty
-	}
-	if (req.query.opt != "1" && req.query.opt != "2")
-		return res.status(400).send(`opt must be 1 (following) or 2 (followers)`)
-	req.query.opt == 1 ? opt = "following" : opt = "followers"
-	if (!req.query.output)
-		return res.send(await manip.lowest(qty, opt).then(async (arr) => await manip.id_array_to_acc(arr)))
-	return res.send(await manip.lowest(qty, opt).then(async (arr) => await manip.name_id_to_X(req.query.output, arr)))
-})
-
-app.get('/api/retrieve/random', async (req, res) => {
-	var manip = new acc_manip
-	var qty = await manip.get_size()
-	if (req.query.qty) {
-		if (!Number(req.query.qty))
-			return res.status(400).send(`qty type must be Number`)
-		qty = req.query.qty
-	}
-	if (!req.query.output)
-		return res.send(await manip.getRandom(qty).then(async (arr) => await manip.id_array_to_acc(arr)))
-	return (res.send(await manip.getRandom(qty).then(async (arr) => await manip.name_id_to_X(req.query.output, arr))))
-})
-
-app.get('/api/retrieve/specific', async (req, res) => {
-	var manip = new acc_manip
-	if (!req.query.tag)
-		return (res.status(400).send(`tag(s) must be specified`))
-	var re = await manip.get_spe(req.query.tag)
-	if (!req.query.output)
-		return (res.send(await manip.id_array_to_acc(re)))
-	return (res.send(await manip.name_id_to_X(req.query.output, re)))
-})
-
-app.listen(8080)
+app.listen(80)

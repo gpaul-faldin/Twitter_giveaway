@@ -9,9 +9,9 @@ var Chance = require('chance')
 const {phone_number} = require('./sms_wrapper.js')
 const {parentPort} = require("worker_threads");
 const mongoose = require('mongoose')
-const cookies = require("./../mongo/cookies.js")
-const info = require("./../mongo/twitter_info.js")
-const user = require("./../mongo/User.js")
+const cookies = require("./mongo/cookies.js")
+const info = require("./mongo/twitter_info.js")
+const user = require("./mongo/User.js")
 
 mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 

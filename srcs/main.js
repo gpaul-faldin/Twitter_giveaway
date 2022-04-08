@@ -4,7 +4,7 @@
 var chance = require('chance').Chance()
 const {StaticPool} = require("node-worker-threads-pool");
 const fs = require('fs');
-const {follow} = require('./srcs/twitter_wrapper.js')
+const {follow} = require('./twitter_wrapper.js')
 var common = require('./events/common');
 var commonEmitter = common.commonEmitter;
 
@@ -104,7 +104,7 @@ class	rand {
 
 //var proxies = create_proxy_array()
 const random = new rand
-const twit = new follow(require('./tokens/twitter.json')['Bearer'])
+const twit = new follow(require('../tokens/twitter.json')['Bearer'])
 
 /*
 	HANDLER
