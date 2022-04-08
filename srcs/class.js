@@ -1,4 +1,5 @@
 const user = require('./../mongo/User.js')
+const info = require('./../mongo/twitter_info.js')
 
 class	actions {
 	constructor(MAX_THREAD) {
@@ -104,6 +105,9 @@ class acc_manip {
 			nbr = await this.get_size()
 		return(await user.find({}, {"_id": 1}).limit(nbr))
 	}
+	async get_info_id() {
+		return(await info.find({}, {"_id": 1}))
+	}
 	async id_array_to_acc(arr) {
 		var re = []
 
@@ -111,7 +115,7 @@ class acc_manip {
 			re.push(await user.findById(arr[x]._id))//.populate('cookies'))
 		return (re)
 	}
-	async id_to_X(x, arr) {
+	async name_id_to_X(x, arr) {
 		var re = []
 		var split = x.split(',')
 		var selec = {}
@@ -122,6 +126,17 @@ class acc_manip {
 			re.push(await user.findById(arr[n]._id, selec))
 		return re
 	}
+	async info_id_to_X(x, arr) {
+		var re = []
+		var split = x.split(',')
+		var selec = {}
+
+		for (let i in split)
+			selec[split[i]] = 1
+		for (let n in arr)
+			re.push(await info.findById(arr[n]._id, selec))
+		return re
+	}
 	async get_size() {
 		return (await user.countDocuments())
 	}
@@ -129,7 +144,7 @@ class acc_manip {
 		var i = 0
 		var save = []
 		var re = []
-		var arr = await this.get_acc_id(0).then(async(arr) => this.id_to_X(`info.${opt}.nbr`, arr))
+		var arr = await this.get_info_id().then(async(arr) => this.info_id_to_X(`info.${opt}.nbr,referTo`, arr))
 
 		while (i < nbr) {
 			var n = 0
@@ -141,7 +156,7 @@ class acc_manip {
 				}
 			}
 			save.push(n)
-			re.push(arr[n])
+			re.push(arr[n].referTo)
 			i++;
 		}
 		return re

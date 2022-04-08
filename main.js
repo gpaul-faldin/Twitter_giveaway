@@ -30,34 +30,6 @@ class	accounts {
 		this.info = info
 		this.cookies = cookies
 	}
-	async write_file(acc) {
-		fs.writeFileSync(__dirname + `/db/acc.json`, JSON.stringify(acc, null, '	'), {flags:"w"});
-	}
-	getRandom(arr, n) {
-		var len = arr.length;
-		if (n > len)
-			n = len
-		var result = new Array(n);
-		var taken = new Array(len);
-		var size = n;
-		while (n--) {
-			var x = Math.floor(Math.random() * len);
-			result[n] = arr[x in taken ? taken[x] : x];
-			taken[x] = --len in taken ? taken[len] : len;
-		}
-		for (let x in result) {
-			result[x].size = size
-		}
-		return result;
-	}
-	username_arr(acc) {
-		var re = []
-		for (let i in acc) {
-			if (acc[i].tag.length != 0)
-				re.push(acc[i].tag.substring(1))
-		}
-		return (re)
-	}
 	async update_info(acc) {
 		var nfo = await twit.re_users_follow(this.username_arr(acc))
 		for (let i in acc) {
@@ -81,66 +53,6 @@ class	accounts {
 					break ;
 			}
 		}
-	}
-	lowest_followers(acc, nbr) {
-		var i = 0
-		var save = []
-		var re = []
-		while (i < nbr) {
-			var n = 0
-			var lowest = 100
-			for (let x in acc) {
-				if (acc[x].info.followers < lowest && save.includes(x) == false) {
-					n = x
-					lowest = acc[x].info.followers
-				}
-			}
-			save.push(n)
-			re.push(acc[n])
-			i++;
-		}
-		for (let x in re)
-			re[x].size = re.length
-		return (re)
-	}
-	lowest_following(acc, nbr) {
-		var i = 0
-		var save = []
-		var re = []
-		while (i < nbr) {
-			var n = 0
-			var lowest = 100
-			for (let x in acc) {
-				if (acc[x].info.following < lowest && save.includes(x) == false) {
-					n = x
-					lowest = acc[x].info.following
-				}
-			}
-			save.push(n)
-			re.push(acc[n])
-			i++;
-		}
-		for (let x in re)
-			re[x].size = re.length
-		return (re)
-	}
-	set_init_true(acc) {
-		for (let x in acc) {
-			acc[x].init = true
-		}
-	}
-	acc_from_user(user) {
-		var re = []
-		for (let x in acc) {
-			for (let w in user) {
-				if (acc[x].user == user[w]) {
-					if (re.includes(acc[x]) == false)
-						re.push(acc[x])
-					break ;
-				}
-			}
-		}
-		return (re)
 	}
 }
 
@@ -170,35 +82,6 @@ class	proxy_stat {
 	}
 }
 
-class	actions {
-	constructor() {
-		this.url = "",
-		this.rt = false,
-		this.like = false,
-		this.tag = {
-			'on' : false,
-			'nbr' : 0
-		},
-		this.follow = {
-			'on' : false,
-			'acc': []
-		}
-		this.info = {
-			'threads': 1,
-			'headless': true,
-			'nbr_acc': 0
-		}
-	}
-	handler_tag(nbr) {
-		this.tag.on = true,
-		this.tag.nbr = nbr
-	}
-	handler_follow(acc) {
-		this.follow.on = true,
-		this.follow.acc = acc
-	}
-}
-
 class	rand {
 	gen_month() {
 		return (chance.integer({min: 1, max: 12}))
@@ -224,18 +107,6 @@ class	rand {
 const random = new rand
 const twit = new follow(require('./tokens/twitter.json')['Bearer'])
 
-	//////MODIFICATION ON CLASS VARIABLE//////
-
-// acc[0].write_file(acc)
-// //action.url = "https://twitter.com/ignxred/status/1510728821003198466"
-// action.rt = true
-// action.like = true
-// action.info.headless = true
-// action.info.threads = 15
-// //action.info.nbr_acc = 30
-// action.handler_follow([`wungay`])
-// action.handler_tag(2)
-
 /*
 	HANDLER
 */
@@ -243,8 +114,6 @@ const twit = new follow(require('./tokens/twitter.json')['Bearer'])
 async function main_handler(acc, action) {
 	var i = 0
 	var prom = []
-	var size = await acc[0].populate('info')
-	console.log(size)
 	const pool = new StaticPool({
 		size: action.info.threads,
 		task: process.cwd() + "/srcs/main_worker.js"
@@ -285,13 +154,13 @@ async function check_pva(acc) {
 	var i = 0
 	var prom = []
 	const pool = new StaticPool({
-		size: 15, //action.info.threads,
+		size: action.info.threads,
 		task: "./srcs/check_for_pva.js"
 	});
 
 	if (arr.length == 0)
-		arr = acc
-	while (i < arr[0].size) {
+		return (1)
+	while (i < action.info.nbr_acc) {
 		prom.push(pool.exec({action: action, account: arr[i], index: i}))
 		i++;
 	}
@@ -303,19 +172,19 @@ async function check_pva(acc) {
 */
 
 async function main(arr, action) {
-	//var acc = create_acc_array(arr)
-	console.log(arr)
+	var acc = create_acc_array(arr)
 	if (action.info.pva) {
 		console.log("Check for PVA")
-		await check_pva(arr)
+		await check_pva(acc)
 	}
 	if (action.info.init) {
 		console.log("Check for INIT")
 		await init_handler(action)
 	}
 	console.log("Starting the actions")
-	await main_handler(arr, action)
+	await main_handler(acc, action)
 	commonEmitter.emit("finish")
+	console.log("FINISH")
 	return (0)
 
 }
@@ -330,9 +199,8 @@ function create_acc_array(db) {
 	let re = new Array
 
 	for (let i in db) {
-		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, "", db[i].cookies.cookies))
+		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, {}, []))
 	}
-	console.log(re[0])
 	return (re);
 }
 
@@ -356,39 +224,6 @@ function give_proxy() {
 
 	//////MISC//////
 
-function rm_useless_cookies() {
-	var files = fs.readdirSync(__dirname + `/cookies/`)
-	var db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
-
-	for (let x in files) {
-		let tmp = files[x].split('_cookies.json')[0]
-		var i = 0
-		var exist = false
-		while (db[i]) {
-			if (tmp == db[i].user)
-				exist = true
-			i++;
-		}
-		if (exist == false)
-			fs.unlinkSync(__dirname + `/cookies/${tmp}_cookies.json`)
-	}
-}
-
-async function rm_suspended() {
-	var db_new = []
-	let db = JSON.parse(fs.readFileSync(__dirname + `/db/acc.json`, 'utf8'))
-
-	for (let i in db) {
-		if (db[i].tag != "SUSPENDED") {
-			db_new.push(db[i])
-		}
-	}
-	for (let x in db_new)
-		db_new[x].size = db_new.length
-	acc[0].write_file(db_new)
-	rm_useless_cookies()
-}
-
 async function rm_timeout(arr) {
 	var db = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
 
@@ -403,15 +238,6 @@ async function rm_timeout(arr) {
 	for (let x in arr) {
 		arr[x].size = arr.length
 	}
-}
-
-function already_in(db, acc) {
-	var mail = acc.split(':')[0]
-	for (let i in db) {
-		if (db[i].user == mail)
-			return (i);
-	}
-	return (-1);
 }
 
 /*

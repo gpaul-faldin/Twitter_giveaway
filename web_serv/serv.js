@@ -17,8 +17,8 @@ var common = require('../events/common');
 */
 
 //////DB//////
+global.db = (global.db ? global.db : mongoose.connect('mongodb://192.168.0.23:27017/Twitter'));
 
-mongoose.connect('mongodb://192.168.0.23:27017/Twitter')
 
 //////CLASS//////
 
@@ -201,7 +201,7 @@ app.get('/api/retrieve/lowest', async (req, res) => {
 	req.query.opt == 1 ? opt = "following" : opt = "followers"
 	if (!req.query.output)
 		return res.send(await manip.lowest(qty, opt).then(async (arr) => await manip.id_array_to_acc(arr)))
-	return res.send(await manip.lowest(qty, opt).then(async (arr) => await manip.id_to_X(req.query.output, arr)))
+	return res.send(await manip.lowest(qty, opt).then(async (arr) => await manip.name_id_to_X(req.query.output, arr)))
 })
 
 app.get('/api/retrieve/random', async (req, res) => {
@@ -214,7 +214,7 @@ app.get('/api/retrieve/random', async (req, res) => {
 	}
 	if (!req.query.output)
 		return res.send(await manip.getRandom(qty).then(async (arr) => await manip.id_array_to_acc(arr)))
-	return (res.send(await manip.getRandom(qty).then(async (arr) => await manip.id_to_X(req.query.output, arr))))
+	return (res.send(await manip.getRandom(qty).then(async (arr) => await manip.name_id_to_X(req.query.output, arr))))
 })
 
 app.get('/api/retrieve/specific', async (req, res) => {
@@ -224,7 +224,7 @@ app.get('/api/retrieve/specific', async (req, res) => {
 	var re = await manip.get_spe(req.query.tag)
 	if (!req.query.output)
 		return (res.send(await manip.id_array_to_acc(re)))
-	return (res.send(await manip.id_to_X(req.query.output, re)))
+	return (res.send(await manip.name_id_to_X(req.query.output, re)))
 })
 
 app.listen(8080)

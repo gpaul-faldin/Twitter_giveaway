@@ -8,6 +8,12 @@ const fs = require('fs');
 var Chance = require('chance')
 const {phone_number} = require('./sms_wrapper.js')
 const {parentPort} = require("worker_threads");
+const mongoose = require('mongoose')
+const cookies = require("./../mongo/cookies.js")
+const info = require("./../mongo/twitter_info.js")
+const user = require("./../mongo/User.js")
+
+mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 
 /*
 	THREADS
@@ -23,10 +29,10 @@ parentPort.on("message", async (data) => {
 
 puppeteer.use(StealthPlugin())
 
-async function cookie_str(account) {
-	console.log( await account.populate("cookies"))
-
-	return (cookies)
+async function acc_fill(account) {
+	account.info = await info.findOne({user: account.user}).then(nfo => nfo.info)
+	account.cookies = await cookies.findOne({user: account.user}).then(nfo => nfo.cookies)
+	return (account)
 }
 
 async function action_todo(action, page, user, array) {
@@ -147,8 +153,7 @@ async function pva(page, user) {
 async function log_in_twitter(action, account, array, index) {
 	var stop = false
 	var suspended = false
-
-	await cookie_str(account)
+	account = await acc_fill(account)
 
 	const browser = await puppeteer.launch({
 		headless: action.info.headless,
@@ -162,7 +167,7 @@ async function log_in_twitter(action, account, array, index) {
 	})
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 1280, height: 720 })
-	await page.setCookie(... account.cookies);
+	await page.setCookie(...account.cookies);
 	try {
 		await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
 	}
@@ -173,6 +178,7 @@ async function log_in_twitter(action, account, array, index) {
 		return (0)
 	}
 	await page.waitForTimeout(3000)
+	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${account.user}_TEST.jpg`})
 	if (await page.url() == "https://twitter.com/account/access") {
 		console.log(`PVA for ${account.user}`)
 		stop = true
@@ -185,9 +191,13 @@ async function log_in_twitter(action, account, array, index) {
 		await action_todo(action, page, account.user, array)
 	}
 	else if (suspended == true) {
-		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
-		acc[index].tag = "SUSPENDED"
-		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
+
+		await cookies.deleteOne({user: account.user})
+		await info.deleteOne({user: account.user})
+		await user.deleteOne({user: account.user})
+		// const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
+		// acc[index].tag = "SUSPENDED"
+		// fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		console.log(`${account.user} is suspended`)
 	}
 	await browser.close()
