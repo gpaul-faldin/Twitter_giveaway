@@ -103,7 +103,6 @@ class	rand {
 	//////CREATE CLASS VARIABLE//////
 
 //var proxies = create_proxy_array()
-//var action = new actions
 const random = new rand
 const twit = new follow(require('./tokens/twitter.json')['Bearer'])
 
@@ -150,7 +149,7 @@ async function init_handler(action) {
 	return (0)
 }
 
-async function check_pva(acc) {
+async function check_pva(acc, action) {
 	var i = 0
 	var prom = []
 	const pool = new StaticPool({
@@ -158,10 +157,10 @@ async function check_pva(acc) {
 		task: "./srcs/check_for_pva.js"
 	});
 
-	if (arr.length == 0)
+	if (acc.length == 0)
 		return (1)
 	while (i < action.info.nbr_acc) {
-		prom.push(pool.exec({action: action, account: arr[i], index: i}))
+		prom.push(pool.exec({action: action, account: acc[i], index: i}))
 		i++;
 	}
 	await Promise.all(prom)
