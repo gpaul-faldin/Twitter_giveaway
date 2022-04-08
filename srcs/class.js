@@ -81,14 +81,42 @@ class	actions {
 	}
 }
 
+class info_manip {
+	constructor() {
+	}
+	async update_info(nfo, user, opt) {
+		if (opt == 1)
+			nfo.followers.arr = await info.findOne({user: user}, {"info.followers.arr": 1}).then(async (x) => x.info.followers.arr)
+		if (opt == 2)
+			nfo.following.arr = await info.findOne({user: user}, {"info.following.arr": 1}).then(async (x) => x.info.following.arr)
+		await info.updateOne({user: user}, {info: nfo})
+	}
+	async update_info_array(nfo_arr, opt) {
+		for (let x in nfo_arr) {
+			await this.update_info(nfo_arr[x], x, opt)
+		}
+	}
+	async info_arr(nbr, opt) {
+		var re = []
+		if (opt == "empty") {
+			var db = await info.find()
+			for (let x in db) {
+				if (re.length === nbr)
+					return re;
+				if (db[x].info.followers.arr.length === 0)
+					re.push(db[x])
+			}
+		}
+	}
+}
+
 class acc_manip {
 	constructor(){
 	}
 	async getRandom(nbr) {
 		var arr = await user.find({}, {"_id": 1})
 		var len = arr.length;
-		
-		
+
 		if (nbr > len || nbr <= 0)
 			nbr = len
 		var result = new Array(nbr);
@@ -118,24 +146,24 @@ class acc_manip {
 	async name_id_to_X(x, arr) {
 		var re = []
 		var split = x.split(',')
-		var selec = {}
+		var selec = {_id: 0}
 
 		for (let i in split)
 			selec[split[i]] = 1
 		for (let n in arr)
 			re.push(await user.findById(arr[n]._id, selec))
-		return re
+		return (re)
 	}
 	async info_id_to_X(x, arr) {
 		var re = []
 		var split = x.split(',')
-		var selec = {}
+		var selec = {_id: 0}
 
 		for (let i in split)
 			selec[split[i]] = 1
 		for (let n in arr)
 			re.push(await info.findById(arr[n]._id, selec))
-		return re
+		return (re)
 	}
 	async get_size() {
 		return (await user.countDocuments())
@@ -159,7 +187,7 @@ class acc_manip {
 			re.push(arr[n].referTo)
 			i++;
 		}
-		return re
+		return (re)
 	}
 	async get_spe(tag) {
 		var split = tag.split(',')
@@ -172,6 +200,15 @@ class acc_manip {
 		}
 		return (re)
 	}
+	make_list(arr) {
+		var re = ""
+
+		for (let x in arr) {
+			re += arr[x].tag + ","
+		}
+		re = re.slice(0, -1)
+		return (re)
+	}
 }
 
-module.exports = {actions, acc_manip}
+module.exports = {actions, acc_manip, info_manip}

@@ -7,14 +7,31 @@ class twitter {
 	constructor(token) {
 		this.client = new TwitterApi(token)
 	}
-	add_info(re, user, id, metrics) {
-		re[`${user}`] = {
+	add_info_nbr(re, user, id, metrics) {
+		re[user] = {
 			id: id,
 			followers: {
 				nbr: metrics.followers_count,
 				arr: []
 				},
-			following: metrics.following_count
+			following: {
+				nbr: metrics.following_count,
+				arr: []
+			}
+		}
+		return (re)
+	}
+	add_info_arr(re, user, id, follower_nbr, follower, following_nbr) {
+		re[user] = {
+			id: id,
+			followers: {
+				nbr: follower_nbr,
+				arr: follower
+				},
+			following: {
+				nbr: following_nbr,
+				arr: []
+			}
 		}
 		return (re)
 	}
@@ -31,30 +48,42 @@ class follow extends twitter {
 	constructor(token) {
 		super(token)
 	}
-	async users_follow_API(users, re) {
+	async nbr_follow_API(users, re) {
 		var web = await this.client.v2.usersByUsernames(users, { "user.fields": "public_metrics" })
 		for (let x in web.data) {
-			re = this.add_info(re, web.data[x].username, web.data[x].id, web.data[x].public_metrics)
+			re = this.add_info_nbr(re, web.data[x].username, web.data[x].id, web.data[x].public_metrics)
 		}
 		return (re)
 	}
-	async re_users_follow(users) {
+	async get_nbr_follow(users) {
 		var re = {}
+		for (let x in users) {
+			if (users[x][0] === '@')
+				users[x] = users[x].substring(1)
+		}
 		var chunks = this.splitArray(users, 100)
 		for (let index in chunks) {
-			re = await this.users_follow_API(chunks[index], re)
+			re = await this.nbr_follow_API(chunks[index], re)
 		}
 		return (re)
 	}
-	async get_followers(id) {
-		var re = []
+	async get_followers_list_API(nfo, re) {
+		var arr = []
 		try {
-			var web = await this.client.v2.followers(id)
+			var web = await this.client.v2.followers(nfo.info.id)
 			for (let x in web.data) {
-				re.push("@" + web.data[x].username)
+				arr.push("@" + web.data[x].username)
 			}
 		}
 		catch (e) {}
+		re = this.add_info_arr(re, nfo.user, nfo.info.id, nfo.info.followers.nbr, arr, nfo.info.following.nbr)
+		return (re)
+	}
+	async get_followers_arr(infos) {
+		var re = {}
+		for (let x in infos) {
+			re = await this.get_followers_list_API(infos[x], re)
+		}
 		return (re)
 	}
 }

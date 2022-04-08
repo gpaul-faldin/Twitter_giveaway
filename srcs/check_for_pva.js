@@ -7,6 +7,12 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const {phone_number} = require('./sms_wrapper.js')
 const fs = require('fs');
 const {parentPort} = require("worker_threads");
+const mongoose = require('mongoose')
+const cookies = require("./mongo/cookies.js")
+const info = require("./mongo/twitter_info.js")
+const user = require("./mongo/User.js")
+
+mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 
 /*
 	THREADS
@@ -23,10 +29,10 @@ parentPort.on("message", async (data) => {
 
 puppeteer.use(StealthPlugin())
 
-async function cookie_str(user) {
-	const cookiesString = fs.readFileSync(process.cwd() + `/cookies/${user}_cookies.json`);
-	const cookies = JSON.parse(cookiesString);
-	return (cookies)
+async function acc_fill(account) {
+	account.info = await info.findOne({user: account.user}).then(nfo => nfo.info)
+	account.cookies = await cookies.findOne({user: account.user}).then(nfo => nfo.cookies)
+	return (account)
 }
 
 async function pva(page, user) {
@@ -92,8 +98,8 @@ async function pva(page, user) {
 	}
 	await page.click('input[value="Continue to Twitter"]')
 	await page.waitForTimeout(5000)
-	let cookie = await page.cookies()
-	fs.writeFileSync(process.cwd() + `/cookies/${user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
+	//let cookie = await page.cookies()
+	//fs.writeFileSync(process.cwd() + `/cookies/${user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
 	await page.waitForTimeout(2000)
 }
 
@@ -102,6 +108,7 @@ async function check_pva(action, account, index) {
 	var stop = false
 	var suspended = false
 	var timeout = false
+	account = await acc_fill(account)
 	const browser = await puppeteer.launch({
 		headless: action.info.headless,
 		args: [`--proxy-server=${account.proxy}`]
@@ -115,7 +122,7 @@ async function check_pva(action, account, index) {
 	})
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 1280, height: 720 })
-	await page.setCookie(... await cookie_str(account.user));
+	await page.setCookie(...account.cookies);
 	await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
 	await page.waitForTimeout(3000)
 	if (await page.url() == "https://twitter.com/account/access") {
@@ -127,8 +134,6 @@ async function check_pva(action, account, index) {
 			suspended = true
 		else if (status == 3)
 			timeout = true
-		else
-			await page.setCookie(... await cookie_str(account.user));
 	}
 	if (suspended == true) {
 		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
@@ -143,15 +148,15 @@ async function check_pva(action, account, index) {
 		console.log(`${account.user} is suspended`)
 	}
 	if (timeout == true) {
-		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
-		for (let x in acc) {
-			if (acc[x].user == account.user) {
-				index = x
-				break ;
-			}
-		}
-		acc[index].timeout = true
-		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
+		//const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
+		// for (let x in acc) {
+		// 	if (acc[x].user == account.user) {
+		// 		index = x
+		// 		break ;
+		// 	}
+		// }
+		//acc[index].timeout = true
+		//fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		console.log(`${account.user} had too many phone for the day`)
 	}
 	await browser.close()

@@ -1,43 +1,43 @@
 {
-  "name": "twitter_giveaway",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "start": "nodemon web_serv/serv.js",
-    "test": "nodemon ./test/pptr.js",
-	"web": "nodemon ./web_serv/serv.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gpaul-42/Twitter_giveaway.git"
-  },
-  "author": "Gpaul | Faldin#8570",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/gpaul-42/Twitter_giveaway/issues"
-  },
-  "homepage": "https://github.com/gpaul-42/Twitter_giveaway#readme",
-  "nodemonConfig": {
-    "ignore": [
-      "./db/*",
-      "./cookies/*"
-    ]
-  },
-  "dependencies": {
-    "axios": "^0.26.1",
-    "body-parser": "^1.20.0",
-    "chance": "^1.1.8",
-    "express": "^4.17.3",
-    "gender-detection-from-name": "^1.7.3",
-    "imapflow": "^1.0.86",
-    "mongoose": "^6.2.10",
-    "node-worker-threads-pool": "^1.5.1",
-    "nodemon": "^2.0.15",
-    "puppeteer": "^13.5.1",
-    "puppeteer-extra": "^3.2.3",
-    "puppeteer-extra-plugin-recaptcha": "^3.5.0",
-    "puppeteer-extra-plugin-stealth": "^2.9.0",
-    "twitter-api-v2": "^1.11.2"
-  }
+	"name": "twitter_giveaway",
+	"version": "1.0.0",
+	"description": "",
+	"main": "main.js",
+	"scripts": {
+		"start": "nodemon web_serv/serv.js",
+		"test": "nodemon ./test/pptr.js",
+		"web": "nodemon ./web_serv/serv.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gpaul-42/Twitter_giveaway.git"
+	},
+	"author": "Gpaul | Faldin#8570",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/gpaul-42/Twitter_giveaway/issues"
+	},
+	"homepage": "https://github.com/gpaul-42/Twitter_giveaway#readme",
+	"nodemonConfig": {
+		"ignore": [
+			"./test/*"
+		]
+	},
+	"dependencies": {
+		"axios": "^0.26.1",
+		"body-parser": "^1.20.0",
+		"chance": "^1.1.8",
+		"dotenv": "^16.0.0",
+		"express": "^4.17.3",
+		"gender-detection-from-name": "^1.7.3",
+		"imapflow": "^1.0.86",
+		"mongoose": "^6.2.10",
+		"node-worker-threads-pool": "^1.5.1",
+		"nodemon": "^2.0.15",
+		"puppeteer": "^13.5.1",
+		"puppeteer-extra": "^3.2.3",
+		"puppeteer-extra-plugin-recaptcha": "^3.5.0",
+		"puppeteer-extra-plugin-stealth": "^2.9.0",
+		"twitter-api-v2": "^1.11.2"
+	}
 }

@@ -30,30 +30,6 @@ class	accounts {
 		this.info = info
 		this.cookies = cookies
 	}
-	async update_info(acc) {
-		var nfo = await twit.re_users_follow(this.username_arr(acc))
-		for (let i in acc) {
-			for (let x in nfo) {
-				if (acc[i].tag.substring(1) == x) {
-					nfo[x].followers.arr = acc[i].info.followers.arr
-					acc[i].info = nfo[x]
-					break ;
-				}
-			}
-		}
-		await this.write_file(acc)
-	}
-	async update_follow_list(acc) {
-		for (let x in acc) {
-			if (acc[x].info.followers.arr.length == 0 && acc[x].info.followers.nbr != 0) {
-				let re = await twit.get_followers(acc[x].info.id)
-				if (re.length != 0)
-					acc[x].info.followers.arr = re
-				else
-					break ;
-			}
-		}
-	}
 }
 
 class	proxy_stat {
@@ -104,7 +80,6 @@ class	rand {
 
 //var proxies = create_proxy_array()
 const random = new rand
-const twit = new follow(require('../tokens/twitter.json')['Bearer'])
 
 /*
 	HANDLER
@@ -174,11 +149,11 @@ async function main(arr, action) {
 	var acc = create_acc_array(arr)
 	if (action.info.pva) {
 		console.log("Check for PVA")
-		await check_pva(acc)
+		await check_pva(acc, action)
 	}
 	if (action.info.init) {
 		console.log("Check for INIT")
-		await init_handler(action)
+		await init_handler(acc, action)
 	}
 	console.log("Starting the actions")
 	await main_handler(acc, action)

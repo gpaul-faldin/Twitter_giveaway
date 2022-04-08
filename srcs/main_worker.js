@@ -83,71 +83,23 @@ async function action_todo(action, page, user, array) {
 	if (action.follow.on == true) {
 		for (let i in action.follow.acc) {
 			if (action.follow.acc[i] != user) {
-				let url = "https://twitter.com/" + action.follow.acc[i][0] == '@' ? action.follow.acc[i].substring(1) : action.follow.acc[i]
+				let acc = action.follow.acc[i]
+				if (acc[0] == '@')
+					acc = acc.substring(1)
+				var url = "https://twitter.com/".concat(acc)
 				await page.waitForTimeout(1000)
 				try {
 					await page.goto(url, { waitUntil: 'networkidle2'})
 					await page.waitForTimeout(1000)
-					var acc = action.follow.acc[i][0] == '@' ? action.follow.acc[i] : '@' + action.follow.acc[i]
 					if (await page.$(`div[aria-label="Follow @${acc}"]`) != null)
 						await page.click(`div[aria-label="Follow @${acc}"]`)
 					}
 				catch (e) {
-					console.log(`error follow ${acc} by ${user}`)
+					console.log(`error to follow ${acc} by ${user}`)
 				}
 			}
 		}
 	}
-	console.log(`${user} OK`)
-}
-
-async function pva(page, user) {
-	if (await page.$('input[value="Start"]'))
-		await page.click('input[value="Start"]')
-	await page.waitForTimeout(1000)
-	if (await page.$('input[placeholder="Enter confirmation code"]'))
-		await page.goto('https://twitter.com/account/access?lang=en&did_not_receive=true')
-	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
-	try {await page.waitForSelector('#country_code')}
-	catch(e) {
-		console.log(`${user} had funcaptcha`)
-		return (1)
-	}
-	await page.select('#country_code', "84")
-	let phone = new phone_number(10, 'tw', 2)
-	await phone.get_number()
-	await page.type('#phone_number', phone.nbr)
-	await page.click('input[name="discoverable_by_mobile_phone"]')
-	await page.waitForTimeout(500)
-	await page.click('input[type="submit"]')
-	await page.waitForTimeout(2000)
-	if (await page.evaluate(`
-		function timeout() {
-			if (document.querySelector("body > div.PageContainer > div > a")) {
-				if (document.querySelector("body > div.PageContainer > div > a").innerHTML === 'Try Again')
-					return (1)
-			}
-			else {
-				return (0)
-			}
-		}
-		timeout()
-	`) == 1) {
-		await phone.set_status(8)
-		return (1)
-	}
-	let code = await phone.get_code(user)
-	if (code == "NONE")
-		return (1)
-	await page.type('#code', code)
-	await page.waitForTimeout(2000)
-	await page.click('input[value="Next"]')
-	await page.waitForSelector('input[value="Continue to Twitter"]')
-	await page.click('input[value="Continue to Twitter"]')
-	await page.waitForTimeout(5000)
-	let cookie = await page.cookies()
-	fs.writeFileSync(process.cwd() + `/cookies/${user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
-	await page.waitForTimeout(2000)
 }
 
 async function log_in_twitter(action, account, array, index) {
@@ -169,7 +121,7 @@ async function log_in_twitter(action, account, array, index) {
 	await page.setViewport({ width: 1280, height: 720 })
 	await page.setCookie(...account.cookies);
 	try {
-		await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
+		await page.goto('https://twitter.com/home', {waitUntil: 'networkidle2', timeout: 60})
 	}
 	catch (e) {
 		console.log(`${account.user} failed to go /home`)
@@ -178,7 +130,6 @@ async function log_in_twitter(action, account, array, index) {
 		return (0)
 	}
 	await page.waitForTimeout(3000)
-	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${account.user}_TEST.jpg`})
 	if (await page.url() == "https://twitter.com/account/access") {
 		console.log(`PVA for ${account.user}`)
 		stop = true
@@ -191,13 +142,9 @@ async function log_in_twitter(action, account, array, index) {
 		await action_todo(action, page, account.user, array)
 	}
 	else if (suspended == true) {
-
 		await cookies.deleteOne({user: account.user})
 		await info.deleteOne({user: account.user})
 		await user.deleteOne({user: account.user})
-		// const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
-		// acc[index].tag = "SUSPENDED"
-		// fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		console.log(`${account.user} is suspended`)
 	}
 	await browser.close()
