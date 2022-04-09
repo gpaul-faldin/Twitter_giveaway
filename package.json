@@ -32,6 +32,7 @@
 		"gender-detection-from-name": "^1.7.3",
 		"imapflow": "^1.0.86",
 		"mongoose": "^6.2.10",
+		"node-cron": "^3.0.0",
 		"node-worker-threads-pool": "^1.5.1",
 		"nodemon": "^2.0.15",
 		"puppeteer": "^13.5.1",

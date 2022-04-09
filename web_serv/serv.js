@@ -39,6 +39,7 @@ class accounts extends acc_manip {
 const app = express()
 app.use(bodyParser.json());
 app.use(bodyParser.text())
+require('./../srcs/cron/update_twitter')();
 
 /*
 	EXPRESS

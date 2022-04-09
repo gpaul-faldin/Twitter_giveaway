@@ -162,10 +162,10 @@ const update_twitter_handler = async function (req, res) {
 	if (req.query.opt === "1") {
 		var lst = await manip.get_acc_id(0).then(async (re) => await manip.name_id_to_X("tag", re)).then((arr) => manip.make_list(arr))
 		var nbrs = await twitter.get_nbr_follow(lst.split(','))
-		return (await manip_i.update_info_array(nbrs, 0))
+		return (await manip_i.update_info_array(nbrs))
 	}
 	let tmp = await manip_i.info_arr(15, "empty").then(async (infos) => await twitter.get_followers_arr(infos))
-	return (await manip_i.update_info_array(tmp, 0))
+	return (await manip_i.update_info_array(tmp))
 }
 
 /*
