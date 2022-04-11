@@ -28,6 +28,8 @@ app.use(bodyParser.text())
 	EXPRESS
 */
 
+app.listen(process.env.PORT)
+
 app.get('/', (req, res) => {
 	res.status(418).send("Lost ?")
 })
@@ -35,6 +37,7 @@ app.get('/', (req, res) => {
 //////ACTION//////
 app.post('/api/action', handler.check_auth, handler.action_handler)
 app.post('/api/start', handler.check_auth, handler.start_handler)
+app.post('/api/init', handler.check_auth, handler.init_handler)
 
 //////RETRIEVE DATA//////
 app.get('/api/retrieve/lowest', handler.check_auth, handler.retrieve_lowest_handler)
@@ -52,12 +55,3 @@ app.put('/api/update/proxy', handler.check_auth, handler.update_proxy)
 //////DELETE DATA//////
 app.delete('/api/delete/proxy', handler.check_auth, handler.proxy_delete)
 app.delete('/api/delete/account', handler.check_auth, handler.account_delete)
-
-/*
-	TODO: ADD_ACCOUNT
-	-classic init handler for pptr
-*/
-
-app.post('/api/init', handler.check_auth, handler.init_handler)
-
-app.listen(process.env.PORT)
