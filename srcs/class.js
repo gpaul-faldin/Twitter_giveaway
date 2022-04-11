@@ -1,5 +1,7 @@
 const user = require('./mongo/User.js')
 const info = require('./mongo/twitter_info.js')
+const proxies = require('./mongo/proxies.js')
+const cookies = require('./mongo/cookies.js')
 
 class	actions {
 	constructor(MAX_THREAD) {
@@ -68,7 +70,10 @@ class	actions {
 					if (body[x] > await user.countDocuments()) {
 						throw Error(`Requested ${body[x]} account where ${await user.countDocuments()} are available`)
 					}
-					this.info[x] = body[x]
+					if (body[x] == 0)
+						this.info[x] = await user.countDocuments()
+					else
+						this.info[x] = body[x]
 				}
 				else {
 					if (typeof(body[x]) != typeof(this.info[x]))
@@ -84,14 +89,16 @@ class	actions {
 class info_manip {
 	constructor() {
 	}
-	async update_info(nfo, user) {
-		nfo.followers.arr = await info.findOne({user: user}, {"info.followers.arr": 1}).then(async (x) => x.info.followers.arr)
-		nfo.following.arr = await info.findOne({user: user}, {"info.following.arr": 1}).then(async (x) => x.info.following.arr)
-		await info.updateOne({user: user}, {info: nfo})
+	async update_info(nfo) {
+		if (nfo.followers.arr.length === 0)
+			nfo.followers.arr = await info.findOne({"info.id": nfo.id}, {"info.followers.arr": 1}).then((x) => x.info.followers.arr)
+		if (nfo.following.arr.length === 0)
+			nfo.following.arr = await info.findOne({"info.id": nfo.id}, {"info.following.arr": 1}).then((x) => x.info.following.arr)
+		await info.updateOne({"info.id": nfo.id}, {info: nfo})
 	}
 	async update_info_array(nfo_arr) {
 		for (let x in nfo_arr) {
-			await this.update_info(nfo_arr[x], x)
+			await this.update_info(nfo_arr[x])
 		}
 	}
 	async info_arr(nbr, opt) {
@@ -101,8 +108,10 @@ class info_manip {
 			for (let x in db) {
 				if (re.length === nbr)
 					return re;
-				if (db[x].info.followers.arr.length === 0)
-					re.push(db[x])
+				if (db[x].info.followers) {
+					if (db[x].info.followers.arr.length === 0)
+						re.push(db[x])
+				}
 			}
 		}
 	}
@@ -144,23 +153,31 @@ class acc_manip {
 	async name_id_to_X(x, arr) {
 		var re = []
 		var split = x.split(',')
-		var selec = {_id: 0}
+		var selec = { _id: 0 }
 
 		for (let i in split)
 			selec[split[i]] = 1
-		for (let n in arr)
-			re.push(await user.findById(arr[n]._id, selec))
+		for (let n in arr) {
+			if (split.includes('info'))
+				re.push(await user.findById(arr[n]._id, selec).populate('info'))
+			else
+				re.push(await user.findById(arr[n]._id, selec))
+		}
 		return (re)
 	}
 	async info_id_to_X(x, arr) {
 		var re = []
 		var split = x.split(',')
-		var selec = {_id: 0}
+		var selec = { _id: 0 }
 
 		for (let i in split)
 			selec[split[i]] = 1
-		for (let n in arr)
-			re.push(await info.findById(arr[n]._id, selec))
+		for (let n in arr) {
+			if (split.includes('info'))
+				re.push(await info.findById(arr[n]._id, selec).populate('info'))
+			else
+				re.push(await info.findById(arr[n]._id, selec))
+		}
 		return (re)
 	}
 	async get_size() {

@@ -7,6 +7,7 @@ const fs = require('fs')
 const path = require('path');
 const axios = require('axios').default
 const {getGender} = require('gender-detection-from-name');
+const legit = require('./legit.json')
 
 
 /*
@@ -133,7 +134,7 @@ class unsplash {
 
 
 class legit_at {
-	constructor(legit) {
+	constructor() {
 		this.size_csgo = this.draw_int(8),
 		this.csgo = Object.keys(legit.csgo)
 		this.size_news = this.draw_int(2),

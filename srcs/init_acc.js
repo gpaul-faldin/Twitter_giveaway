@@ -4,19 +4,26 @@
 
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const {picture, legit_at} = require('./banner-pp')
+const {picture, legit_at} = require('./banner-pp/profil_fill.js')
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 const fs = require('fs');
 const {parentPort} = require("worker_threads");
-const legit_json = require('../db/legit.json')
+const cookies = require("./mongo/cookies.js")
+const info = require("./mongo/twitter_info.js")
+const user = require("./mongo/User.js")
+const axios = require("axios").default
+const mongoose = require('mongoose')
 
 
 /*
 	INIT
 */
 
+mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
+
+
 const pic = new picture
-const legit = new legit_at(legit_json)
+const legit = new legit_at()
 
 /*
 	THREADS
@@ -33,10 +40,10 @@ parentPort.on("message", async (data) => {
 puppeteer.use(StealthPlugin())
 puppeteer.use(RecaptchaPlugin({ provider: { id: '2captcha', token: '89f71b2cf02b35c6b5c1f8deb9f9161b' }, visualFeedback: true }))
 
-async function cookie_str(user) {
-	const cookiesString = fs.readFileSync(process.cwd() + `/cookies/${user}_cookies.json`);
-	const cookies = JSON.parse(cookiesString);
-	return (cookies)
+async function acc_fill(account) {
+	account.info = await info.findOne({user: account.user}).then(nfo => nfo.info)
+	account.cookies = await cookies.findOne({user: account.user}).then(nfo => nfo.cookies)
+	return (account)
 }
 
 async function delete_str_in_selec(page, selector) {
@@ -85,8 +92,8 @@ async function assign_img(page, user, name) {
 }
 
 async function follow(page, user) {
-
 	var arr = legit.give_arr()
+
 	for (let x in arr) {
 		var url = "https://twitter.com/" + arr[x]
 		try {
@@ -104,6 +111,7 @@ async function follow(page, user) {
 async function init_twitter(account, index) {
 	var suspended = false
 	var stop = false
+	account = await acc_fill(account)
 	const browser = await puppeteer.launch({
 		headless: true,
 		args: [`--proxy-server=${account.proxy}`]
@@ -116,8 +124,8 @@ async function init_twitter(account, index) {
 	})
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 800, height: 600 })
-	if (fs.existsSync(process.cwd() + `/cookies/${account.user}_cookies.json`)) {
-		await page.setCookie(... await cookie_str(account.user));
+	if (account.cookies.length != 0) {
+		await page.setCookie(...account.cookies);
 	}
 	else {
 		await page.goto('https://twitter.com/i/flow/login', { waitUntil: 'networkidle2' });
@@ -161,7 +169,10 @@ async function init_twitter(account, index) {
 				accept_cookies()
 			`)
 			let cookie = await page.cookies()
-			fs.writeFileSync(process.cwd() + `/cookies/${account.user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
+			await cookies.create({
+				user: account.user,
+				cookies: cookie
+			})
 		}
 	}
 	if (await page.url() == "https://twitter.com/account/access") {
@@ -172,7 +183,7 @@ async function init_twitter(account, index) {
 	}
 	try {await page.goto("https://twitter.com/settings/profile", { waitUntil: 'networkidle2', timeout: 0})}
 	catch(e) {
-		console.log(`${account.user} error while loading`)
+		console.log(`${account.user} error while loading profile settings`)
 		stop = true
 		suspended = true
 	}
@@ -183,24 +194,22 @@ async function init_twitter(account, index) {
 			var name = document.querySelector('a[aria-label="Profile"]').href.split('/')[3]
 			'@' + name
 			`)
-			const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
-			acc[index].tag = tag
+			await user.updateOne({user: account.user}, {$set: {tag: tag}})
 			account.tag = tag
-			fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
 		}
 		await assign_img(page, account.user, account.tag.substring(1))
-		if (account.init == false)
+		if (account.ini_follow == true)
 			await follow(page, account.user)
 	}
 	else if (suspended == true) {
-		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
-		acc[index].tag = "SUSPENDED"
-		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
+		await axios.delete(`http://twitter.faldin.xyz/api/delete/account?user=${account.user}`)
 	}
 	if (stop || suspended)
 		console.log(`${account.user} NOT OK`)
-	else
+	else {
+		await user.updateOne({user: account.user}, {$set: {ini: false}})
 		console.log(`${account.user} INIT OK`)
+	}
 	await browser.close()
 	return (0)
 }

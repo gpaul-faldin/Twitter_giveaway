@@ -102,25 +102,19 @@ async function main_handler(acc, action) {
 	return (0)
 }
 
-async function init_handler(action) {
+async function init_worker(threads, arr) {
 	var i = 0;
 	var prom = []
+	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: action.info.threads,
+		size: threads,
 		task: "./srcs/init_acc.js"
 	});
 
-	while (i < acc[0].size) {
-		if (acc[i].tag == "" || fs.existsSync(__dirname + `/cookies/${acc[i].user}_cookies.json`) == false || acc[i].init == true) {
-			if (acc[i].proxy == "") {
-				acc[i].proxy = give_proxy()
-			}
-			prom.push(pool.exec({account: acc[i], index: i}))
-		}
-		i++;
-	}
-	acc[0].write_file(acc);
+	for (let x in acc)
+		prom.push(pool.exec({account: acc[x], index: i}))
 	await Promise.all(prom)
+	commonEmitter.emit("finish")
 	return (0)
 }
 
@@ -147,18 +141,14 @@ async function check_pva(acc, action) {
 
 async function main(arr, action) {
 	var acc = create_acc_array(arr)
+
 	if (action.info.pva) {
 		console.log("Check for PVA")
 		await check_pva(acc, action)
 	}
-	if (action.info.init) {
-		console.log("Check for INIT")
-		await init_handler(acc, action)
-	}
 	console.log("Starting the actions")
 	await main_handler(acc, action)
 	commonEmitter.emit("finish")
-	console.log("FINISH")
 	return (0)
 
 }
@@ -218,4 +208,4 @@ async function rm_timeout(arr) {
 	TEST
 */
 
-module.exports = {main}
+module.exports = {main, init_worker}

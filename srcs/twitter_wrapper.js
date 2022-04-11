@@ -75,7 +75,9 @@ class follow extends twitter {
 				arr.push("@" + web.data[x].username)
 			}
 		}
-		catch (e) {}
+		catch (e) {
+			console.log(e.message, e.rateLimit)
+		}
 		re = this.add_info_arr(re, nfo.user, nfo.info.id, nfo.info.followers.nbr, arr, nfo.info.following.nbr)
 		return (re)
 	}
@@ -145,13 +147,5 @@ class search extends twitter {
 		}
 	}
 }
-
-// (async() => {
-
-// 	var tmp = new search(require('../tokens/twitter.json')['Bearer'])
-// 	//console.log(await tmp.get_followers('1506909517099200515'))
-// 	await tmp.scrape_profileP('1371889652584562689')
-
-// })();
 
 module.exports = {follow, search}

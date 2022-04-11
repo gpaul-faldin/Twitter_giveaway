@@ -57,14 +57,13 @@ async function pva(page, user) {
 	`)
 	if (check_sus == 1)
 		return (2)
-	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
 	try {await page.waitForSelector('#country_code')}
 	catch(e) {
 		console.log(`${user} had funcaptcha`)
 		return (1)
 	}
-	await page.select('#country_code', "84")
-	let phone = new phone_number(10, 'tw', 2)
+	await page.select('#country_code', "7")
+	let phone = new phone_number(2, 'tw', 1)
 	await phone.get_number()
 	await page.type('#phone_number', phone.nbr)
 	await page.click('input[name="discoverable_by_mobile_phone"]')
@@ -86,6 +85,7 @@ async function pva(page, user) {
 		await phone.set_status(8)
 		return (3)
 	}
+	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_PVA.jpg`})
 	let code = await phone.get_code(user)
 	if (code == "NONE")
 		return (1)

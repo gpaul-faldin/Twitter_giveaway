@@ -4,9 +4,7 @@
 
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const fs = require('fs');
 var Chance = require('chance')
-const {phone_number} = require('./sms_wrapper.js')
 const {parentPort} = require("worker_threads");
 const mongoose = require('mongoose')
 const cookies = require("./mongo/cookies.js")
@@ -87,10 +85,11 @@ async function action_todo(action, page, user, array) {
 				if (acc[0] == '@')
 					acc = acc.substring(1)
 				var url = "https://twitter.com/".concat(acc)
-				await page.waitForTimeout(1000)
 				try {
-					await page.goto(url, { waitUntil: 'networkidle2'})
-					await page.waitForTimeout(1000)
+					try {
+						await page.goto(url, { waitUntil: 'networkidle2'})
+					} catch(e) {console.log(e.message)}
+					await page.waitForTimeout(3000)
 					if (await page.$(`div[aria-label="Follow @${acc}"]`) != null)
 						await page.click(`div[aria-label="Follow @${acc}"]`)
 					}
@@ -121,7 +120,7 @@ async function log_in_twitter(action, account, array, index) {
 	await page.setViewport({ width: 1280, height: 720 })
 	await page.setCookie(...account.cookies);
 	try {
-		await page.goto('https://twitter.com/home', {waitUntil: 'networkidle2', timeout: 60})
+		await page.goto('https://twitter.com/home', {waitUntil: 'networkidle2'})
 	}
 	catch (e) {
 		console.log(`${account.user} failed to go /home`)
@@ -132,7 +131,8 @@ async function log_in_twitter(action, account, array, index) {
 	await page.waitForTimeout(3000)
 	if (await page.url() == "https://twitter.com/account/access") {
 		console.log(`PVA for ${account.user}`)
-		stop = true
+		await browser.close()
+		return (0)
 	}
 	if (stop == false && suspended == false) {
 		if (action.url != '') {
@@ -171,7 +171,8 @@ function get_random_at(user, nbr, array) {
 			index = x
 	}
 	var arr = array[index].info.followers.arr
-
+	if (arr.length < nbr)
+		return (re)
 	while (i < nbr) {
 		var tmp = chance.integer({ min: 0, max: (arr.length - 1) })
 		if (mem.includes(arr[tmp]) == false) {

@@ -4,7 +4,10 @@
 var common = require('../srcs/events/common');
 const { actions, acc_manip, info_manip} = require('./../srcs/class')
 const {follow} = require('../srcs/twitter_wrapper.js')
-const {main} = require('../srcs/main.js')
+const {main, init_worker} = require('../srcs/main.js')
+const User = require('./../srcs/mongo/User.js')
+const proxies = require('./../srcs/mongo/proxies.js')
+const twitter_info = require('./../srcs/mongo/twitter_info.js')
 require("dotenv").config();
 
 
@@ -58,13 +61,10 @@ const action_handler = async function (req, res) {
 	}
 }
 
-/*
-	START
-*/
-
 const start_handler = async function (req, res) {
 	var body = req.body
 	var manip = new acc_manip
+	var arr = []
 
 	if (IN_USE == false) {
 		if (Object.keys(body).length === 0)
@@ -75,22 +75,43 @@ const start_handler = async function (req, res) {
 			return (res.status(400).send("Actions are not setup"))
 		switch (body.mode) {
 			case 'rand':
-				var arr = await manip.getRandom(action.info.nbr_acc).then(async (arr) => await manip.id_array_to_acc(arr))
+				arr = await manip.getRandom(action.info.nbr_acc).then(async (arr) => await manip.id_array_to_acc(arr))
 				break;
 			case 'lowest':
 				if (body.opt != "1" && body.opt != "2")
 					return res.status(400).send(`opt must be 1 (following) or 2 (followers) for mode lowest`)
 				body.opt == 1 ? body.opt = "following" : body.opt = "followers"
-				var arr = await manip.lowest(action.info.nbr_acc, body.opt).then(async (arr) => await manip.id_array_to_acc(arr))
+				arr = await manip.lowest(action.info.nbr_acc, body.opt).then(async (arr) => await manip.id_array_to_acc(arr))
 				break;
 			case 'spe':
-				var arr = await manip.get_spe(body.opt).then(async (arr) => await manip.id_array_to_acc(arr))
+				arr = await manip.get_spe(body.opt).then(async (arr) => await manip.id_array_to_acc(arr))
 				break;
+			case 'classic':
+				arr = await manip.get_acc_id(0).then(async (arr) => await manip.id_array_to_acc(arr))
+				break;
+			default :
+				return (res.status(400).send(`${body.mode} is not a valid option`))
 		}
+		if (arr.length != 0) {
+			IN_USE = true
+			main(arr, action)
+			action = new actions(MAX_THREAD)
+			return (res.send("OK"))
+		}
+		return (res.status(400).send("Error: The account list was empty"))
+	}
+	return (res.status(503).send('Bot already in use'))
+}
+
+const init_handler = async function (req, res) {
+
+	if (IN_USE == false) {
+		var arr = await User.find({ ini: true })
+		console.log(arr[0])
 		IN_USE = true
-		main(arr, action)
-		action = new actions(MAX_THREAD)
-		return (res.send("OK"))
+		res.send(`${arr.length} accounts are being initialized`)
+		init_worker(MAX_THREAD, arr)
+		return (0)
 	}
 	return (res.status(503).send('Bot already in use'))
 }
@@ -153,19 +174,130 @@ const retrieve_spe_handler = async function (req, res) {
 const update_twitter_handler = async function (req, res) {
 	if (!req.query.opt)
 		return (res.status(400).send("Opt param is obligatory"))
-	if (req.query.opt !== "1" && req.query.opt !== '2')
-		return (res.status(400).send("Opt must be :\n 1 == follower/following count\n 2 == follower array"))
+	if (req.query.opt > "3" || req.query.opt < "1")
+		return (res.status(400).send("Opt must be :\n1 == follower/following count\n2 == follower array\n3 == all"))
 	res.send("Update on the way")
 	var twitter = new follow(process.env.TWITTER)
 	var manip = new acc_manip
 	var manip_i = new info_manip
-	if (req.query.opt === "1") {
+	
+	if (req.query.opt === "1" || req.query.opt === "3") {
 		var lst = await manip.get_acc_id(0).then(async (re) => await manip.name_id_to_X("tag", re)).then((arr) => manip.make_list(arr))
 		var nbrs = await twitter.get_nbr_follow(lst.split(','))
-		return (await manip_i.update_info_array(nbrs))
+		await manip_i.update_info_array(nbrs)
 	}
-	let tmp = await manip_i.info_arr(15, "empty").then(async (infos) => await twitter.get_followers_arr(infos))
-	return (await manip_i.update_info_array(tmp))
+	if (req.query.opt === "3" || req.query.opt === "2") {
+		let tmp = await manip_i.info_arr(15, "empty").then(async (infos) => await twitter.get_followers_arr(infos))
+		await manip_i.update_info_array(tmp)
+	}
+	return ;
+}
+
+const add_proxy = async function (req, res) {
+	if (req.body.length === undefined)
+		return (res.status(400).send("Body is required to perform actions"))
+	var body = req.body.split('\r\n')
+	res.send("Proxies are being added to the db")
+	for (let x in body) {
+		if (await proxies.find({ proxy: { $eq: body[x] } }).count() === 0)
+			await proxies.create({ proxy: body[x] })
+	}
+	return (0)
+}
+
+const add_account = async function (req, res) {
+	if (req.body.length === undefined)
+		return (res.status(400).send("Body is required to perform actions"))
+	var body = req.body.split('\n\r\n')
+	res.send("Adding accounts to the database")
+	for (let x in body) {
+		let tmp = body[x].split('\r\n')
+		let login = tmp[0].split(": ")[1]
+		if (await User.findOne({ user: login }).count() == 0) {
+			if (await twitter_info.findOne({ user: login }).count() == 0)
+				await twitter_info.create({ user: login })
+			await User.create({
+				user: login,
+				pass: tmp[1].split(": ")[1],
+				mail: tmp[2].split(": ")[1],
+				proxy: await proxies.aggregate([{ $sample: { size: 1 } }]).then((re) => re[0].proxy),
+				timeout: false,
+				ini: true,
+				ini_follow: true,
+				info: await twitter_info.findOne({ user: login })
+			})
+		}
+	}
+	return (0);
+}
+
+const update_proxy = async function (req, res) {
+	if (!req.query.opt)
+		return (res.status(400).send("opt query is necessary"))
+	switch (req.query.opt) {
+		case "tag":
+			if (!req.query.tag)
+				return (res.status(400).send("tag query is necessary when using tag opt"))
+			res.send("Proxies are being changed")
+			let split = req.query.tag.split(',')
+			for (let x in split) {
+				split[x] = split[x][0] == '@' ? split[x] : "@" + split[x]
+				await User.updateMany({ tag: split[x] }, { $set: { proxy: await proxies.aggregate([{ $sample: { size: 1 } }]).then((re) => re[0].proxy) } })
+			}
+			break;
+		case "all":
+			res.send("Proxies are being changed")
+			let acc = await User.find()
+			for (let x in acc) {
+				await User.updateMany(acc[x], { $set: { proxy: await proxies.aggregate([{ $sample: { size: 1 } }]).then((re) => re[0].proxy) } })
+			}
+			break;
+		case "empty":
+			res.send("Proxies are being changed")
+			var lst = await User.find({ proxy: "" })
+			for (let x in lst)
+				await User.updateMany(lst[x], { $set: { proxy: await proxies.aggregate([{ $sample: { size: 1 } }]).then((re) => re[0].proxy) } })
+			break;
+		default:
+			return (res.status(400).send(`${req.query.opt} is not a valid option, valid options are:\n-tag\n-all\n-empty`))
+	}
+	return (0);
+}
+
+/*
+	DELETE
+*/
+
+const proxy_delete = async function (req, res) {
+	if (req.body.length === undefined)
+		return (res.status(400).send("Body is required to perform actions"))
+	var body = req.body.split('\r\n')
+	res.send("proxies are being removed from account(s)")
+	for (let x in body) {
+		if (await proxies.find({ proxy: { $eq: body[x] } }).count() === 1) {
+			await proxies.deleteOne({ proxy: { $eq: body[x] } })
+			if (!req.query.opt) {
+				let new_prox = await proxies.aggregate([{ $sample: { size: 1 } }]).then((re) => re[0].proxy)
+				await user.updateOne({ proxy: body[x] }, { $set: { proxy: new_prox } })
+			}
+			else
+				await user.updateOne({ proxy: body[x] }, { $set: { proxy: '' } })
+		}
+	}
+	return;
+}
+
+const account_delete = async function (req, res) {
+	if (!req.query.user)
+		return (res.status(400).send("Missing the user query"))
+	res.send("If the Accounts exists they are being deleted")
+	var lst = req.query.user.split(',')
+	for (let x in lst) {
+		await cookies.deleteOne({ user: { $eq: lst[x] } })
+		await User.deleteOne({ user: { $eq: lst[x] } })
+		await twitter_info.deleteOne({ user: { $eq: lst[x] } })
+	}
+	return (0);
 }
 
 /*
@@ -176,8 +308,14 @@ module.exports = {
 	check_auth,
 	action_handler,
 	start_handler,
+	init_handler,
 	retrieve_lowest_handler,
 	retrieve_random_handler,
 	retrieve_spe_handler,
-	update_twitter_handler
+	update_twitter_handler,
+	proxy_delete,
+	add_proxy,
+	add_account,
+	update_proxy,
+	account_delete
 }

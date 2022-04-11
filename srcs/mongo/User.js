@@ -8,6 +8,7 @@ const accSchema = new mongoose.Schema({
 	proxy: String,
 	timeout: Boolean,
 	ini: Boolean,
+	ini_follow: Boolean,
 	info : {
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "twitter_infos"

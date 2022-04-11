@@ -5,8 +5,8 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
-const {acc_manip, info_manip} = require('./../srcs/class')
-var handler = require('./routes.js')
+var handler = require('./routes.js');
+const User = require('../srcs/mongo/User.js');
 require("dotenv").config();
 
 /*
@@ -14,32 +14,15 @@ require("dotenv").config();
 */
 
 //////DB//////
-global.db = (global.db ? global.db : mongoose.connect('mongodb://192.168.0.23:27017/Twitter'));
+mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 
-//////CLASS//////
-
-class accounts extends acc_manip {
-	constructor(user, pass, tag, mail, proxy, size, info) {
-		this.user = user
-		this.pass = pass
-		this.tag = tag
-		this.mail = mail
-		if (proxy)
-			this.proxy = proxy
-		else
-			this.proxy = ""
-		this.size = size
-		this.timeout = false
-		this.init = false
-		this.info = info
-	}
-}
+//////CRON//////
+require('./../srcs/cron/update_twitter')();
 
 //////MISC//////
 const app = express()
 app.use(bodyParser.json());
 app.use(bodyParser.text())
-require('./../srcs/cron/update_twitter')();
 
 /*
 	EXPRESS
@@ -50,44 +33,31 @@ app.get('/', (req, res) => {
 })
 
 //////ACTION//////
-
 app.post('/api/action', handler.check_auth, handler.action_handler)
 app.post('/api/start', handler.check_auth, handler.start_handler)
 
 //////RETRIEVE DATA//////
-
 app.get('/api/retrieve/lowest', handler.check_auth, handler.retrieve_lowest_handler)
 app.get('/api/retrieve/random', handler.check_auth, handler.retrieve_random_handler)
 app.get('/api/retrieve/specific', handler.check_auth, handler.retrieve_spe_handler)
 
-//////PUSH/UPDATE DATA//////
+//////ADD DATA//////
+app.put('/api/add/account', handler.check_auth, handler.add_account)
+app.put('/api/add/proxy', handler.check_auth, handler.add_proxy)
 
+//////UPDATE DATA//////
 app.put('/api/update/twitter', handler.check_auth, handler.update_twitter_handler)
-
-app.put('/api/add/proxy', (req, res) => {
-	var body = req.body.split('\n\r\n')
-	console.log(body[0])
-	res.send("OK")
-})
-
-app.put('/api/add/account', (req, res) => {
-	var body = req.body.split('\n\r\n')
-
-	
-})
-
-app.put('/api/update/proxy', (req, res) => {
-
-})
+app.put('/api/update/proxy', handler.check_auth, handler.update_proxy)
 
 //////DELETE DATA//////
+app.delete('/api/delete/proxy', handler.check_auth, handler.proxy_delete)
+app.delete('/api/delete/account', handler.check_auth, handler.account_delete)
 
-app.delete('/api/delete/account', (req, res) => {
+/*
+	TODO: ADD_ACCOUNT
+	-classic init handler for pptr
+*/
 
-})
-
-app.delete('/api/delete/proxy', (req, res) => {
-	
-})
+app.post('/api/init', handler.check_auth, handler.init_handler)
 
 app.listen(process.env.PORT)
