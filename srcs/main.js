@@ -16,17 +16,15 @@ var commonEmitter = common.commonEmitter;
 	//////CLASS//////
 
 class	accounts {
-	constructor(user, pass, tag, mail, proxy, info, cookies) {
+	constructor(user, pass, tag, mail, proxy, info, cookies, init, init_follow) {
 		this.user = user
 		this.pass = pass
 		this.tag = tag
 		this.mail = mail
-		if (proxy)
-			this.proxy = proxy
-		else
-			this.proxy = ""
+		this.proxy = proxy
 		this.timeout = false
-		this.init = false
+		this.init = init
+		this.init_follow = init_follow
 		this.info = info
 		this.cookies = cookies
 	}
@@ -107,7 +105,7 @@ async function init_worker(threads, arr) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: threads,
+		size: 14,
 		task: "./srcs/init_acc.js"
 	});
 
@@ -163,49 +161,9 @@ function create_acc_array(db) {
 	let re = new Array
 
 	for (let i in db) {
-		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, {}, []))
+		re.push(new accounts(db[i].user, db[i].pass, db[i].tag, db[i].mail, db[i].proxy, {}, [], db[i].ini, db[i].ini_follow))
 	}
 	return (re);
 }
-
-function create_proxy_array() {
-	let proxy = fs.readFileSync(__dirname + "/db/proxy.txt", 'utf8')
-	let re = new Array
-
-	proxy = proxy.split('\n')
-	for (let x in proxy) {
-		proxy[x] = proxy[x].trim()
-		if (proxy[x])
-			re.push(new proxy_stat(proxy[x], proxy.length))
-	}
-	return (re);
-}
-
-function give_proxy() {
-	var tmp = proxies[random.gen_number(0, (proxies[0].size - 1))]
-	return (tmp.proxy)
-}
-
-	//////MISC//////
-
-async function rm_timeout(arr) {
-	var db = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
-
-	for (let x in arr) {
-		for (let i in db) {
-			if (arr[x].tag == db[i].tag) {
-				if (db[i].timeout == true)
-					arr.splice(x, 1)
-			}
-		}
-	}
-	for (let x in arr) {
-		arr[x].size = arr.length
-	}
-}
-
-/*
-	TEST
-*/
 
 module.exports = {main, init_worker}

@@ -8,6 +8,8 @@ const {main, init_worker} = require('../srcs/main.js')
 const User = require('./../srcs/mongo/User.js')
 const proxies = require('./../srcs/mongo/proxies.js')
 const twitter_info = require('./../srcs/mongo/twitter_info.js')
+const cookies = require('./../srcs/mongo/cookies.js');
+const { query } = require('express');
 require("dotenv").config();
 
 
@@ -106,8 +108,13 @@ const start_handler = async function (req, res) {
 const init_handler = async function (req, res) {
 
 	if (IN_USE == false) {
-		var arr = await User.find({ ini: true })
-		console.log(arr[0])
+		if (req.query.opt) {
+			var lst = req.query.opt.split(",")
+			await User.updateMany({user: {$in: lst}}, {$set : {ini: true}})
+			var arr = await User.find({user: {$in: lst}})
+		}
+		else
+			var arr = await User.find({ ini: true })
 		IN_USE = true
 		res.send(`${arr.length} accounts are being initialized`)
 		init_worker(MAX_THREAD, arr)
@@ -187,6 +194,8 @@ const update_twitter_handler = async function (req, res) {
 		await manip_i.update_info_array(nbrs)
 	}
 	if (req.query.opt === "3" || req.query.opt === "2") {
+		if (req.query.opt === "3")
+			await sleep(2000)
 		let tmp = await manip_i.info_arr(15, "empty").then(async (infos) => await twitter.get_followers_arr(infos))
 		await manip_i.update_info_array(tmp)
 	}
@@ -215,11 +224,25 @@ const add_account = async function (req, res) {
 		let login = tmp[0].split(": ")[1]
 		if (await User.findOne({ user: login }).count() == 0) {
 			if (await twitter_info.findOne({ user: login }).count() == 0)
-				await twitter_info.create({ user: login })
+				await twitter_info.create({
+					user: login,
+					info: {
+						id: "",
+						followers: {
+							nbr: 0,
+							arr: []
+						},
+						following: {
+							nbr: 0,
+							arr: []
+						}
+					}
+				})
 			await User.create({
 				user: login,
 				pass: tmp[1].split(": ")[1],
 				mail: tmp[2].split(": ")[1],
+				tag: "",
 				proxy: await proxies.aggregate([{ $sample: { size: 1 } }]).then((re) => re[0].proxy),
 				timeout: false,
 				ini: true,
@@ -227,6 +250,7 @@ const add_account = async function (req, res) {
 				info: await twitter_info.findOne({ user: login })
 			})
 		}
+		await twitter_info.updateOne({ user: login }, {$set: {referTo: await User.findOne({ user: login })}})
 	}
 	return (0);
 }
@@ -293,11 +317,21 @@ const account_delete = async function (req, res) {
 	res.send("If the Accounts exists they are being deleted")
 	var lst = req.query.user.split(',')
 	for (let x in lst) {
-		await cookies.deleteOne({ user: { $eq: lst[x] } })
+		if (await cookies.find({user: lst[x]}))
+			await cookies.deleteOne({ user: { $eq: lst[x] } })
 		await User.deleteOne({ user: { $eq: lst[x] } })
 		await twitter_info.deleteOne({ user: { $eq: lst[x] } })
 	}
 	return (0);
+}
+
+/*
+	UTILS
+*/
+function sleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 }
 
 /*

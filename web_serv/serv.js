@@ -55,3 +55,13 @@ app.put('/api/update/proxy', handler.check_auth, handler.update_proxy)
 //////DELETE DATA//////
 app.delete('/api/delete/proxy', handler.check_auth, handler.proxy_delete)
 app.delete('/api/delete/account', handler.check_auth, handler.account_delete)
+
+const info = require("./../srcs/mongo/twitter_info.js")
+const user = require("./../srcs/mongo/User.js")
+
+app.post('/api/test', async (req, res) => {
+
+	//await user.updateOne({ user: req.query.user }, {$set: {referTo: await info.findOne({ user: req.query.user })}})
+	//await info.updateOne({ user: req.query.user }, {$set: {referTo: await user.findOne({ user: req.query.user })}})
+	res.send("OK")
+})

@@ -89,16 +89,17 @@ class	actions {
 class info_manip {
 	constructor() {
 	}
-	async update_info(nfo) {
+	async update_info(nfo, name) {
+
 		if (nfo.followers.arr.length === 0)
-			nfo.followers.arr = await info.findOne({"info.id": nfo.id}, {"info.followers.arr": 1}).then((x) => x.info.followers.arr)
+			nfo.followers.arr = await user.findOne({tag: "@" + name}).then(async(x) => await info.findOne({"user": x.user}, {"info.followers.arr": 1}).then((y) => y.info.followers.arr))
 		if (nfo.following.arr.length === 0)
-			nfo.following.arr = await info.findOne({"info.id": nfo.id}, {"info.following.arr": 1}).then((x) => x.info.following.arr)
-		await info.updateOne({"info.id": nfo.id}, {info: nfo})
+			nfo.following.arr = await user.findOne({tag: "@" + name}).then(async(x) => await info.findOne({"user": x.user}, {"info.following.arr": 1}).then((y) => y.info.following.arr))
+		await user.findOne({tag: "@" + name}).then(async(x) =>await info.updateOne({"user": x.user}, {info: nfo}))
 	}
 	async update_info_array(nfo_arr) {
 		for (let x in nfo_arr) {
-			await this.update_info(nfo_arr[x])
+			await this.update_info(nfo_arr[x], x)
 		}
 	}
 	async info_arr(nbr, opt) {

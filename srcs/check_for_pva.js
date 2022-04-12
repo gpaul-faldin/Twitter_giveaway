@@ -59,6 +59,7 @@ async function pva(page, user) {
 		return (2)
 	try {await page.waitForSelector('#country_code')}
 	catch(e) {
+		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_ERRPVA.jpg`})
 		console.log(`${user} had funcaptcha`)
 		return (1)
 	}

@@ -6,7 +6,6 @@ const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const {picture, legit_at} = require('./banner-pp/profil_fill.js')
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
-const fs = require('fs');
 const {parentPort} = require("worker_threads");
 const cookies = require("./mongo/cookies.js")
 const info = require("./mongo/twitter_info.js")
@@ -29,6 +28,7 @@ const legit = new legit_at()
 	THREADS
 */
 parentPort.on("message", async (data) => {
+	await sleep(pic.draw_int(10000))
 	await init_twitter(data.account, data.index)
 	parentPort.postMessage("OK")
 })
@@ -41,8 +41,11 @@ puppeteer.use(StealthPlugin())
 puppeteer.use(RecaptchaPlugin({ provider: { id: '2captcha', token: '89f71b2cf02b35c6b5c1f8deb9f9161b' }, visualFeedback: true }))
 
 async function acc_fill(account) {
-	account.info = await info.findOne({user: account.user}).then(nfo => nfo.info)
-	account.cookies = await cookies.findOne({user: account.user}).then(nfo => nfo.cookies)
+	account.info = await info.findOne({ user: account.user }).then(nfo => nfo.info)
+	await user.updateOne({ user: account.user }, {$set: {referTo: await info.findOne({ user: account.user })}})
+	try {
+		account.cookies = await cookies.findOne({ user: account.user }).then(nfo => nfo.cookies)
+	} catch (e) {}
 	return (account)
 }
 
@@ -124,7 +127,7 @@ async function init_twitter(account, index) {
 	})
 	await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36`)
 	await page.setViewport({ width: 800, height: 600 })
-	if (account.cookies.length != 0) {
+	if (account.cookies.length !== 0) {
 		await page.setCookie(...account.cookies);
 	}
 	else {
@@ -190,6 +193,7 @@ async function init_twitter(account, index) {
 	await page.waitForTimeout(2000)
 	if (suspended == false && stop == false) {
 		if (account.tag == "") {
+			await page.screenshot({ path: process.cwd() + `/debug_screenshot/${account.user}.jpg`})
 			var tag = await page.evaluate(`
 			var name = document.querySelector('a[aria-label="Profile"]').href.split('/')[3]
 			'@' + name
@@ -198,7 +202,7 @@ async function init_twitter(account, index) {
 			account.tag = tag
 		}
 		await assign_img(page, account.user, account.tag.substring(1))
-		if (account.ini_follow == true)
+		if (account.init_follow == true)
 			await follow(page, account.user)
 	}
 	else if (suspended == true) {
@@ -207,9 +211,19 @@ async function init_twitter(account, index) {
 	if (stop || suspended)
 		console.log(`${account.user} NOT OK`)
 	else {
-		await user.updateOne({user: account.user}, {$set: {ini: false}})
+		await user.updateOne({user: account.user}, {$set: {ini: false, ini_follow: false}})
 		console.log(`${account.user} INIT OK`)
 	}
 	await browser.close()
 	return (0)
+}
+
+/*
+	UTILS
+*/
+
+function sleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
 }
