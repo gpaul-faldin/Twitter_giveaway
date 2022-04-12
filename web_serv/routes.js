@@ -9,9 +9,10 @@ const User = require('./../srcs/mongo/User.js')
 const proxies = require('./../srcs/mongo/proxies.js')
 const twitter_info = require('./../srcs/mongo/twitter_info.js')
 const cookies = require('./../srcs/mongo/cookies.js');
-const { query } = require('express');
 require("dotenv").config();
+const {Webhook} = require('simple-discord-webhooks');
 
+const webhook = new Webhook(process.env.HOOK)
 
 /*
 	EVENTS
@@ -21,6 +22,7 @@ var IN_USE = false
 var commonEmitter = common.commonEmitter;
 commonEmitter.on("finish", data => {
 	console.log("Action finished")
+	webhook.send("Bots ready to take new instructions")
 	IN_USE == true ? IN_USE = false : 0
 });
 
@@ -192,10 +194,10 @@ const update_twitter_handler = async function (req, res) {
 		var lst = await manip.get_acc_id(0).then(async (re) => await manip.name_id_to_X("tag", re)).then((arr) => manip.make_list(arr))
 		var nbrs = await twitter.get_nbr_follow(lst.split(','))
 		await manip_i.update_info_array(nbrs)
+		if (req.query.opt === "3")
+			await sleep(5000)
 	}
 	if (req.query.opt === "3" || req.query.opt === "2") {
-		if (req.query.opt === "3")
-			await sleep(2000)
 		let tmp = await manip_i.info_arr(15, "empty").then(async (infos) => await twitter.get_followers_arr(infos))
 		await manip_i.update_info_array(tmp)
 	}

@@ -49,11 +49,13 @@ async function action_todo(action, page, user, array) {
 		}
 	}
 	if (action.tag.on == true && action.url != '') {
-		while (await page.$('div[data-testid="reply"]') == null);
-		await page.waitForTimeout(50)
-		await page.click('div[data-testid="reply"]')
-		await page.waitForTimeout(2000)
-		await page.evaluate(`
+		var str = get_random_at(user, action.tag.nbr, array)
+		if (str != "") {
+			while (await page.$('div[data-testid="reply"]') == null);
+			await page.waitForTimeout(50)
+			await page.click('div[data-testid="reply"]')
+			await page.waitForTimeout(2000)
+			await page.evaluate(`
 			var tmp = document.querySelectorAll('span')
 			function swag() {
 				for (let x in tmp) {
@@ -70,13 +72,14 @@ async function action_todo(action, page, user, array) {
 			}
 			res()
 		`)
-		while (await page.$('div[data-testid="tweetTextarea_0"]') == null);
-		await page.waitForTimeout(500)
-		await page.type('div[data-testid="tweetTextarea_0"]', get_random_at(user, action.tag.nbr, array))
-		await page.waitForTimeout(500)
-		await page.click('div[data-testid="tweetButton"]')
-		await page.click('div[data-testid="tweetButton"]')
-		await page.waitForTimeout(2000)
+			while (await page.$('div[data-testid="tweetTextarea_0"]') == null);
+			await page.waitForTimeout(500)
+			await page.type('div[data-testid="tweetTextarea_0"]', str)
+			await page.waitForTimeout(500)
+			await page.click('div[data-testid="tweetButton"]')
+			await page.click('div[data-testid="tweetButton"]')
+			await page.waitForTimeout(2000)
+		}
 	}
 	if (action.follow.on == true) {
 		for (let i in action.follow.acc) {
@@ -87,7 +90,7 @@ async function action_todo(action, page, user, array) {
 				var url = "https://twitter.com/".concat(acc)
 				try {
 					try {
-						await page.goto(url, { waitUntil: 'networkidle2'})
+						await page.goto(url, { waitUntil: 'networkidle2', timeout: 6000})
 					} catch(e) {console.log(e.message)}
 					await page.waitForTimeout(3000)
 					if (await page.$(`div[aria-label="Follow @${acc}"]`) != null)

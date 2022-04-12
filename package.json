@@ -38,6 +38,7 @@
 		"puppeteer-extra": "^3.2.3",
 		"puppeteer-extra-plugin-recaptcha": "^3.5.0",
 		"puppeteer-extra-plugin-stealth": "^2.9.0",
+		"simple-discord-webhooks": "^1.1.1",
 		"twitter-api-v2": "^1.11.2"
 	}
 }

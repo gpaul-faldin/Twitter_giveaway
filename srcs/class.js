@@ -186,21 +186,12 @@ class acc_manip {
 	}
 	async lowest(nbr, opt) {
 		var i = 0
-		var save = []
 		var re = []
-		var arr = await this.get_info_id().then(async(arr) => this.info_id_to_X(`info.${opt}.nbr,referTo`, arr))
+		var arr = await this.get_info_id().then(async(arr) => await this.info_id_to_X(`info.${opt}.nbr,referTo`, arr))
+		arr.sort()
 
 		while (i < nbr) {
-			var n = 0
-			var lowest = 100
-			for (let x in arr) {
-				if (arr[x].info[opt].nbr < lowest && save.includes(x) == false) {
-					n = x
-					lowest = arr[x].info[opt].nbr
-				}
-			}
-			save.push(n)
-			re.push(arr[n].referTo)
+			re.push(arr[i].referTo)
 			i++;
 		}
 		return (re)
