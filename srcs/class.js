@@ -2,10 +2,13 @@ const user = require('./mongo/User.js')
 const info = require('./mongo/twitter_info.js')
 const proxies = require('./mongo/proxies.js')
 const cookies = require('./mongo/cookies.js')
+const {search} = require('./twitter_wrapper')
+require("dotenv").config();
+
 
 class	actions {
 	constructor(MAX_THREAD) {
-		this.url = "",
+		this.id = "",
 		this.rt = false,
 		this.like = false,
 		this.tag = {
@@ -36,7 +39,8 @@ class	actions {
 					this[act[x]].on = true
 					if (!query.follow)
 						throw Error ('Missing follow query')
-					this[act[x]].acc = query.follow.split(',')
+					let tmp = new search(process.env.TWITTER, "")
+					this[act[x]].acc = await tmp.id_from_user(query.follow)
 				}
 				else if (act[x] === 'tag') {
 					this[act[x]].on = true
@@ -49,7 +53,7 @@ class	actions {
 			}
 		}
 		if (query.url)
-			this.url = query.url
+			this.id = query.url.split('/')[5]
 		if (query.option) {
 			await this.parse_body(body)
 		}

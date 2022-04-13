@@ -146,6 +146,15 @@ class search extends twitter {
 			throw new Error(err);
 		}
 	}
+	async id_from_user(string) {
+		var re = []
+		string = string.replaceAll('@', '')
+		var web = await this.client.v2.usersByUsernames(string)
+		for (let x in web.data) {
+			re.push(web.data[x].id)
+		}
+		return (re)
+	}
 }
 
 module.exports = {follow, search}

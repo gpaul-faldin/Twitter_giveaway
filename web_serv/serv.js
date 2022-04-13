@@ -56,12 +56,14 @@ app.put('/api/update/proxy', handler.check_auth, handler.update_proxy)
 app.delete('/api/delete/proxy', handler.check_auth, handler.proxy_delete)
 app.delete('/api/delete/account', handler.check_auth, handler.account_delete)
 
+/*
+	TEST API
+*/
+
 const info = require("./../srcs/mongo/twitter_info.js")
-const user = require("./../srcs/mongo/User.js")
+const user = require("./../srcs/mongo/User.js");
+const cookies = require('../srcs/mongo/cookies.js');
 
 app.post('/api/test', async (req, res) => {
-
-	//await user.updateOne({ user: req.query.user }, {$set: {referTo: await info.findOne({ user: req.query.user })}})
-	//await info.updateOne({ user: req.query.user }, {$set: {referTo: await user.findOne({ user: req.query.user })}})
 	res.send("OK")
 })

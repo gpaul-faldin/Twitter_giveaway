@@ -91,7 +91,7 @@ const start_handler = async function (req, res) {
 				arr = await manip.get_spe(body.opt).then(async (arr) => await manip.id_array_to_acc(arr))
 				break;
 			case 'classic':
-				arr = await manip.get_acc_id(0).then(async (arr) => await manip.id_array_to_acc(arr))
+				arr = await manip.get_acc_id(action.info.nbr_acc).then(async (arr) => await manip.id_array_to_acc(arr))
 				break;
 			default :
 				return (res.status(400).send(`${body.mode} is not a valid option`))

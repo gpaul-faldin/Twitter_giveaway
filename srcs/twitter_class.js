@@ -79,7 +79,7 @@ class twit {
 						"__fs_interactive_text_enabled": true,
 						"__fs_responsive_web_uc_gql_enabled": false
 					},
-					"queryId": "l-kS-W5Ht5bBGBNp-wNzcA"
+					"queryId": "6nmMmSYJiD9rc9SPKPJRcQ"
 				},
 				headers: this.headers,
 				proxy: this.proxy
