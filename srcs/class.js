@@ -103,17 +103,9 @@ class info_manip {
 		}
 	}
 	async info_arr(nbr, opt) {
-		var re = []
 		if (opt == "empty") {
-			var db = await info.find()
-			for (let x in db) {
-				if (re.length === nbr)
-					return re;
-				if (db[x].info.followers) {
-					if (db[x].info.followers.arr.length === 0)
-						re.push(db[x])
-				}
-			}
+			var db = await info.find({'info.followers.arr': {$eq: []}}).limit(nbr)
+			return (db)
 		}
 	}
 }
