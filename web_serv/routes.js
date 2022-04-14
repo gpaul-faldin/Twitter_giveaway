@@ -3,7 +3,7 @@
 */
 var common = require('../srcs/events/common');
 const { actions, acc_manip, info_manip} = require('./../srcs/class')
-const {follow} = require('../srcs/twitter_wrapper.js')
+const {follow, tweet} = require('../srcs/twitter_wrapper.js')
 const {main, init_worker} = require('../srcs/main.js')
 const User = require('./../srcs/mongo/User.js')
 const proxies = require('./../srcs/mongo/proxies.js')
@@ -53,6 +53,8 @@ const action_handler = async function (req, res) {
 
 		try {
 			await action.parse_query(req.query, req.body)
+			var tmp = new tweet(process.env.TWITTER)
+			await tmp.fill_giveaway(action, req.query.end, req.query.url)
 		} catch (e) {
 			return (res.status(400).send(e.message))
 

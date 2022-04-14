@@ -5,7 +5,7 @@ const {StaticPool} = require("node-worker-threads-pool");
 var common = require('./events/common');
 var commonEmitter = common.commonEmitter;
 var Chance = require('chance')
-
+var ga = require('./mongo/giveaway.js')
 
 /*
 	INIT
@@ -63,7 +63,12 @@ async function req_main(action, user) {
 			prom.push(twitter.follow(action.follow.acc[x]))
 		}
 	}
-	await Promise.all(prom)
+	await Promise.all(prom).then((value) => {
+		if (value.includes('NO'))
+			return (1)
+	})
+	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_acc': 1}, $push: {'info.acc': user.user}})
+	return (0)
 }
 
 async function main_handler(acc, action) {
@@ -132,6 +137,7 @@ async function main(arr, action) {
 	for (let x in arr) {
 		await req_main(action, arr[x])
 	}
+	await ga.updateOne({tweet_id: action.id}, {$set: {participate: true}})
 	commonEmitter.emit("finish")
 	return (0)
 

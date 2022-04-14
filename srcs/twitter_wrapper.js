@@ -2,6 +2,11 @@ const { TwitterApi } = require('twitter-api-v2');
 const path = require('path');
 const axios = require('axios').default
 const fs = require('fs')
+const ga = require('./mongo/giveaway.js');
+const User = require('./mongo/User.js');
+const {Webhook} = require('simple-discord-webhooks');
+
+const webhook = new Webhook(`https://discord.com/api/webhooks/963929665473482804/1j5BI8hClD-GolgKJdeVCV7_lpWPdcmaNIODqaV8OLhfrjWt8D9hIXfsmLQ539HxWeBS`)
 
 class twitter {
 	constructor(token) {
@@ -108,7 +113,6 @@ class search extends twitter {
 	async scrape_profileP(id) {
 		var re = []
 		var web = await this.client.v2.followers(id, {"user.fields": "profile_image_url", max_results: 1000})
-		//var prom = []
 		web = web.data
 		for (let x in web) {
 			if (web[x].profile_image_url !== 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png') {
@@ -128,9 +132,6 @@ class search extends twitter {
 
 			}
 		}
-		//await Promise.all(prom)
-		
-		//console.log('https://pbs.twimg.com/profile_images/1511441890016702465/Z2LYR5SB.jpg'.substring(37))
 	}
 	async download_pic(fileUrl, downloadFolder, name) {
 		const localFilePath = path.resolve(__dirname, downloadFolder, name);
@@ -157,4 +158,74 @@ class search extends twitter {
 	}
 }
 
-module.exports = {follow, search}
+class tweet extends twitter {
+	constructor(token) {
+		super(token)
+	}
+
+	async get_id_name(name) {
+		var web = await this.client.v2.usersByUsernames(name)
+		return (web.data[0].id)
+
+	}
+	async get_date(id) {
+		var re = await this.client.v2.singleTweet(id, {'tweet.fields': "created_at"})//.then((x) => x.data.created_at)
+		if (re.errors)
+			throw Error("The tweet does not exist")
+		re = re.data.created_at
+		return (Date.parse(re))
+	}
+	async fill_giveaway(action, end, url) {
+		var start = await this.get_date(action.id)
+
+		if (await ga.findOne({ tweet_id: action.id }) === null) {
+			await ga.create({
+				tweet_id: action.id,
+				tweet_url: url,
+				by: await this.get_id_name(url.split('/')[3]),
+				start: start,
+				draw: start + (end * 86400000),
+				conditions: {
+					like: action.like,
+					rt: action.rt,
+					tag: action.tag.nbr,
+					follow: action.follow.acc
+				},
+				participate: false,
+				info:{
+					nbr_acc: 0
+				}
+			})
+			return (0)
+		}
+	}
+	async check_win(giveaway) {
+		var res = await this.client.v2.userTimeline(giveaway.by, { expansions: 'referenced_tweets.id' })
+		let arr = res.data.data
+		const keywords = ['win', 'Congrat', 'gg', 'GG']
+
+		for (let x in arr) {
+			if (arr[x].referenced_tweets) {
+				if (arr[x].referenced_tweets[0].type === 'replied_to' || arr[x].referenced_tweets[0].type === 'quoted') {
+					let ref_id = arr[x].referenced_tweets[0].id
+					if (keywords.map((term) => arr[x].text.includes(term)).includes(true)) {
+						webhook.send(`Just checking to be sure check ${giveaway.tweet_url}`)
+						var tag = arr[x].text.match(/(@[A-Za-z1-9])\w+/g)[0]
+						if (ref_id === giveaway.tweet_id) {
+							if (await User.find({ tag: tag }) !== null) {
+								webhook.send(`
+									Winner Winner chicken dinner!\n
+									${tag} just won this giveaway: ${giveaway.tweet_url}\n
+									<@259353316184555521>
+								`)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+module.exports = {follow, search, tweet}
