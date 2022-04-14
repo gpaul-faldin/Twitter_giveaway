@@ -112,6 +112,18 @@ class twit {
 			return ("OK");
 		} catch (e) { return ("NO") }
 	}
+	async badge() {
+		this.headers['content-type'] = ""
+		try {
+			var web = await axios({
+				method: 'get',
+				url: 'https://twitter.com/i/api/2/badge_count/badge_count.json?supports_ntab_urt=1',
+				headers: this.headers,
+				proxy: this.proxy
+			})
+			return (web.data);
+		} catch (e) { return ("NO") }
+	}
 }
 
 module.exports = twit

@@ -63,7 +63,18 @@ app.delete('/api/delete/account', handler.check_auth, handler.account_delete)
 const info = require("./../srcs/mongo/twitter_info.js")
 const user = require("./../srcs/mongo/User.js");
 const cookies = require('../srcs/mongo/cookies.js');
+const {Webhook} = require('simple-discord-webhooks');
+const twit = require('../srcs/twitter_class.js')
+const webhook = new Webhook("https://discord.com/api/webhooks/963929665473482804/1j5BI8hClD-GolgKJdeVCV7_lpWPdcmaNIODqaV8OLhfrjWt8D9hIXfsmLQ539HxWeBS")
+
 
 app.post('/api/test', async (req, res) => {
+	var lst = await user.find().populate('cookies')
+	for (let x in lst) {
+		let twitter = new twit(lst[x].cookies.req_cookie, lst[x].cookies.crsf, lst[x].proxy.split(':'))
+		if (await twitter.badge().then((x) => x.dm_unread_count) != 0) {
+			//webhook.send(`${lst[x].user} won a giveaway ! <@259353316184555521>`)
+		}
+	}
 	res.send("OK")
 })

@@ -11,7 +11,8 @@ const cookies = require("./mongo/cookies.js")
 const info = require("./mongo/twitter_info.js")
 const user = require("./mongo/User.js")
 const axios = require("axios").default
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const { findOne } = require('./mongo/User.js');
 
 
 /*
@@ -172,9 +173,18 @@ async function init_twitter(account, index) {
 				accept_cookies()
 			`)
 			let cookie = await page.cookies()
+			var req_cookie = []
+			for (let x in cookie) {
+				let str = cookie[x].name + '=' + cookie[x].value
+				if (cookie[x].name === 'ct0')
+					var crsf = cookie[x].value
+				req_cookie.push(str)
+			}
 			await cookies.create({
 				user: account.user,
-				cookies: cookie
+				cookies: cookie,
+				crsf: crsf,
+				req_cookie: req_cookie
 			})
 		}
 	}
@@ -211,7 +221,12 @@ async function init_twitter(account, index) {
 	if (stop || suspended)
 		console.log(`${account.user} NOT OK`)
 	else {
-		await user.updateOne({user: account.user}, {$set: {ini: false, ini_follow: false}})
+		await user.updateOne({ user: account.user },
+			{
+				$set: {
+					ini: false, ini_follow: false, cookies: await cookies.findOne({ user: account.user })
+				}
+			})
 		console.log(`${account.user} INIT OK`)
 	}
 	await browser.close()
