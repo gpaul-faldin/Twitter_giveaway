@@ -152,7 +152,6 @@ const retrieve_lowest_handler = async function (req, res) {
 		return (res.send(re))
 	}
 	return res.send(await manip.lowest(qty, opt).then(async (arr) => await manip.id_array_to_acc(arr)))
-	
 }
 
 const retrieve_random_handler = async function (req, res) {
@@ -176,6 +175,16 @@ const retrieve_spe_handler = async function (req, res) {
 	if (!req.query.output)
 		return (res.send(await manip.id_array_to_acc(re)))
 	return (res.send(await manip.name_id_to_X(req.query.output, re)))
+}
+
+const retrieve_number = async function (req, res) {
+	if (!req.query.opt)
+		return (res.status(400).send(`Need to provide opt query:\n1 == Active\n2 == timed out`))
+	if (req.query.opt == 1)
+		return (res.send(`Number of active accounts: ${await User.countDocuments({ timeout: false })}`))
+	if (req.query.opt == 2)
+		return (res.send(`Number of timed out accounts : ${await User.countDocuments({ timeout: true })}`))
+	return (res.status(400).send(`Opt must be 1 or 2`))
 }
 
 /*
@@ -350,10 +359,11 @@ module.exports = {
 	retrieve_lowest_handler,
 	retrieve_random_handler,
 	retrieve_spe_handler,
+	retrieve_number,
 	update_twitter_handler,
-	proxy_delete,
+	update_proxy,
 	add_proxy,
 	add_account,
-	update_proxy,
+	proxy_delete,
 	account_delete
 }

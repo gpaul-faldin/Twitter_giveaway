@@ -6,6 +6,7 @@ var common = require('./events/common');
 var commonEmitter = common.commonEmitter;
 var Chance = require('chance')
 var ga = require('./mongo/giveaway.js')
+const twit = require('./twitter_class')
 
 /*
 	INIT
@@ -41,11 +42,12 @@ function create_acc_array(db) {
 	HANDLER
 */
 
-const twit = require('./twitter_class')
-
 async function req_main(action, user) {
-	await user.populate('cookies')
-	await user.populate('info')
+
+	await Promise.all([
+		user.populate('cookies'),
+		user.populate('info')
+	])
 	var twitter = new twit(user.cookies.req_cookie, user.cookies.crsf, user.proxy.split(':'))
 	var prom = []
 
@@ -64,8 +66,11 @@ async function req_main(action, user) {
 		}
 	}
 	await Promise.all(prom).then((value) => {
-		if (value.includes('NO'))
+		console.log(value)
+		if (value.includes('NO')) {
+			console.log(`${user.user} might be timeout`)
 			return (1)
+		}
 	})
 	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_acc': 1}, $push: {'info.acc': user.user}})
 	return (0)
@@ -104,9 +109,9 @@ async function init_worker(threads, arr) {
 	return (0)
 }
 
-async function check_pva(acc, action) {
-	var i = 0
+async function check_pva(arr, action) {
 	var prom = []
+	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
 		size: action.info.threads,
 		task: "./srcs/check_for_pva.js"
@@ -114,10 +119,8 @@ async function check_pva(acc, action) {
 
 	if (acc.length == 0)
 		return (1)
-	while (i < action.info.nbr_acc) {
+	for (let i in acc)
 		prom.push(pool.exec({action: action, account: acc[i], index: i}))
-		i++;
-	}
 	await Promise.all(prom)
 }
 
@@ -126,18 +129,17 @@ async function check_pva(acc, action) {
 */
 
 async function main(arr, action) {
-	//var acc = create_acc_array(arr)
-	// if (action.info.pva) {
-	// 	console.log("Check for PVA")
-	// 	await check_pva(acc, action)
-	// }
-	// console.log("Starting the actions")
-	// await main_handler(acc, action)
 
-	for (let x in arr) {
-		await req_main(action, arr[x])
+
+	if (action.info.pva) {
+		console.log("Check for PVA")
+		await check_pva(arr, action)
 	}
-	await ga.updateOne({tweet_id: action.id}, {$set: {participate: true}})
+
+	// for (let x in arr) {
+	// 	await req_main(action, arr[x])
+	// }
+	// await ga.updateOne({tweet_id: action.id}, {$set: {participate: true}})
 	commonEmitter.emit("finish")
 	return (0)
 

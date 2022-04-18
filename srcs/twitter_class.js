@@ -17,7 +17,7 @@ class twit {
 	async like(tweet_id) {
 		this.headers['content-type'] = "application/json"
 		try {
-			await axios({
+			let re = await axios({
 				method: 'post',
 				url: 'https://twitter.com/i/api/graphql/lI07N6Otwv1PhnEgXILM7A/FavoriteTweet',
 				data: {
@@ -29,13 +29,15 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
+			if (re.data.errors)
+				return ('NO')
 			return ("OK");
 		} catch (e) { return ("NO") }
 	}
 	async rt(tweet_id) {
 		this.headers['content-type'] = "application/json"
 		try {
-			await axios({
+			let re = await axios({
 				method: 'post',
 				url: "https://twitter.com/i/api/graphql/ojPdsZsimiJrUGLR1sjUtA/CreateRetweet",
 				data: {
@@ -48,13 +50,15 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
+			if (re.data.errors)
+				return ('NO')
 			return ("OK");
 		} catch (e) { return ("NO") }
 	}
 	async tag(tweet_id, text) {
 		this.headers['content-type'] = "application/json"
 		try {
-			await axios({
+			let re = await axios({
 				method: 'post',
 				url: "https://twitter.com/i/api/graphql/l-kS-W5Ht5bBGBNp-wNzcA/CreateTweet",
 				data: {
@@ -84,6 +88,8 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
+			if (re.data.errors)
+				return ('NO')
 			return ("OK");
 		} catch (e) { return ("NO") }
 	}

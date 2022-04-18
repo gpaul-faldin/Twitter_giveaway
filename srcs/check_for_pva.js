@@ -36,6 +36,7 @@ async function acc_fill(account) {
 }
 
 async function pva(page, user) {
+	console.log(`PVA for ${user}`)
 	if (await page.$('input[value="Start"]'))
 		await page.click('input[value="Start"]')
 	await page.waitForTimeout(1000)
@@ -127,7 +128,15 @@ async function check_pva(action, account, index) {
 	await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
 	await page.waitForTimeout(3000)
 	if (await page.url() == "https://twitter.com/account/access") {
-		console.log(`PVA for ${account.user}`)
+		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${account.user}_TEST_PVA.jpg`})
+		if (await page.$('input[value="Continue to Twitter"]')) {
+			console.log(`${account.user} is timeout`)
+			await page.click('input[value="Continue to Twitter"]')
+			await page.waitForTimeout(2000)
+			await user.updateOne({user: account.user}, {$set: {timeout: true, end_timeout: Date.now() + (3 * 86400000)}})
+			await browser.close()
+			return (0)
+		}
 		var status = await pva(page, account.user)
 		if (status >= 1)
 			stop = true

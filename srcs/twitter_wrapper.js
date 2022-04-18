@@ -166,7 +166,6 @@ class tweet extends twitter {
 	async get_id_name(name) {
 		var web = await this.client.v2.usersByUsernames(name)
 		return (web.data[0].id)
-
 	}
 	async get_date(id) {
 		var re = await this.client.v2.singleTweet(id, {'tweet.fields': "created_at"})//.then((x) => x.data.created_at)

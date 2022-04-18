@@ -143,8 +143,11 @@ class acc_manip {
 	async id_array_to_acc(arr) {
 		var re = []
 
-		for (let x in arr)
-			re.push(await user.findById(arr[x]._id))//.populate('cookies'))
+		for (let x in arr) {
+			let acc = await user.findById(arr[x]._id)
+			if (acc.timeout === false)
+				re.push(acc)
+		}
 		return (re)
 	}
 	async name_id_to_X(x, arr) {
@@ -156,9 +159,11 @@ class acc_manip {
 			selec[split[i]] = 1
 		for (let n in arr) {
 			if (split.includes('info'))
-				re.push(await user.findById(arr[n]._id, selec).populate('info'))
+				var acc = await user.findById(arr[n]._id, selec).populate('info')
 			else
-				re.push(await user.findById(arr[n]._id, selec))
+				var acc = await user.findById(arr[n]._id, selec)
+			if (acc.timeout === false)
+				re.push(acc)
 		}
 		return (re)
 	}

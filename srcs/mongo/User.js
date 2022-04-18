@@ -7,6 +7,7 @@ const accSchema = new mongoose.Schema({
 	mail: String,
 	proxy: String,
 	timeout: Boolean,
+	end_timeout: Date,
 	ini: Boolean,
 	ini_follow: Boolean,
 	info : {

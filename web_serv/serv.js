@@ -16,7 +16,9 @@ require("dotenv").config();
 mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 
 //////CRON//////
-require('./../srcs/cron/update_twitter')();
+require('./../srcs/cron/update_twitter.js')();
+require('./../srcs/cron/check_timeout.js')();
+require('./../srcs/cron/check_win_ga.js')();
 
 //////MISC//////
 const app = express()
@@ -42,6 +44,7 @@ app.post('/api/init', handler.check_auth, handler.init_handler)
 app.get('/api/retrieve/lowest', handler.check_auth, handler.retrieve_lowest_handler)
 app.get('/api/retrieve/random', handler.check_auth, handler.retrieve_random_handler)
 app.get('/api/retrieve/specific', handler.check_auth, handler.retrieve_spe_handler)
+app.get('/api/retrieve/number', handler.check_auth, handler.retrieve_number)
 
 //////ADD DATA//////
 app.put('/api/add/account', handler.check_auth, handler.add_account)
