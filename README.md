@@ -7,7 +7,7 @@
  * [ ] Docker/Kube
  * [ ] Make the participation more natural, utilizing all of the days of the giveaway
  * [x] Ditch puppeteer for actions
- * [ ] Pass the Pro-fill as a self contains webserv
+ * [x] Pass the Pro-fill as a self contains webserv
  * [x] Ping on discord when a bots has won a giveaway
  * [ ] Add support for youtube :
       * [ ] Watch
