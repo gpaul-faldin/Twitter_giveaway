@@ -2,7 +2,7 @@
 	REQUIRE
 */
 var common = require('../srcs/events/common');
-const { actions, acc_manip, info_manip} = require('./../srcs/class')
+const {actions, acc_manip, info_manip} = require('./../srcs/class')
 const {follow, tweet} = require('../srcs/twitter_wrapper.js')
 const {main, init_worker} = require('../srcs/main.js')
 const User = require('./../srcs/mongo/User.js')
@@ -11,6 +11,8 @@ const twitter_info = require('./../srcs/mongo/twitter_info.js')
 const cookies = require('./../srcs/mongo/cookies.js');
 require("dotenv").config();
 const {Webhook} = require('simple-discord-webhooks');
+
+const cron_ga = require('../srcs/cron/cron_class.js')
 
 const webhook = new Webhook(process.env.HOOK)
 
@@ -22,7 +24,6 @@ var IN_USE = false
 var commonEmitter = common.commonEmitter;
 commonEmitter.on("finish", data => {
 	console.log("Action finished")
-	webhook.send("Bots ready to take new instructions")
 	IN_USE == true ? IN_USE = false : 0
 });
 
@@ -53,11 +54,12 @@ const action_handler = async function (req, res) {
 
 		try {
 			await action.parse_query(req.query, req.body)
-			var tmp = new tweet(process.env.TWITTER)
-			await tmp.fill_giveaway(action, req.query.end, req.query.url)
+			var twit = new tweet(process.env.TWITTER)
+			await twit.fill_giveaway(action, req.query.end, req.query.url)
+			new cron_ga(action.id, action.info.interval, action)
+			action = new actions(MAX_THREAD)
 		} catch (e) {
 			return (res.status(400).send(e.message))
-
 		}
 		action.info.ready = true
 		res.send(`Action is ready`)
@@ -100,8 +102,7 @@ const start_handler = async function (req, res) {
 		}
 		if (arr.length != 0) {
 			IN_USE = true
-			main(arr, action)
-			action = new actions(MAX_THREAD)
+			main(arr, body.action)
 			return (res.send("OK"))
 		}
 		return (res.status(400).send("Error: The account list was empty"))
@@ -203,6 +204,7 @@ const update_twitter_handler = async function (req, res) {
 	
 	if (req.query.opt === "1" || req.query.opt === "3") {
 		var lst = await manip.get_acc_id(0).then(async (re) => await manip.name_id_to_X("tag", re)).then((arr) => manip.make_list(arr))
+		
 		var nbrs = await twitter.get_nbr_follow(lst.split(','))
 		await manip_i.update_info_array(nbrs)
 		if (req.query.opt === "3")

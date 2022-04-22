@@ -7,7 +7,9 @@ var commonEmitter = common.commonEmitter;
 var Chance = require('chance')
 var ga = require('./mongo/giveaway.js')
 const twit = require('./twitter_class')
+const {Webhook} = require('simple-discord-webhooks');
 
+const webhook = new Webhook(`https://discord.com/api/webhooks/966783471911571486/i7xTtaMRUR3ErvhQDIlXiz5ZEOoBCmnJwh6q3yPkg37kQ1IJ9PXXWNqRVjwT2Um6wC4Y`)
 /*
 	INIT
 */
@@ -68,28 +70,11 @@ async function req_main(action, user) {
 	await Promise.all(prom).then((value) => {
 		console.log(value)
 		if (value.includes('NO')) {
-			console.log(`${user.user} might be timeout`)
+			webhook.send(`${user.user} might be timeout`)
 			return (1)
 		}
 	})
-	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_acc': 1}, $push: {'info.acc': user.user}})
-	return (0)
-}
-
-async function main_handler(acc, action) {
-	var i = 0
-	var prom = []
-	const pool = new StaticPool({
-		size: action.info.threads,
-		task: process.cwd() + "/srcs/main_worker.js"
-	});
-	if (acc.length == 0)
-		return (1)
-	while (i < action.info.nbr_acc) {
-		prom.push(pool.exec({action: action, account: acc[i], array: acc, index: i}))
-		i++;
-	}
-	await Promise.all(prom)
+	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_parti': 1}, $push: {'info.acc': user.user}})
 	return (0)
 }
 
@@ -131,15 +116,14 @@ async function check_pva(arr, action) {
 async function main(arr, action) {
 
 
-	if (action.info.pva) {
-		console.log("Check for PVA")
-		await check_pva(arr, action)
-	}
-
-	// for (let x in arr) {
-	// 	await req_main(action, arr[x])
+	// if (action.info.pva) {
+	// 	console.log("Check for PVA")
+	// 	await check_pva(arr, action)
 	// }
-	// await ga.updateOne({tweet_id: action.id}, {$set: {participate: true}})
+
+	for (let x in arr) {
+		await req_main(action, arr[x])
+	}
 	commonEmitter.emit("finish")
 	return (0)
 

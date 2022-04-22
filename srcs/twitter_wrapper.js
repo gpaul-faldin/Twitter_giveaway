@@ -176,7 +176,8 @@ class tweet extends twitter {
 	}
 	async fill_giveaway(action, end, url) {
 		var start = await this.get_date(action.id)
-
+		var interval = Math.trunc(((end - 1) * 24 * 60) / action.info.nbr_acc)
+		action.info.interval = interval == 0 ? 1 : interval
 		if (await ga.findOne({ tweet_id: action.id }) === null) {
 			await ga.create({
 				tweet_id: action.id,
@@ -192,8 +193,11 @@ class tweet extends twitter {
 				},
 				participate: false,
 				info:{
-					nbr_acc: 0
-				}
+					nbr_acc: action.info.nbr_acc,
+					nbr_parti: 0,
+					interval: interval == 0 ? 1 : interval
+				},
+				action: action
 			})
 			return (0)
 		}
@@ -207,17 +211,14 @@ class tweet extends twitter {
 			if (arr[x].referenced_tweets) {
 				if (arr[x].referenced_tweets[0].type === 'replied_to' || arr[x].referenced_tweets[0].type === 'quoted') {
 					let ref_id = arr[x].referenced_tweets[0].id
-					if (keywords.map((term) => arr[x].text.includes(term)).includes(true)) {
-						webhook.send(`Just checking to be sure check ${giveaway.tweet_url}`)
-						var tag = arr[x].text.match(/(@[A-Za-z1-9])\w+/g)[0]
-						if (ref_id === giveaway.tweet_id) {
-							if (await User.find({ tag: tag }) !== null) {
-								webhook.send(`
-									Winner Winner chicken dinner!\n
-									${tag} just won this giveaway: ${giveaway.tweet_url}\n
-									<@259353316184555521>
-								`)
-							}
+					if (ref_id === giveaway.tweet_id) {
+						if (keywords.map((term) => arr[x].text.includes(term)).includes(true)) {
+							webhook.send(`Just checking to be sure check ${giveaway.tweet_url}`)
+							var tag = arr[x].text.match(/(@[A-Za-z1-9])\w+/g)[0]
+								if (await User.findOne({ tag: tag })) {
+									webhook.send(`Winner Winner chicken dinner!\n${tag} just won this giveaway: ${giveaway.tweet_url}\n<@259353316184555521>`)
+								}
+								await ga.deleteOne({tweet_id: giveaway.tweet_id})
 						}
 					}
 				}

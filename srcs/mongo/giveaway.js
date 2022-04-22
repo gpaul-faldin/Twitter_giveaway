@@ -15,8 +15,11 @@ const GASchema = new mongoose.Schema({
 	participate: Boolean,
 	info: {
 		nbr_acc: Number,
+		nbr_parti: Number,
+		interval: Number,
 		acc: []
-	}
+	},
+	action: {}
 })
 
 module.exports = mongoose.model("giveaways", GASchema)

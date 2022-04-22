@@ -26,7 +26,8 @@ class	actions {
 			pva: false,
 			init: false,
 			max_threads: MAX_THREAD,
-			ready: false
+			ready: false,
+			interval: 0
 		}
 	}
 	async parse_query(query, body) {
@@ -153,7 +154,7 @@ class acc_manip {
 	async name_id_to_X(x, arr) {
 		var re = []
 		var split = x.split(',')
-		var selec = { _id: 0 }
+		var selec = { _id: 0, timeout: 1 }
 
 		for (let i in split)
 			selec[split[i]] = 1

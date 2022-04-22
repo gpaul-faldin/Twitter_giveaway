@@ -8,8 +8,9 @@ module.exports = () => {
 		var time = Date.now()
 		var twit = new tweet(process.env.TWITTER)
 		var lst = await ga.find({draw: {$lte: time}})
-		for (let x in lst) {
-			await twit.check_win(lst[x])
-		}
+		if (lst.length != 0)
+			for (let x in lst) {
+				await twit.check_win(lst[x])
+			}
 	})
 }
