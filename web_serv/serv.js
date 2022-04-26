@@ -68,7 +68,7 @@ const user = require("./../srcs/mongo/User.js");
 const cookies = require('../srcs/mongo/cookies.js');
 const ga = require('../srcs/mongo/giveaway.js');
 const {tweet} = require('../srcs/twitter_wrapper.js')
-
+const captcha2 = require('../srcs/2captcha_wrapper')
 
 
 app.post('/api/test', async (req, res) => {

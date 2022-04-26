@@ -1,6 +1,6 @@
 var cron = require('node-cron');
-const User = require('./../mongo/User.js')
-const ga = require('./../mongo/giveaway.js')
+const User = require('../mongo/User.js')
+const ga = require('../mongo/giveaway.js')
 const {Webhook} = require('simple-discord-webhooks');
 const axios = require('axios')
 require("dotenv").config();
@@ -21,11 +21,11 @@ class cron_ga {
 			var lst = await ga.findOne({ tweet_id: ga_id })
 			if (lst.info.nbr_parti == lst.info.nbr_acc) {
 				await ga.updateOne(lst, { $set: { participate: true } })
-				webhook.send(`Participations finished for ${ga.url}`)
+				webhook.send(`Participations finished for ${ga.tweet_url}`)
 				this.del_job()
 				return (1)
 			}
-			var acc = await User.find({ $nin: lst.info.acc }, { tag: 1 })
+			var acc = await User.find({user: {$nin: lst.info.acc}}, { tag: 1 })
 				.then((x) => {
 					var random = Math.floor(Math.random() * x.length);
 					return x[random].tag

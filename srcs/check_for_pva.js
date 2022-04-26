@@ -11,8 +11,15 @@ const mongoose = require('mongoose')
 const cookies = require("./mongo/cookies.js")
 const info = require("./mongo/twitter_info.js")
 const user = require("./mongo/User.js")
+const capt = require("./2captcha_wrapper.js")
+require("dotenv").config();
 
 mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
+
+/*
+	INIT
+*/
+var captcha = new capt(process.env.CAPTCHA_KEY, "0152B4EB-D2DC-460A-89A1-629838B529C9", "https://twitter.com/account/access")
 
 /*
 	THREADS
@@ -58,14 +65,29 @@ async function pva(page, user) {
 	`)
 	if (check_sus == 1)
 		return (2)
+	if (await page.$("#arkose_iframe")) {
+		var resp = ""
+		while (resp == "")
+			resp = await captcha.get_code()
+		await page.evaluate(`
+			var Token = \"${resp}\"
+			var enc = document.getElementById('arkose_iframe')
+			var encWin = enc.contentWindow || enc
+			var encDoc = enc.contentDocument || encWin.document
+			let script = encDoc.createElement('SCRIPT')
+			script.append('function SubmitCaptcha(token) { parent.postMessage(JSON.stringify({ eventId: "challenge-complete", payload: { sessionToken: token } }), "*") }')
+			encDoc.documentElement.appendChild(script)
+			encWin.SubmitCaptcha(Token)
+		`)
+	}
 	try {await page.waitForSelector('#country_code')}
 	catch(e) {
 		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_ERRPVA.jpg`})
 		console.log(`${user} had funcaptcha`)
 		return (1)
 	}
-	await page.select('#country_code', "7")
-	let phone = new phone_number(2, 'tw', 1)
+	await page.select('#country_code', "372")
+	let phone = new phone_number(34, 'tw', 3)
 	await phone.get_number()
 	await page.type('#phone_number', phone.nbr)
 	await page.click('input[name="discoverable_by_mobile_phone"]')
@@ -100,8 +122,6 @@ async function pva(page, user) {
 	}
 	await page.click('input[value="Continue to Twitter"]')
 	await page.waitForTimeout(5000)
-	//let cookie = await page.cookies()
-	//fs.writeFileSync(process.cwd() + `/cookies/${user}_cookies.json`, JSON.stringify(cookie, null, 2), { flags: "w" });
 	await page.waitForTimeout(2000)
 }
 
@@ -113,7 +133,13 @@ async function check_pva(action, account, index) {
 	account = await acc_fill(account)
 	const browser = await puppeteer.launch({
 		headless: action.info.headless,
-		args: [`--proxy-server=${account.proxy}`]
+		args: [
+			`--proxy-server=${account.proxy}`,
+			"--disable-web-security",
+			"--disable-site-isolation-trials",
+			"--disable-application-cache",
+			'--disable-features=IsolateOrigins,site-per-process'
+		]
 	});
 	const page = await browser.newPage();
 
@@ -128,7 +154,6 @@ async function check_pva(action, account, index) {
 	await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
 	await page.waitForTimeout(3000)
 	if (await page.url() == "https://twitter.com/account/access") {
-		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${account.user}_TEST_PVA.jpg`})
 		if (await page.$('input[value="Continue to Twitter"]')) {
 			console.log(`${account.user} is timeout`)
 			await page.click('input[value="Continue to Twitter"]')

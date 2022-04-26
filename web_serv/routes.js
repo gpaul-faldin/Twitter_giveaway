@@ -11,8 +11,8 @@ const twitter_info = require('./../srcs/mongo/twitter_info.js')
 const cookies = require('./../srcs/mongo/cookies.js');
 require("dotenv").config();
 const {Webhook} = require('simple-discord-webhooks');
-
-const cron_ga = require('../srcs/cron/cron_class.js')
+const ga = require('./../srcs/mongo/giveaway.js');
+const cron_ga = require('../srcs/cron/cron_class_ga.js')
 
 const webhook = new Webhook(process.env.HOOK)
 
@@ -23,7 +23,6 @@ var IN_USE = false
 
 var commonEmitter = common.commonEmitter;
 commonEmitter.on("finish", data => {
-	console.log("Action finished")
 	IN_USE == true ? IN_USE = false : 0
 });
 
@@ -51,17 +50,17 @@ const check_auth = function (req, res, next) {
 
 const action_handler = async function (req, res) {
 	if (IN_USE == false) {
-
 		try {
 			await action.parse_query(req.query, req.body)
 			var twit = new tweet(process.env.TWITTER)
 			await twit.fill_giveaway(action, req.query.end, req.query.url)
-			new cron_ga(action.id, action.info.interval, action)
-			action = new actions(MAX_THREAD)
+			if (!req.query.opt) {
+				new cron_ga(action.id, action.info.interval, action)
+				action = new actions(MAX_THREAD)
+			}
 		} catch (e) {
 			return (res.status(400).send(e.message))
 		}
-		action.info.ready = true
 		res.send(`Action is ready`)
 	}
 	else {
@@ -79,8 +78,13 @@ const start_handler = async function (req, res) {
 			return (res.status(400).send("No body found"))
 		if (!body.mode)
 			return (res.status(400).send("Missing mode field in body"))
-		if (action.info.ready == false)
-			return (res.status(400).send("Actions are not setup"))
+		if (!body.action) {
+			if (!req.query.id)
+				return (res.status(400).send("Query id not found"))
+			body.action = await ga.findOne({tweet_id: req.query.id}, {action: 1}).then((x) => {
+				return (x.action)
+			})
+		}
 		switch (body.mode) {
 			case 'rand':
 				arr = await manip.getRandom(action.info.nbr_acc).then(async (arr) => await manip.id_array_to_acc(arr))
@@ -101,7 +105,7 @@ const start_handler = async function (req, res) {
 				return (res.status(400).send(`${body.mode} is not a valid option`))
 		}
 		if (arr.length != 0) {
-			IN_USE = true
+			//IN_USE = true
 			main(arr, body.action)
 			return (res.send("OK"))
 		}
@@ -348,6 +352,16 @@ function sleep(ms) {
 		setTimeout(resolve, ms);
 	});
 }
+
+/*
+	START
+*/
+(async () =>{
+	var lst = await ga.find({participate: false})
+	for (let x in lst){
+		new cron_ga(lst[x].tweet_id, lst[x].info.interval, lst[x].action)
+	}
+})()
 
 /*
 	EXPORT

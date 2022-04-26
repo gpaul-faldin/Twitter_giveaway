@@ -63,9 +63,7 @@ class phone_number {
 		while (await this.get_status() === "NO" && Date.now() < this.end)
 			await this.sleep(5000)
 		let re = await this.get_status()
-		console.log(`${user} code : ${re}`)
 		if (re === "NO") {
-			//await this.set_status(8)
 			return ("NONE")
 		}
 		await this.set_status(6)
