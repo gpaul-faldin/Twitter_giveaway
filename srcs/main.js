@@ -10,6 +10,7 @@ const twit = require('./twitter_class')
 const {Webhook} = require('simple-discord-webhooks');
 
 const webhook = new Webhook(`https://discord.com/api/webhooks/966783471911571486/i7xTtaMRUR3ErvhQDIlXiz5ZEOoBCmnJwh6q3yPkg37kQ1IJ9PXXWNqRVjwT2Um6wC4Y`)
+
 /*
 	INIT
 */
