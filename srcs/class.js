@@ -19,6 +19,7 @@ class	actions {
 			on : false,
 			acc: []
 		}
+		this.ytb = false,
 		this.info = {
 			threads: 1,
 			headless: true,

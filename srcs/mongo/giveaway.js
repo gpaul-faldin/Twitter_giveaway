@@ -10,16 +10,16 @@ const GASchema = new mongoose.Schema({
 		like: Boolean,
 		rt: Boolean,
 		tag: Number,
-		follow: []
+		follow: Array
 	},
 	participate: Boolean,
 	info: {
 		nbr_acc: Number,
 		nbr_parti: Number,
 		interval: Number,
-		acc: []
+		acc: Array
 	},
-	action: {}
+	action: Object
 })
 
 module.exports = mongoose.model("giveaways", GASchema)

@@ -225,6 +225,10 @@ class tweet extends twitter {
 			}
 		}
 	}
+	async get_info_tweet(id) {
+		var web = await this.client.v2.singleTweet(id, { "tweet.fields": "created_at,author_id"})
+		return (web.data)
+	}
 }
 
 

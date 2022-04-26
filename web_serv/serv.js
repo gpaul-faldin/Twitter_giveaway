@@ -30,7 +30,8 @@ app.use(bodyParser.text())
 	EXPRESS
 */
 
-app.listen(process.env.PORT)
+//app.listen(process.env.PORT)
+app.listen(50000)
 
 app.get('/', (req, res) => {
 	res.status(418).send("Lost ?")
@@ -40,6 +41,7 @@ app.get('/', (req, res) => {
 app.post('/api/action', handler.check_auth, handler.action_handler)
 app.post('/api/start', handler.check_auth, handler.start_handler)
 app.post('/api/init', handler.check_auth, handler.init_handler)
+
 
 //////RETRIEVE DATA//////
 app.get('/api/retrieve/lowest', handler.check_auth, handler.retrieve_lowest_handler)
@@ -69,6 +71,43 @@ const cookies = require('../srcs/mongo/cookies.js');
 const ga = require('../srcs/mongo/giveaway.js');
 const {tweet} = require('../srcs/twitter_wrapper.js')
 const captcha2 = require('../srcs/2captcha_wrapper')
+const {actions} = require('../srcs/class.js')
+
+app.post('/api/action-v2', handler.check_auth, async (req, res) => {
+	if (!req.query.url)
+		return (res.status(400).send("The url query is missing"))
+	if (!req.query.end)
+		return (res.status(400).send("The end query is missing"))
+	var id = req.query.url.split("status/")[1]
+	if (id == undefined)
+		return (res.status(400).send("Not a valid URL"))
+
+	var action = new actions(10)
+	action.id = id;
+	action.rt = true;
+	action.like = true;
+	action.follow.on = true;
+	var twit = new tweet(process.env.TWITTER);
+	var web = await twit.get_info_tweet(id);
+
+	//var follow = web.text.match(/(@[A-Za-z0-9])\w+/g)
+	var ytb = web.text.match(/(t.co\/[A-Za-z0-9])\w+/g);
+
+	
+	var split = web.text.split('\n');
+	for (let x in split) {
+		if (split[x].match(/tag/gi)) {
+			action.tag.on = true;
+			if (split[x].match(/([0-9])/g) == null)
+				action.tag.nbr = 1;
+			else
+				action.tag.nbr = Number(split[x].match(/([0-9])/g));
+		}
+	}
+
+	res.send("OK")
+	
+})
 
 
 app.post('/api/test', async (req, res) => {
