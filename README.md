@@ -9,5 +9,6 @@
  * [x] Ditch puppeteer for actions
  * [x] Pass the Pro-fill as a self contains webserv
  * [x] Ping on discord when a bots has won a giveaway
+ * [x] Handle funcaptcha when account are PVA
  * [ ] Add support for youtube : scrap 10-15 screenshots from comments
  * [ ] Add support to set a winrate on a giveaway and program will self adjust during the participations time
