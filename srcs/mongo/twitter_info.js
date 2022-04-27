@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const cookiesSchema = new mongoose.Schema({
 	user: String,
-	info:{},
+	info: Object,
 	referTo: {
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "accounts"

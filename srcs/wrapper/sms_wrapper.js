@@ -56,7 +56,7 @@ class phone_number {
 			console.log(e)
 		}
 	}
-	async get_code(user) {
+	async get_code() {
 		this.end = Date.now() + 600000
 		await this.set_status(1)
 		await this.sleep(10000)
