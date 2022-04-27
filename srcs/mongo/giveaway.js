@@ -6,12 +6,6 @@ const GASchema = new mongoose.Schema({
 	by: String,
 	start: Date,
 	draw: Date,
-	conditions: {
-		like: Boolean,
-		rt: Boolean,
-		tag: Number,
-		follow: Array
-	},
 	participate: Boolean,
 	info: {
 		nbr_acc: Number,

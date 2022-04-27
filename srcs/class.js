@@ -2,15 +2,15 @@ const user = require('./mongo/User.js')
 const info = require('./mongo/twitter_info.js')
 const proxies = require('./mongo/proxies.js')
 const cookies = require('./mongo/cookies.js')
-const {search} = require('./twitter_wrapper')
+const {search} = require('./wrapper/twitter_wrapper')
 require("dotenv").config();
 
 
 class	actions {
 	constructor(MAX_THREAD) {
 		this.id = "",
-		this.rt = false,
-		this.like = false,
+		this.rt = true,
+		this.like = true,
 		this.tag = {
 			on : false,
 			nbr : 0
@@ -21,11 +21,9 @@ class	actions {
 		}
 		this.ytb = false,
 		this.info = {
-			threads: 1,
 			headless: true,
 			nbr_acc: 0,
 			pva: false,
-			init: false,
 			max_threads: MAX_THREAD,
 			ready: false,
 			interval: 0

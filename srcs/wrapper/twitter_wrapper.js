@@ -2,8 +2,8 @@ const { TwitterApi } = require('twitter-api-v2');
 const path = require('path');
 const axios = require('axios').default
 const fs = require('fs')
-const ga = require('./mongo/giveaway.js');
-const User = require('./mongo/User.js');
+const ga = require('../mongo/giveaway.js');
+const User = require('../mongo/User.js');
 const {Webhook} = require('simple-discord-webhooks');
 
 const webhook = new Webhook(`https://discord.com/api/webhooks/963929665473482804/1j5BI8hClD-GolgKJdeVCV7_lpWPdcmaNIODqaV8OLhfrjWt8D9hIXfsmLQ539HxWeBS`)
@@ -165,6 +165,7 @@ class tweet extends twitter {
 
 	async get_id_name(name) {
 		var web = await this.client.v2.usersByUsernames(name)
+		console.log(web)
 		return (web.data[0].id)
 	}
 	async get_date(id) {
@@ -185,12 +186,6 @@ class tweet extends twitter {
 				by: await this.get_id_name(url.split('/')[3]),
 				start: start,
 				draw: start + (end * 86400000),
-				conditions: {
-					like: action.like,
-					rt: action.rt,
-					tag: action.tag.nbr,
-					follow: action.follow.acc
-				},
 				participate: false,
 				info:{
 					nbr_acc: action.info.nbr_acc,

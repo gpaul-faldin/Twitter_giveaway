@@ -1,7 +1,7 @@
 var cron = require('node-cron');
 require("dotenv").config();
 const ga = require('./../mongo/giveaway.js')
-const {tweet} = require('./../twitter_wrapper.js')
+const {tweet} = require('../wrapper/twitter_wrapper.js')
 
 module.exports = () => {
 	cron.schedule("0 */4 * * *", async() => {

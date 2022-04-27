@@ -102,7 +102,7 @@ async function check_pva(arr, action) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: action.info.threads,
+		size: action.info.max_threads,
 		task: "./srcs/check_for_pva.js"
 	});
 

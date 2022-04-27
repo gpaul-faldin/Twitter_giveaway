@@ -3,7 +3,7 @@
 */
 var common = require('../srcs/events/common');
 const {actions, acc_manip, info_manip} = require('./../srcs/class')
-const {follow, tweet} = require('../srcs/twitter_wrapper.js')
+const {follow, tweet} = require('../srcs/wrapper/twitter_wrapper.js')
 const {main, init_worker} = require('../srcs/main.js')
 const User = require('./../srcs/mongo/User.js')
 const proxies = require('./../srcs/mongo/proxies.js')
@@ -13,6 +13,7 @@ require("dotenv").config();
 const {Webhook} = require('simple-discord-webhooks');
 const ga = require('./../srcs/mongo/giveaway.js');
 const cron_ga = require('../srcs/cron/cron_class_ga.js')
+const {setup_ga} = require('../srcs/setup_ga.js')
 
 const webhook = new Webhook(process.env.HOOK)
 
@@ -66,6 +67,23 @@ const action_handler = async function (req, res) {
 	else {
 		res.status(503).send(`Service already in use`)
 	}
+}
+
+const action_handler2 = async function (req, res) {
+	if (!req.query.url)
+		return (res.status(400).send("The url query is missing"))
+	if (!req.query.end)
+		return (res.status(400).send("The end query is missing"))
+	if (!req.query.nbr_acc)
+		req.query.nbr_acc = 0
+	var id = req.query.url.split("status/")[1]
+	if (id == undefined)
+		return (res.status(400).send("Not a valid URL"))
+	var test = false
+	if (req.query.test)
+		test = true
+	res.send("Giveaway added to the database")
+	await setup_ga(req.query.url, req.query.end, req.query.nbr_acc, id, test)
 }
 
 const start_handler = async function (req, res) {
@@ -356,6 +374,7 @@ function sleep(ms) {
 /*
 	START
 */
+
 (async () =>{
 	var lst = await ga.find({participate: false})
 	for (let x in lst){
@@ -370,6 +389,7 @@ function sleep(ms) {
 module.exports = {
 	check_auth,
 	action_handler,
+	action_handler2,
 	start_handler,
 	init_handler,
 	retrieve_lowest_handler,
