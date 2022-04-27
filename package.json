@@ -5,8 +5,7 @@
 	"main": "main.js",
 	"scripts": {
 		"start": "nodemon web_serv/serv.js",
-		"test": "nodemon ./test/pptr.js",
-		"web": "nodemon ./web_serv/serv.js"
+		"test": "nodemon ./test/pptr.js"
 	},
 	"repository": {
 		"type": "git",
@@ -20,7 +19,8 @@
 	"homepage": "https://github.com/gpaul-42/Twitter_giveaway#readme",
 	"nodemonConfig": {
 		"ignore": [
-			"./test/*"
+			"./test/*",
+			"./srcs/img/*"
 		]
 	},
 	"dependencies": {

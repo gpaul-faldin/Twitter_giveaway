@@ -4,7 +4,6 @@
 
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const {picture, legit_at} = require('./banner-pp/profil_fill.js')
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 const {parentPort} = require("worker_threads");
 const cookies = require("./mongo/cookies.js")
@@ -13,6 +12,7 @@ const user = require("./mongo/User.js")
 const axios = require("axios").default
 const mongoose = require('mongoose');
 const { findOne } = require('./mongo/User.js');
+const { get_pp, get_banner, get_bio, get_legit, rm_img, get_name} = require('./wrapper/pro-fill_wrapper.js');
 
 
 /*
@@ -22,14 +22,10 @@ const { findOne } = require('./mongo/User.js');
 mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 
 
-const pic = new picture
-const legit = new legit_at()
-
 /*
 	THREADS
 */
 parentPort.on("message", async (data) => {
-	await sleep(pic.draw_int(10000))
 	await init_twitter(data.account, data.index)
 	parentPort.postMessage("OK")
 })
@@ -59,6 +55,9 @@ async function delete_str_in_selec(page, selector) {
 }
 
 async function assign_img(page, user, name) {
+	var path_pp = await get_pp(name)
+	var path_ba = await get_banner()
+
 	while (await page.$('input[name="displayName"]') == null)
 		await page.waitForTimeout(500)
 	try {
@@ -67,7 +66,8 @@ async function assign_img(page, user, name) {
 			page.click('div[aria-label="Add avatar photo"]'),
 		]);
 		await page.waitForTimeout(1000)
-		await pp_choose.accept([pic.get_pp(name)])
+		await pp_choose.accept([path_pp])
+		await rm_img(path_pp)
 		await page.waitForSelector('div[data-testid="applyButton"]')
 		await page.click('div[data-testid="applyButton"]')
 	}
@@ -80,15 +80,16 @@ async function assign_img(page, user, name) {
 		page.waitForFileChooser(),
 		page.click('div[aria-label="Add banner photo"]'),
 	]);
-	await banner_chooser.accept([pic.get_banner()])
+	await banner_chooser.accept([path_ba])
+	await rm_img(path_ba)
 	await page.waitForSelector('div[data-testid="applyButton"]')
 	await page.click('div[data-testid="applyButton"]')
 	await delete_str_in_selec(page, 'input[name="displayName"]')
 	await delete_str_in_selec(page, 'input[name="displayName"]')
-	await page.type('input[name="displayName"]', pic.get_name(name))
+	await page.type('input[name="displayName"]', get_name(name))
 	await delete_str_in_selec(page, 'textarea[name="description"]')
 	await delete_str_in_selec(page, 'textarea[name="description"]')
-	await page.type('textarea[name="description"]', pic.get_bio())
+	await page.type('textarea[name="description"]', await get_bio())
 	await page.waitForTimeout(2000)
 	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
 	await page.click('div[data-testid="Profile_Save_Button"]')
@@ -96,7 +97,7 @@ async function assign_img(page, user, name) {
 }
 
 async function follow(page, user) {
-	var arr = legit.give_arr()
+	var arr = await get_legit()
 
 	for (let x in arr) {
 		var url = "https://twitter.com/" + arr[x]
