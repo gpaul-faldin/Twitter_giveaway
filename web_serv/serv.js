@@ -30,8 +30,8 @@ app.use(bodyParser.text())
 	EXPRESS
 */
 
-//app.listen(process.env.PORT)
-app.listen(50000)
+app.listen(process.env.PORT)
+//app.listen(50000)
 
 app.get('/', (req, res) => {
 	res.status(418).send("Lost ?")
@@ -78,6 +78,6 @@ const { get_pp, get_banner, get_bio, get_legit, rm_img} = require('../srcs/wrapp
 
 
 app.post('/api/test', async (req, res) => {
-	await rm_img("srcs/img/625dd38563f2ef3154ea22af.jpg")
+	
 	res.send("OK")
 })
