@@ -10,6 +10,7 @@ const accSchema = new mongoose.Schema({
 	end_timeout: Date,
 	ini: Boolean,
 	ini_follow: Boolean,
+	last_action: Date,
 	info : {
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "twitter_infos"

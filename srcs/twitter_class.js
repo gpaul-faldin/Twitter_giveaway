@@ -16,6 +16,9 @@ class twit {
 	}
 	async like(tweet_id) {
 		this.headers['content-type'] = "application/json"
+		var ret = {}
+
+		ret['like'] = false
 		try {
 			let re = await axios({
 				method: 'post',
@@ -29,13 +32,18 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
-			if (re.data.errors)
-				return ('NO')
-			return ("OK");
-		} catch (e) { return ("NO") }
+			ret['like'] = true
+			return (ret);
+		} catch (e) {
+			console.log(e)
+			return (ret)
+		}
 	}
 	async rt(tweet_id) {
 		this.headers['content-type'] = "application/json"
+		var ret = {}
+
+		ret['rt'] = false
 		try {
 			let re = await axios({
 				method: 'post',
@@ -50,13 +58,18 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
-			if (re.data.errors)
-				return ('NO')
-			return ("OK");
-		} catch (e) { return ("NO") }
+			ret['rt'] = true
+			return (ret)
+		} catch (e) {
+			console.log(e)
+			return (ret)
+		}
 	}
 	async tag(tweet_id, text) {
 		this.headers['content-type'] = "application/json"
+		var ret = {}
+
+		ret['tag'] = false
 		try {
 			let re = await axios({
 				method: 'post',
@@ -88,13 +101,17 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
-			if (re.data.errors)
-				return ('NO')
-			return ("OK");
-		} catch (e) { return ("NO") }
+			ret['tag'] = true
+			return (ret);
+		} catch (e) {
+			console.log(e)
+			return (ret)
+		}
 	}
 	async follow(acc_id) {
 		this.headers['content-type'] = 'application/x-www-form-urlencoded'
+		var ret = {}
+		ret['follow'] = false
 		try {
 			await axios({
 				method: 'post',
@@ -115,8 +132,12 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
-			return ("OK");
-		} catch (e) { return ("NO") }
+			ret['follow'] = true
+			return (ret);
+		} catch (e) {
+			console.log(e)
+			return (ret)
+		}
 	}
 	async badge() {
 		this.headers['content-type'] = ""

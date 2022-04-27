@@ -31,6 +31,7 @@ app.use(bodyParser.text())
 */
 
 app.listen(process.env.PORT)
+//app.listen(50000)
 
 app.get('/', (req, res) => {
 	res.status(418).send("Lost ?")
@@ -38,8 +39,10 @@ app.get('/', (req, res) => {
 
 //////ACTION//////
 app.post('/api/action', handler.check_auth, handler.action_handler)
+app.post('/api/action-v2', handler.check_auth, handler.action_handler2)
 app.post('/api/start', handler.check_auth, handler.start_handler)
 app.post('/api/init', handler.check_auth, handler.init_handler)
+
 
 //////RETRIEVE DATA//////
 app.get('/api/retrieve/lowest', handler.check_auth, handler.retrieve_lowest_handler)
@@ -67,8 +70,10 @@ const info = require("./../srcs/mongo/twitter_info.js")
 const user = require("./../srcs/mongo/User.js");
 const cookies = require('../srcs/mongo/cookies.js');
 const ga = require('../srcs/mongo/giveaway.js');
-const {tweet} = require('../srcs/twitter_wrapper.js')
-const captcha2 = require('../srcs/2captcha_wrapper')
+const {tweet} = require('../srcs/wrapper/twitter_wrapper.js')
+const captcha2 = require('../srcs/wrapper/2captcha_wrapper')
+const {actions} = require('../srcs/class.js')
+const {setup_ga} = require('../srcs/setup_ga.js')
 
 
 app.post('/api/test', async (req, res) => {

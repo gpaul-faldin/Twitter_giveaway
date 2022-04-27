@@ -68,14 +68,17 @@ async function req_main(action, user) {
 			prom.push(twitter.follow(action.follow.acc[x]))
 		}
 	}
-	await Promise.all(prom).then(async(value) => {
-		if (value.includes('NO')) {
-			await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_acc': -1}})
-			webhook.send(`${user.user} might be timeout ${value} for ${action.id}`)
+	var res_prom = await Promise.all(prom).then(async(value) => {
+		for (let x in value) {
+			if (value[x] == false) {
+				await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_acc': -1}})
+				webhook.send(`${user.user} might be timeout ${value} for ${action.id}`)
+				break;
+			}
 		}
 		return (value)
 	})
-	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_parti': 1}, $push: {'info.acc': user.user}})
+	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_parti': 1}, $push: {"info.acc": user.user}})
 	return (0)
 }
 
@@ -99,7 +102,7 @@ async function check_pva(arr, action) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: action.info.threads,
+		size: action.info.max_threads,
 		task: "./srcs/check_for_pva.js"
 	});
 
@@ -117,10 +120,10 @@ async function check_pva(arr, action) {
 async function main(arr, action) {
 
 
-	if (action.info.pva) {
-		console.log("Check for PVA")
-		await check_pva(arr, action)
-	}
+	// if (action.info.pva == true) {
+	// 	console.log("Check for PVA")
+	// 	await check_pva(arr, action)
+	// }
 
 	for (let x in arr) {
 		await req_main(action, arr[x])
