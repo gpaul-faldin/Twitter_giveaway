@@ -125,50 +125,51 @@ class twit {
 			return (ret)
 		}
 	}
-	async tweet_pic() {
-		this.headers['content-type'] = "application/json"
+	async tweet_pic(user) {
 		var ret = {}
 		var img = await this.upload_media()
+		this.headers['content-type'] = "application/json"
 
 		ret['pic'] = false
 		try {
 			let re = await axios({
 				method: 'post',
-				url: "https://twitter.com/i/api/graphql/l-kS-W5Ht5bBGBNp-wNzcA/CreateTweet",
+				url: "https://twitter.com/i/api/graphql/22ZmD6h57SAhSmN3dWCB3w/CreateTweet",
 				data: {
-					"variables": {
-						"tweet_text": "",
-						"reply": {
-							"in_reply_to_tweet_id": this.tweet_id,
-							"exclude_reply_user_ids": []
+					variables: {
+						tweet_text: "",
+						reply: {
+							in_reply_to_tweet_id: this.tweet_id,
+							exclude_reply_user_ids: []
 						},
-						"media": {
-							"media_entities": [{
-								"media_id": img,
-								"tagged_users": []
+						media: {
+							media_entities: [{
+								media_id: img,
 							}],
-							"possibly_sensitive": false
+							possibly_sensitive: false
 						},
-						"withDownvotePerspective": false,
-						"withReactionsMetadata": false,
-						"withReactionsPerspective": false,
-						"withSuperFollowsTweetFields": true,
-						"withSuperFollowsUserFields": true,
-						"semantic_annotation_ids": [],
-						"dark_request": false,
-						"__fs_dont_mention_me_view_api_enabled": true,
-						"__fs_interactive_text_enabled": true,
-						"__fs_responsive_web_uc_gql_enabled": false
+						withDownvotePerspective: true,
+						withReactionsMetadata: false,
+						withReactionsPerspective: false,
+						withSuperFollowsTweetFields: true,
+						withSuperFollowsUserFields: true,
+						semantic_annotation_ids: [],
+						dark_request: false,
+						__fs_dont_mention_me_view_api_enabled: true,
+						__fs_interactive_text_enabled: true,
+						__fs_responsive_web_uc_gql_enabled: false,
+						__fs_responsive_web_edit_tweet_api_enabled:false
 					},
-					"queryId": "6nmMmSYJiD9rc9SPKPJRcQ"
+					queryId: "22ZmD6h57SAhSmN3dWCB3w"
 				},
 				headers: this.headers,
 				proxy: this.proxy
 			})
+			console.log(`${user} successfully sent a tweet with an image`)
 			ret['pic'] = true
 			return (ret);
 		} catch (e) {
-			console.log(e)
+			console.log(e.response.data)
 			return (ret)
 		}
 	}
@@ -229,7 +230,6 @@ class twit {
 				command: "INIT",
 				total_bytes: this.size_img,
 				media_type: "image/jpeg",
-				media_category: "tweet_image"
 			},
 			headers: this.headers,
 			proxy: this.proxy
