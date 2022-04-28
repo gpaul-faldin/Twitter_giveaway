@@ -220,7 +220,6 @@ class twit {
 		this.size_img = await sc.findOne({image_id: this.img_id}).then((x) => {
 			this.base64_img = x.base64_img
 			let file = Buffer.from(this.base64_img, "base64");
-
 			return (Buffer.byteLength(file))
 		})
 		var response = await axios({

@@ -68,8 +68,10 @@ async function check_for_ytb(tweet_text, action) {
 	var ytb = tweet_text.match(/(https:\/\/t.co\/[A-Za-z0-9])\w+/g);
 	for (let x in ytb) {
 		action.ytb = await check_t_co_links(ytb[x])
-		if (action.ytb == true)
+		if (action.ytb == true) {
+			await twit.get_sc(action.id)
 			break ;
+		}
 	}
 	return (0)
 }

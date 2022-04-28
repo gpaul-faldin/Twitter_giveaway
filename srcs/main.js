@@ -60,6 +60,9 @@ async function req_main(action, user) {
 	if (action.rt == true) {
 		prom.push(twitter.rt(action.id))
 	}
+	if (action.ytb == true) {
+		prom.push(twitter.tweet_pic())
+	}
 	if (action.tag.on == true) {
 		prom.push(twitter.tag(action.id, get_random_at(user, action.tag.nbr)))
 	}

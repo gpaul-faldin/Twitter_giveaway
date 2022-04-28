@@ -224,6 +224,22 @@ class tweet extends twitter {
 		var web = await this.client.v2.singleTweet(id, { "tweet.fields": "created_at,author_id"})
 		return (web.data)
 	}
+	async get_sc(tweet_id) {
+		var media = await this.client.v2.search(`conversation_id:${tweet_id}`, {'max_results':15, 'expansions': 'attachments.media_keys', 'media.fields': 'url'})
+			.then((x) => {
+				return(x.includes.media)
+			})
+		var prom = []
+		for (let x in media) {
+			let screenshot = await axios.get(media[x].url, {responseType: 'arraybuffer'})
+			prom.push(sc.create({
+				tweet_id: tweet_id,
+				image_id: media[x].media_key,
+				base64_img: Buffer.from(screenshot.data).toString('base64')
+			}))
+		}
+		await Promise.all(prom)
+	}
 }
 
 module.exports = {follow, search, tweet}
