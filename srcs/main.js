@@ -51,7 +51,7 @@ async function req_main(action, user) {
 		user.populate('cookies'),
 		user.populate('info')
 	])
-	var twitter = new twit(user.cookies.req_cookie, user.cookies.crsf, user.proxy.split(':'))
+	var twitter = new twit(user.cookies.req_cookie, user.cookies.crsf, user.proxy.split(':'), action.id)
 	var prom = []
 
 	if (action.like == true) {

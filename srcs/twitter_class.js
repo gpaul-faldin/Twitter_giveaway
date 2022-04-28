@@ -270,4 +270,4 @@ class twit {
 	}
 }
 
-module.exports = {twit}
+module.exports = twit
