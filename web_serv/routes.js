@@ -376,9 +376,11 @@ function sleep(ms) {
 */
 
 (async () =>{
-	var lst = await ga.find({participate: false})
-	for (let x in lst){
-		new cron_ga(lst[x].tweet_id, lst[x].info.interval, lst[x].action)
+	if (process.env.CRON_GA == true) {
+		var lst = await ga.find({participate: false})
+		for (let x in lst){
+			new cron_ga(lst[x].tweet_id, lst[x].info.interval, lst[x].action)
+		}
 	}
 })()
 
