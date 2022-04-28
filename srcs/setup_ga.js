@@ -33,7 +33,7 @@ async function setup_ga(url, end, nbr_acc, id, is_test) {
 }
 
 /*
-	FCT
+	MISC FCT
 */
 
 function check_for_tag(split, action) {

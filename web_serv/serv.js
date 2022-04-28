@@ -75,9 +75,9 @@ const captcha2 = require('../srcs/wrapper/2captcha_wrapper')
 const {actions} = require('../srcs/class.js')
 const {setup_ga} = require('../srcs/setup_ga.js');
 const { get_pp, get_banner, get_bio, get_legit, rm_img} = require('../srcs/wrapper/pro-fill_wrapper.js');
-
+const screen = require("./../srcs/mongo/screen_ga.js");
+const fs = require('fs')
 
 app.post('/api/test', async (req, res) => {
-	
 	res.send("OK")
 })
