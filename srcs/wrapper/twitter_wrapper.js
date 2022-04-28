@@ -201,14 +201,13 @@ class tweet extends twitter {
 	async check_win(giveaway) {
 		var res = await this.client.v2.userTimeline(giveaway.by, { expansions: 'referenced_tweets.id' })
 		let arr = res.data.data
-		const keywords = ['win', 'Congrat', 'gg', 'GG']
 
 		for (let x in arr) {
 			if (arr[x].referenced_tweets) {
 				if (arr[x].referenced_tweets[0].type === 'replied_to' || arr[x].referenced_tweets[0].type === 'quoted') {
 					let ref_id = arr[x].referenced_tweets[0].id
 					if (ref_id === giveaway.tweet_id) {
-						if (keywords.map((term) => arr[x].text.includes(term)).includes(true)) {
+						if (arr[x].text.match(/win|congrat|gg\w+/gi)) {
 							webhook.send(`Just checking to be sure check ${giveaway.tweet_url}`)
 							var tag = arr[x].text.match(/(@[A-Za-z1-9])\w+/g)[0]
 								if (await User.findOne({ tag: tag })) {
