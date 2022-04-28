@@ -3,8 +3,10 @@ const User = require('../mongo/User.js')
 const ga = require('../mongo/giveaway.js')
 const {Webhook} = require('simple-discord-webhooks');
 const axios = require('axios')
+const Chance = require('chance')
 require("dotenv").config();
 
+const chance = new Chance()
 const webhook = new Webhook(process.env.HOOK)
 
 class cron_ga {
@@ -18,6 +20,7 @@ class cron_ga {
 		if (interval < 1)
 			interval = 1
 		var re = new cron.schedule(`*/${interval} * * * *`, async () => {
+			await this.sleep()
 			var lst = await ga.findOne({ tweet_id: ga_id })
 			if (lst.info.nbr_parti == lst.info.nbr_acc) {
 				await ga.updateOne(lst, { $set: { participate: true } })
@@ -50,6 +53,11 @@ class cron_ga {
 	del_job() {
 		this.job.stop();
 		delete this.job;
+	}
+	sleep() {
+		return new Promise((resolve) => {
+			setTimeout(resolve, chance.integer({min: 1400, max: 8000}));
+		});
 	}
 }
 
