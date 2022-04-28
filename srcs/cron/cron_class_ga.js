@@ -24,7 +24,7 @@ class cron_ga {
 			var lst = await ga.findOne({ tweet_id: ga_id })
 			if (lst.info.nbr_parti == lst.info.nbr_acc) {
 				await ga.updateOne(lst, { $set: { participate: true } })
-				webhook.send(`Participations finished for ${ga.tweet_url}`)
+				webhook.send(`Participations finished for ${lst.tweet_url}`)
 				this.del_job()
 				return (1)
 			}

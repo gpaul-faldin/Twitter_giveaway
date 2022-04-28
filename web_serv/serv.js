@@ -78,5 +78,10 @@ const screen = require("./../srcs/mongo/screen_ga.js");
 const fs = require('fs')
 
 app.post('/api/test', async (req, res) => {
+
+	var ga_id = "1516464329754828803"
+
+	var lst = await ga.findOne({ tweet_id: ga_id })
+	console.log(lst.tweet_url)
 	res.send("OK")
 })
