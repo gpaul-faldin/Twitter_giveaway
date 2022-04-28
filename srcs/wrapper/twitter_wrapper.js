@@ -225,7 +225,7 @@ class tweet extends twitter {
 		return (web.data)
 	}
 	async get_sc(tweet_id) {
-		var media = await this.client.v2.search(`conversation_id:${tweet_id}`, {'max_results':15, 'expansions': 'attachments.media_keys', 'media.fields': 'url'})
+		var media = await this.client.v2.search(`conversation_id:${tweet_id}`, {'expansions': 'attachments.media_keys', 'media.fields': 'url'})
 			.then((x) => {
 				return(x.includes.media)
 			})
