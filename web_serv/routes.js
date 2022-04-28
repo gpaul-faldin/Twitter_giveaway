@@ -80,9 +80,9 @@ const action_handler2 = async function (req, res) {
 	if (id == undefined)
 		return (res.status(400).send("Not a valid URL"))
 	var test = false
-	if (req.query.test)
+	if (req.query.test == "true")
 		test = true
-	if (ga.findOne({tweet_id: id}) != null)
+	if (!ga.findOne({tweet_id: id}))
 		return(res.send("Giveaway already in the database"))
 	res.send("Giveaway added to the database")
 	await setup_ga(req.query.url, req.query.end, req.query.nbr_acc, id, test)

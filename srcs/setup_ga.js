@@ -5,6 +5,7 @@
 const {actions} = require('./class.js')
 const {tweet} = require('./wrapper/twitter_wrapper.js')
 const user = require('./mongo/User.js')
+const ga = require('./mongo/giveaway.js')
 var axios = require('axios').default
 const cron_ga = require('./cron/cron_class_ga.js')
 var twit = new tweet(process.env.TWITTER);
@@ -26,8 +27,10 @@ async function setup_ga(url, end, nbr_acc, id, is_test) {
 	await check_for_follow(nfo.text, action, nfo.author_id);
 	await check_for_ytb(nfo.text, action);
 	await twit.fill_giveaway(action, end, url);
-	if (is_test)
+	if (is_test == true) {
+		await ga.updateOne({tweet_id: id}, {$set: {participate: true}})
 		return (0);
+	}
 	new cron_ga(action.id, action.info.interval, action);
 	return (0);
 }
