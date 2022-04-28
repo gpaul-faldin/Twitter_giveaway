@@ -31,7 +31,6 @@ app.use(bodyParser.text())
 */
 
 app.listen(process.env.PORT)
-//app.listen(50000)
 
 app.get('/', (req, res) => {
 	res.status(418).send("Lost ?")
