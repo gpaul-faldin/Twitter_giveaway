@@ -166,7 +166,6 @@ class tweet extends twitter {
 
 	async get_id_name(name) {
 		var web = await this.client.v2.usersByUsernames(name)
-		console.log(web)
 		return (web.data[0].id)
 	}
 	async get_date(id) {
@@ -186,7 +185,7 @@ class tweet extends twitter {
 				tweet_url: url,
 				by: await this.get_id_name(url.split('/')[3]),
 				start: start,
-				draw: start + (end * 86400000),
+				draw: Date.now() + (end * 86400000),
 				participate: false,
 				info:{
 					nbr_acc: action.info.nbr_acc,
