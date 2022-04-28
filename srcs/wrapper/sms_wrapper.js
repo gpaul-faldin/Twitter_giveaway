@@ -50,7 +50,7 @@ class phone_number {
 			if (String(resp.data).includes('STATUS_OK'))
 				return (resp.data)
 			else
-				return ("NO")
+				return (1)
 		}
 		catch(e){
 			console.log(e)
@@ -60,10 +60,10 @@ class phone_number {
 		this.end = Date.now() + 600000
 		await this.set_status(1)
 		await this.sleep(10000)
-		while (await this.get_status() === "NO" && Date.now() < this.end)
+		while (await this.get_status() === 1 && Date.now() < this.end)
 			await this.sleep(5000)
 		let re = await this.get_status()
-		if (re === "NO") {
+		if (re === 1) {
 			return ("NONE")
 		}
 		await this.set_status(6)

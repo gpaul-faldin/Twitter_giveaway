@@ -30,8 +30,8 @@ app.use(bodyParser.text())
 	EXPRESS
 */
 
-//app.listen(process.env.PORT)
-app.listen(50000)
+app.listen(process.env.PORT)
+//app.listen(50000)
 
 app.get('/', (req, res) => {
 	res.status(418).send("Lost ?")
@@ -75,9 +75,9 @@ const captcha2 = require('../srcs/wrapper/2captcha_wrapper')
 const {actions} = require('../srcs/class.js')
 const {setup_ga} = require('../srcs/setup_ga.js');
 const { get_pp, get_banner, get_bio, get_legit, rm_img} = require('../srcs/wrapper/pro-fill_wrapper.js');
-
+const screen = require("./../srcs/mongo/screen_ga.js");
+const fs = require('fs')
 
 app.post('/api/test', async (req, res) => {
-	await rm_img("srcs/img/625dd38563f2ef3154ea22af.jpg")
 	res.send("OK")
 })

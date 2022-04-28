@@ -3,6 +3,7 @@ const path = require('path');
 const axios = require('axios').default
 const fs = require('fs')
 const ga = require('../mongo/giveaway.js');
+const sc = require('../mongo/screen_ga.js')
 const User = require('../mongo/User.js');
 const {Webhook} = require('simple-discord-webhooks');
 
@@ -213,6 +214,7 @@ class tweet extends twitter {
 								if (await User.findOne({ tag: tag })) {
 									webhook.send(`Winner Winner chicken dinner!\n${tag} just won this giveaway: ${giveaway.tweet_url}\n<@259353316184555521>`)
 								}
+								await sc.deleteMany({tweet_id: giveaway.tweet_id})
 								await ga.deleteOne({tweet_id: giveaway.tweet_id})
 						}
 					}
@@ -225,6 +227,5 @@ class tweet extends twitter {
 		return (web.data)
 	}
 }
-
 
 module.exports = {follow, search, tweet}

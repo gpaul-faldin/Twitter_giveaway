@@ -29,6 +29,7 @@
 		"chance": "^1.1.8",
 		"dotenv": "^16.0.0",
 		"express": "^4.17.3",
+		"form-data": "^4.0.0",
 		"gender-detection-from-name": "^1.7.3",
 		"mongoose": "^6.2.10",
 		"node-cron": "^3.0.0",

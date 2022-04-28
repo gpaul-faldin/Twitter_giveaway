@@ -375,12 +375,12 @@ function sleep(ms) {
 	START
 */
 
-(async () =>{
-	var lst = await ga.find({participate: false})
-	for (let x in lst){
-		new cron_ga(lst[x].tweet_id, lst[x].info.interval, lst[x].action)
-	}
-})()
+// (async () =>{
+// 	var lst = await ga.find({participate: false})
+// 	for (let x in lst){
+// 		new cron_ga(lst[x].tweet_id, lst[x].info.interval, lst[x].action)
+// 	}
+// })()
 
 /*
 	EXPORT
