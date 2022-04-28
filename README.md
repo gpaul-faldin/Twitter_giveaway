@@ -13,4 +13,5 @@
  * [x] Handle funcaptcha when account are PVA
  * [x] Simplify adding giveaway to the database
  * [ ] Add support for youtube : scrap 10-15 screenshots from comments
+ * [x] Being able to respond to a tweet with an image
  * [ ] Add support to set a winrate on a giveaway and program will self adjust during the participations time
