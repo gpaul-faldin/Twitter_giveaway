@@ -125,7 +125,7 @@ class twit {
 			return (ret)
 		}
 	}
-	async tweet_pic(user) {
+	async tweet_pic() {
 		var ret = {}
 		var img = await this.upload_media()
 		this.headers['content-type'] = "application/json"
@@ -165,7 +165,6 @@ class twit {
 				headers: this.headers,
 				proxy: this.proxy
 			})
-			console.log(`${user} successfully sent a tweet with an image`)
 			ret['pic'] = true
 			return (ret);
 		} catch (e) {

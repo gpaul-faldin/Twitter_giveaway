@@ -56,7 +56,7 @@ class cron_ga {
 	}
 	sleep() {
 		return new Promise((resolve) => {
-			setTimeout(resolve, chance.integer({min: 1400, max: 8000}));
+			setTimeout(resolve, chance.integer({min: 1000, max: 15000}));
 		});
 	}
 }
