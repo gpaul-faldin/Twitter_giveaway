@@ -128,9 +128,11 @@ class twit {
 	async tweet_pic() {
 		var ret = {}
 		var img = await this.upload_media()
+		ret['pic'] = false
+		if (img == null)
+			return (ret)
 		this.headers['content-type'] = "application/json"
 
-		ret['pic'] = false
 		try {
 			let re = await axios({
 				method: 'post',
@@ -222,21 +224,27 @@ class twit {
 			let file = Buffer.from(this.base64_img, "base64");
 			return (Buffer.byteLength(file))
 		})
-		var response = await axios({
-			method: "POST",
-			url: "https://upload.twitter.com/i/media/upload.json",
-			params: {
-				command: "INIT",
-				total_bytes: this.size_img,
-				media_type: "image/jpeg",
-			},
-			headers: this.headers,
-			proxy: this.proxy
-		})
-		this.media_id = response.data.media_id_string
+		try {
+			var response = await axios({
+				method: "POST",
+				url: "https://upload.twitter.com/i/media/upload.json",
+				params: {
+					command: "INIT",
+					total_bytes: this.size_img,
+					media_type: "image/jpeg",
+				},
+				headers: this.headers,
+				proxy: this.proxy
+			})
+			this.media_id = response.data.media_id_string
+			return (0)
+		} catch (e) {
+			return (1)
+		}
 	}
 	async upload_media() {
-		await this.get_ids()
+		if (await this.get_ids() == 1)
+			return (null)
 		var file = Buffer.from(this.base64_img, "base64");
 		const form = new FormData()
 		form.append('media', file, "blob")

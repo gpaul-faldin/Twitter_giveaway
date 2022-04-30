@@ -3,7 +3,6 @@
 ## V2:
 
  * [ ] Autoscrap giveaways
- * [ ] Add username changer
  * [ ] Docker/Kube
  * [x] Make the participation more natural, utilizing all of the days of the giveaway
  * [x] Ditch puppeteer for actions
@@ -14,4 +13,5 @@
  * [x] Simplify adding giveaway to the database
  * [x] Add support for youtube : scrap 10-15 screenshots from comments
  * [x] Being able to respond to a tweet with an image
+ * [ ] Rework account init to optimize it and make it more random
  * [ ] Add support to set a winrate on a giveaway and program will self adjust during the participations time
