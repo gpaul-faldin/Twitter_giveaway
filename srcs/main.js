@@ -55,16 +55,16 @@ async function req_main(action, user) {
 	var prom = []
 
 	if (action.like == true) {
-		prom.push(twitter.like(action.id))
+		prom.push(twitter.like())
 	}
 	if (action.rt == true) {
-		prom.push(twitter.rt(action.id))
+		prom.push(twitter.rt())
 	}
 	if (action.ytb == true) {
 		prom.push(twitter.tweet_pic(user.user))
 	}
 	if (action.tag.on == true) {
-		prom.push(twitter.tag(action.id, get_random_at(user, action.tag.nbr)))
+		prom.push(twitter.tag(get_random_at(user, action.tag.nbr)))
 	}
 	if (action.follow.on == true) {
 		for (let x in action.follow.acc) {
