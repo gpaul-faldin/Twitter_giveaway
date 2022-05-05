@@ -69,7 +69,8 @@ const info = require("./../srcs/mongo/twitter_info.js")
 const user = require("./../srcs/mongo/User.js");
 const cookies = require('../srcs/mongo/cookies.js');
 const ga = require('../srcs/mongo/giveaway.js');
-const {tweet} = require('../srcs/wrapper/twitter_wrapper.js')
+const cp = require('./../srcs/mongo/copy_accounts.js')
+const {copy_profile} = require('../srcs/wrapper/twitter_wrapper.js')
 const twit = require('../srcs/twitter_class.js')
 const captcha2 = require('../srcs/wrapper/2captcha_wrapper')
 const {actions, acc_manip} = require('../srcs/class.js')
@@ -77,7 +78,14 @@ const {setup_ga} = require('../srcs/setup_ga.js');
 const { get_pp, get_banner, get_bio, get_legit, rm_img} = require('../srcs/wrapper/pro-fill_wrapper.js');
 const screen = require("./../srcs/mongo/screen_ga.js");
 const fs = require('fs')
+const copy_account = require('./../srcs/scrap_accounts.js')
+
+
+var tmp = new copy_account("1048018930785083392")
+
 
 app.post('/api/test', async (req, res) => {
+
+	await tmp.add_banner_to_acc()
 	res.send("OK")
 })

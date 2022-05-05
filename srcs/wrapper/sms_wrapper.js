@@ -69,7 +69,7 @@ class phone_number {
 		await this.set_status(6)
 		return (re)
 	}
-	async sleep(ms) {
+	sleep(ms) {
 		return new Promise((resolve) => {
 			setTimeout(resolve, ms);
 		});

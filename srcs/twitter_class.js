@@ -127,6 +127,7 @@ class twit {
 	}
 	async tweet_pic() {
 		var ret = {}
+		await this.setup_screenshot()
 		var img = await this.upload_media()
 		ret['pic'] = false
 		if (img == null)
@@ -217,7 +218,7 @@ class twit {
 			return (web.data);
 		} catch (e) { return ("NO") }
 	}
-	async get_ids() {
+	async setup_screenshot() {
 		this.img_id = await sc.aggregate([{ $match: {tweet_id: this.tweet_id}}, { $sample: { size: 1 } }]).then((x) => x[0].image_id)
 		this.size_img = await sc.findOne({image_id: this.img_id}).then((x) => {
 			this.base64_img = x.base64_img
@@ -243,8 +244,6 @@ class twit {
 		}
 	}
 	async upload_media() {
-		if (await this.get_ids() == 1)
-			return (null)
 		var file = Buffer.from(this.base64_img, "base64");
 		const form = new FormData()
 		form.append('media', file, "blob")
@@ -273,6 +272,29 @@ class twit {
 			proxy: this.proxy
 		})
 		return (this.media_id)
+	}
+	async get_banner(tag) {
+		this.headers['content-type'] = "application/json"
+		var web = await axios({
+			method: 'get',
+			url: 'https://twitter.com/i/api/graphql/Bhlf1dYJ3bYCKmLfeEQ31A/UserByScreenName',
+			params: {
+				variables: {
+					screen_name: tag,
+					withSafetyModeUserFields: true,
+					withSuperFollowsUserFields: true
+				}
+			},
+			headers: this.headers,
+			proxy:this.proxy
+		})
+		
+		try {
+			if (!web.data.data.user.result.legacy || web.data.data.user.result.legacy.profile_banner_url == undefined)
+				return (null)
+			else
+				return (web.data.data.user.result.legacy.profile_banner_url)
+		} catch (e) {return(null)}
 	}
 }
 

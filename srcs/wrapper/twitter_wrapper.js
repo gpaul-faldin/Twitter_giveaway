@@ -159,6 +159,33 @@ class search extends twitter {
 	}
 }
 
+class copy_profile extends twitter {
+	constructor(token) {
+		super(token)
+		this.token = ""
+	}
+	async get_list_user(user_id) {
+		if (this.token == "")
+			try {
+				var web = await this.client.v2.followers(user_id, {"user.fields": "profile_image_url,description,public_metrics", max_results: 1000})
+				} catch (e) {return (null)}
+		else
+			try {
+				var web = await this.client.v2.followers(user_id, {"user.fields": "profile_image_url,description,public_metrics", max_results: 1000, pagination_token: this.token})
+				} catch (e) {return (null)}
+		this.token = web.meta.next_token
+		web = web.data
+		var re = []
+		for (let x = 0; x < web.length; x++) {
+			if (web[x].profile_image_url.match(/default_profile_images|\.png/g) == null &&
+				web[x].public_metrics.followers_count <= 500) {
+					re.push(web[x])
+			}
+		}
+		return (re)
+	}
+}
+
 class tweet extends twitter {
 	constructor(token) {
 		super(token)
@@ -242,4 +269,4 @@ class tweet extends twitter {
 	}
 }
 
-module.exports = {follow, search, tweet}
+module.exports = {follow, search, tweet, copy_profile}

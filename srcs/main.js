@@ -90,7 +90,7 @@ async function init_worker(threads, arr) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: 14,
+		size: 10,
 		task: "./srcs/init_acc.js"
 	});
 
