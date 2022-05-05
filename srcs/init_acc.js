@@ -55,7 +55,7 @@ async function delete_str_in_selec(page, selector) {
 }
 
 async function assign_img(page, user, name) {
-	var path_pp = await get_pp(name)
+	var path_pp = await get_pp(name, false)
 	var path_ba = await get_banner()
 
 	while (await page.$('input[name="displayName"]') == null)
