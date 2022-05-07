@@ -80,12 +80,11 @@ const screen = require("./../srcs/mongo/screen_ga.js");
 const fs = require('fs')
 const copy_account = require('./../srcs/scrap_accounts.js')
 
-
 var tmp = new copy_account("1048018930785083392")
 
 
 app.post('/api/test', async (req, res) => {
-
-	await tmp.add_banner_to_acc()
-	res.send("OK")
+	var re = await cp.aggregate([{$sample: {size: 1}}]).then((x) => {return x[0]})
+	//console.log(re)
+	res.send(re)
 })

@@ -11,6 +11,11 @@ const accSchema = new mongoose.Schema({
 	ini: Boolean,
 	ini_follow: Boolean,
 	last_action: Date,
+	old: Boolean,
+	copy_of: {
+		type: mongoose.SchemaTypes.ObjectId,
+		ref: "copy_accounts"
+	},
 	info : {
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "twitter_infos"

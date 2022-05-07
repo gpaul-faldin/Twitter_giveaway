@@ -8,6 +8,7 @@ const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 const {parentPort} = require("worker_threads");
 const cookies = require("./mongo/cookies.js")
 const info = require("./mongo/twitter_info.js")
+const cp_acc = require("./mongo/copy_accounts.js")
 const user = require("./mongo/User.js")
 const axios = require("axios").default
 const mongoose = require('mongoose');
@@ -26,9 +27,19 @@ mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 	THREADS
 */
 parentPort.on("message", async (data) => {
-	await init_twitter(data.account, data.index)
+	var copy = await get_profile()
+	await init_twitter_pptr(data.account, copy)
 	parentPort.postMessage("OK")
 })
+
+
+/*
+	ASSIGN LEGIT PROFILE
+*/
+async function get_profile() {
+	var re = cp_acc.aggregate([{$sample: {size: 1}}]).then((x) => {return x[0]})
+	return (re)
+}
 
 /*
 	PUPPETEER
@@ -113,12 +124,12 @@ async function follow(page, user) {
 	}
 }
 
-async function init_twitter(account, index) {
+async function init_twitter_pptr(account, legit) {
 	var suspended = false
 	var stop = false
 	account = await acc_fill(account)
 	const browser = await puppeteer.launch({
-		headless: true,
+		headless: false,
 		args: [`--proxy-server=${account.proxy}`]
 	});
 	const page = await browser.newPage();
@@ -195,26 +206,40 @@ async function init_twitter(account, index) {
 		await browser.close()
 		return (0)
 	}
-	try {await page.goto("https://twitter.com/settings/profile", { waitUntil: 'networkidle2', timeout: 0})}
-	catch(e) {
+	try {
+		await page.goto("https://twitter.com/settings/your_twitter_data/account", { waitUntil: 'networkidle2', timeout: 0})
+	} catch(e) {
 		console.log(`${account.user} error while loading profile settings`)
 		stop = true
 		suspended = true
-	}
+		}
 	await page.waitForTimeout(2000)
 	if (suspended == false && stop == false) {
-		if (account.tag == "") {
-			await page.screenshot({ path: process.cwd() + `/debug_screenshot/${account.user}.jpg`})
-			var tag = await page.evaluate(`
-			var name = document.querySelector('a[aria-label="Profile"]').href.split('/')[3]
-			'@' + name
-			`)
-			await user.updateOne({user: account.user}, {$set: {tag: tag}})
-			account.tag = tag
-		}
-		await assign_img(page, account.user, account.tag.substring(1))
-		if (account.init_follow == true)
-			await follow(page, account.user)
+		await page.type('input[name="current_password"]', account.pass)
+		await page.evaluate(`
+			function click_confirm() {
+				var tmp = document.querySelectorAll('span')
+				for (let x in tmp) {
+					if (tmp[x].innerHTML == "Confirm") {
+						tmp[x].parentNode.parentNode.parentNode.click()
+						break ;
+					}
+				}
+			}
+			click_confirm()
+		`)
+		while (!page.$('a[href="/settings/screen_name"]'))
+			await page.waitForTimeout(100)
+		await page.click('a[href="/settings/screen_name"]')
+		await page.delete_str_in_selec(page, 'input[name="typedScreenName"]')
+		await page.type('input[name="typedScreenName"]', legit.tag)
+		await page.evaluate(`
+			document.querySelectorAll('div[role="button"]')[3].click()
+		`)
+		await page.click('div[data-testid="settingsDetailSave"]')
+		account.tag = await page.evaluate(`
+			var name = document.querySelector('a[href="/settings/screen_name"]').firstChild.firstChild.lastChild.firstChild.innerHTML
+		`)
 	}
 	else if (suspended == true) {
 		await axios.delete(`http://twitter.faldin.xyz/api/delete/account?user=${account.user}`)
@@ -225,9 +250,12 @@ async function init_twitter(account, index) {
 		await user.updateOne({ user: account.user },
 			{
 				$set: {
-					ini: false, ini_follow: false, cookies: await cookies.findOne({ user: account.user })
+					ini: false,
+					cookies: await cookies.findOne({ user: account.user }),
+					tag: account.tag
 				}
 			})
+		await cp_acc.updateOne({tag: legit.tag}, {$set: {used: true}})
 		console.log(`${account.user} INIT OK`)
 	}
 	await browser.close()
