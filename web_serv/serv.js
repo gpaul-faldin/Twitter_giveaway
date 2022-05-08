@@ -84,17 +84,5 @@ var tmp = new copy_account("1048018930785083392")
 
 
 app.post('/api/test', async (req, res) => {
-	var re = await user.findOne({user: 'Valerie51806170'})
-
-	await re.populate('cookies')
-	var swag = new twit(re.cookies.req_cookie, re.cookies.crsf, re.proxy.split(':'), "12345")
-	var copy = await cp.findOne({_id: re.copy_of})
-
-
-	// await swag.change_username_bio(copy.username, copy.bio)
-	// await swag.update_banner_image(re.tag, re.copy_of)
-	// await swag.update_image(re.tag, re.copy_of)
-	//var copy = await cp.findOne(re.copy_of)
-	//console.log(re)
 	res.send(copy.bio)
 })

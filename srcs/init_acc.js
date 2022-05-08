@@ -27,8 +27,8 @@ mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 */
 parentPort.on("message", async (data) => {
 	var copy = await get_profile()
-	await init_twitter_pptr(data.account, copy)
-	await update_profile(data.account, copy)
+	if (await init_twitter_pptr(data.account, copy) == 0)
+		await update_profile(data.account, copy)
 	parentPort.postMessage("OK")
 })
 
@@ -77,7 +77,7 @@ async function init_twitter_pptr(account, legit) {
 	var stop = false
 	account = await acc_fill(account)
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: true,
 		args: [`--proxy-server=${account.proxy}`]
 	});
 	const page = await browser.newPage();
@@ -163,8 +163,9 @@ async function init_twitter_pptr(account, legit) {
 		}
 	await page.waitForTimeout(2000)
 	if (suspended == false && stop == false) {
-		await page.type('input[name="current_password"]', account.pass)
-		await page.evaluate(`
+		try {
+			await page.type('input[name="current_password"]', account.pass)
+			await page.evaluate(`
 			function click_confirm() {
 				var tmp = document.querySelectorAll('span')
 				for (let x in tmp) {
@@ -176,41 +177,43 @@ async function init_twitter_pptr(account, legit) {
 			}
 			click_confirm()
 		`)
-		while (await page.$('a[href="/settings/screen_name"]') == null)
-			await page.waitForTimeout(100)
-		await page.click('a[href="/settings/screen_name"]')
-		while (await page.$('input[name="typedScreenName"]') == null)
-			await page.waitForTimeout(100)
-		await delete_str_in_selec(page, 'input[name="typedScreenName"]')
-		await page.type('input[name="typedScreenName"]', legit.tag)
-		await page.waitForTimeout(1000)
-		await page.evaluate(`
+			while (await page.$('a[href="/settings/screen_name"]') == null)
+				await page.waitForTimeout(100)
+			await page.click('a[href="/settings/screen_name"]')
+			while (await page.$('input[name="typedScreenName"]') == null)
+				await page.waitForTimeout(100)
+			await delete_str_in_selec(page, 'input[name="typedScreenName"]')
+			await page.type('input[name="typedScreenName"]', legit.tag)
+			await page.waitForTimeout(1000)
+			await page.evaluate(`
 			document.querySelectorAll('div[role="button"]')[3].click()
 		`)
-		await page.click('div[data-testid="settingsDetailSave"]')
-		while (await page.$('a[href="/settings/screen_name"]') == null)
-			await page.waitForTimeout(100)
-		account.tag = await page.evaluate(`
+			await page.click('div[data-testid="settingsDetailSave"]')
+			while (await page.$('a[href="/settings/screen_name"]') == null)
+				await page.waitForTimeout(100)
+			account.tag = await page.evaluate(`
 			document.querySelector('a[href="/settings/screen_name"]').firstChild.firstChild.lastChild.firstChild.innerHTML
 		`)
+		} catch (e) {
+			stop = true
+		}
 	}
 	else if (suspended == true) {
 		await axios.delete(`http://twitter.faldin.xyz/api/delete/account?user=${account.user}`)
 	}
-	if (stop || suspended)
+	if (stop || suspended) {
 		console.log(`${account.user} NOT OK`)
+		await browser.close()
+		return (1)
+	}
 	else {
 		await user.updateOne({ user: account.user },
 			{
 				$set: {
-					ini: false,
 					cookies: await cookies.findOne({ user: account.user }),
 					tag: account.tag,
-					copy_of: await cp_acc.findOne({user_id: legit.user_id})
 				}
 			})
-		await cp_acc.updateOne({tag: legit.tag}, {$set: {used: true}})
-		console.log(`${account.user} INIT OK`)
 	}
 	await browser.close()
 	return (0)
@@ -221,11 +224,20 @@ async function init_twitter_pptr(account, legit) {
 */
 
 async function update_profile(account, copy) {
-	await account.populate('cookies')
+	account.cookies = await cookies.findOne({ user: account.user })
 	var twitter = new twit(account.cookies.req_cookie, account.cookies.crsf, account.proxy.split(':'), "0")
 	await twitter.change_username_bio(copy.username, copy.bio)
-	await twitter.update_banner_image(account.tag, account.copy_of)
-	await twitter.update_image(account.tag, account.copy_of)
+	await twitter.update_banner_image(account.tag, copy._id)
+	await twitter.update_image(account.tag, copy._id)
+	await user.updateOne({user: account.user},
+		{
+			$set: {
+				ini: false,
+				copy_of: await cp_acc.findOne({user_id: copy.user_id})
+			}
+		})
+	await cp_acc.updateOne({tag: copy.tag}, {$set: {used: true}})
+	console.log(`${account.user} INIT OK`)
 	return (0)
 }
 
