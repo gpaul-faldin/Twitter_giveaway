@@ -12,8 +12,7 @@ const cp_acc = require("./mongo/copy_accounts.js")
 const user = require("./mongo/User.js")
 const axios = require("axios").default
 const mongoose = require('mongoose');
-const { findOne } = require('./mongo/User.js');
-const { get_pp, get_banner, get_bio, get_legit, rm_img, get_name} = require('./wrapper/pro-fill_wrapper.js');
+const twit = require('./twitter_class.js')
 
 
 /*
@@ -29,6 +28,7 @@ mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 parentPort.on("message", async (data) => {
 	var copy = await get_profile()
 	await init_twitter_pptr(data.account, copy)
+	await update_profile(data.account, copy)
 	parentPort.postMessage("OK")
 })
 
@@ -37,7 +37,14 @@ parentPort.on("message", async (data) => {
 	ASSIGN LEGIT PROFILE
 */
 async function get_profile() {
-	var re = cp_acc.aggregate([{$sample: {size: 1}}]).then((x) => {return x[0]})
+	var re = cp_acc.aggregate([
+		{
+			$match: {used: false}
+		},
+		{
+			$sample: { size: 1 }
+		}
+	]).then((x) => { return x[0] })
 	return (re)
 }
 
@@ -63,65 +70,6 @@ async function delete_str_in_selec(page, selector) {
 	await page.keyboard.press('A');
 	await page.keyboard.up('Control');
 	await page.keyboard.press('Backspace');
-}
-
-async function assign_img(page, user, name) {
-	var path_pp = await get_pp(name, false)
-	var path_ba = await get_banner()
-
-	while (await page.$('input[name="displayName"]') == null)
-		await page.waitForTimeout(500)
-	try {
-		const [pp_choose] = await Promise.all([
-			page.waitForFileChooser(),
-			page.click('div[aria-label="Add avatar photo"]'),
-		]);
-		await page.waitForTimeout(1000)
-		await pp_choose.accept([path_pp])
-		await rm_img(path_pp)
-		await page.waitForSelector('div[data-testid="applyButton"]')
-		await page.click('div[data-testid="applyButton"]')
-	}
-	catch(e) {
-		console.log(`${user} error add Avatar photo`)
-		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_ERROR.jpg`})
-	}
-	await page.waitForTimeout(1000)
-	const [banner_chooser] = await Promise.all([
-		page.waitForFileChooser(),
-		page.click('div[aria-label="Add banner photo"]'),
-	]);
-	await banner_chooser.accept([path_ba])
-	await rm_img(path_ba)
-	await page.waitForSelector('div[data-testid="applyButton"]')
-	await page.click('div[data-testid="applyButton"]')
-	await delete_str_in_selec(page, 'input[name="displayName"]')
-	await delete_str_in_selec(page, 'input[name="displayName"]')
-	await page.type('input[name="displayName"]', get_name(name))
-	await delete_str_in_selec(page, 'textarea[name="description"]')
-	await delete_str_in_selec(page, 'textarea[name="description"]')
-	await page.type('textarea[name="description"]', await get_bio())
-	await page.waitForTimeout(2000)
-	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}.jpg`})
-	await page.click('div[data-testid="Profile_Save_Button"]')
-	await page.waitForTimeout(5000)
-}
-
-async function follow(page, user) {
-	var arr = await get_legit()
-
-	for (let x in arr) {
-		var url = "https://twitter.com/" + arr[x]
-		try {
-			await page.goto(url, { waitUntil: 'networkidle2' })
-			await page.waitForTimeout(1000)
-			if (await page.$(`div[aria-label="Follow @${arr[x]}"]`) != null)
-				await page.click(`div[aria-label="Follow @${arr[x]}"]`)
-		}
-		catch (e) {
-			console.log(`error follow ${arr[x]} by ${user}`)
-		}
-	}
 }
 
 async function init_twitter_pptr(account, legit) {
@@ -228,17 +176,22 @@ async function init_twitter_pptr(account, legit) {
 			}
 			click_confirm()
 		`)
-		while (!page.$('a[href="/settings/screen_name"]'))
+		while (await page.$('a[href="/settings/screen_name"]') == null)
 			await page.waitForTimeout(100)
 		await page.click('a[href="/settings/screen_name"]')
-		await page.delete_str_in_selec(page, 'input[name="typedScreenName"]')
+		while (await page.$('input[name="typedScreenName"]') == null)
+			await page.waitForTimeout(100)
+		await delete_str_in_selec(page, 'input[name="typedScreenName"]')
 		await page.type('input[name="typedScreenName"]', legit.tag)
+		await page.waitForTimeout(1000)
 		await page.evaluate(`
 			document.querySelectorAll('div[role="button"]')[3].click()
 		`)
 		await page.click('div[data-testid="settingsDetailSave"]')
+		while (await page.$('a[href="/settings/screen_name"]') == null)
+			await page.waitForTimeout(100)
 		account.tag = await page.evaluate(`
-			var name = document.querySelector('a[href="/settings/screen_name"]').firstChild.firstChild.lastChild.firstChild.innerHTML
+			document.querySelector('a[href="/settings/screen_name"]').firstChild.firstChild.lastChild.firstChild.innerHTML
 		`)
 	}
 	else if (suspended == true) {
@@ -252,13 +205,27 @@ async function init_twitter_pptr(account, legit) {
 				$set: {
 					ini: false,
 					cookies: await cookies.findOne({ user: account.user }),
-					tag: account.tag
+					tag: account.tag,
+					copy_of: await cp_acc.findOne({user_id: legit.user_id})
 				}
 			})
 		await cp_acc.updateOne({tag: legit.tag}, {$set: {used: true}})
 		console.log(`${account.user} INIT OK`)
 	}
 	await browser.close()
+	return (0)
+}
+
+/*
+	CHANGE: BIO/PROFILE/BANNER
+*/
+
+async function update_profile(account, copy) {
+	await account.populate('cookies')
+	var twitter = new twit(account.cookies.req_cookie, account.cookies.crsf, account.proxy.split(':'), "0")
+	await twitter.change_username_bio(copy.username, copy.bio)
+	await twitter.update_banner_image(account.tag, account.copy_of)
+	await twitter.update_image(account.tag, account.copy_of)
 	return (0)
 }
 
