@@ -5,9 +5,11 @@ const {StaticPool} = require("node-worker-threads-pool");
 var common = require('./events/common');
 var commonEmitter = common.commonEmitter;
 var Chance = require('chance')
+var User = require('./mongo/User.js')
 var ga = require('./mongo/giveaway.js')
 const twit = require('./twitter_class')
 const {Webhook} = require('simple-discord-webhooks');
+const follow_init = require('./init_follow.js')
 
 const webhook = new Webhook(`https://discord.com/api/webhooks/966783471911571486/i7xTtaMRUR3ErvhQDIlXiz5ZEOoBCmnJwh6q3yPkg37kQ1IJ9PXXWNqRVjwT2Um6wC4Y`)
 
@@ -85,7 +87,7 @@ async function req_main(action, user) {
 	return (0)
 }
 
-async function init_worker(threads, arr) {
+async function init_worker(arr) {
 	var i = 0;
 	var prom = []
 	var acc = create_acc_array(arr)
@@ -97,6 +99,7 @@ async function init_worker(threads, arr) {
 	for (let x in acc)
 		prom.push(pool.exec({account: acc[x], index: i}))
 	await Promise.all(prom)
+	await follow_init()
 	commonEmitter.emit("finish")
 	return (0)
 }
@@ -156,5 +159,10 @@ function get_random_at(user, nbr) {
 	}
 	return (re)
 }
+
+/*
+	UTILS
+*/
+
 
 module.exports = {main, init_worker}

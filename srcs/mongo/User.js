@@ -4,6 +4,7 @@ const accSchema = new mongoose.Schema({
 	user: String,
 	pass: String,
 	tag: String,
+	user_id: String,
 	mail: String,
 	proxy: String,
 	timeout: Boolean,

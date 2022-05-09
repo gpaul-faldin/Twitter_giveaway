@@ -234,8 +234,9 @@ class tweet extends twitter {
 					let ref_id = arr[x].referenced_tweets[0].id
 					if (ref_id === giveaway.tweet_id) {
 						if (arr[x].text.match(/win|congrat|gg\w+/gi)) {
-							webhook.send(`Just checking to be sure check ${giveaway.tweet_url}`)
 							var tag = arr[x].text.match(/(@[A-Za-z1-9])\w+/g)[0]
+							if (tag != null)
+								webhook.send(`Just checking to be sure check ${giveaway.tweet_url}`)
 								if (await User.findOne({ tag: tag })) {
 									webhook.send(`Winner Winner chicken dinner!\n${tag} just won this giveaway: ${giveaway.tweet_url}\n<@259353316184555521>`)
 								}

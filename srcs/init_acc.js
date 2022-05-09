@@ -13,6 +13,8 @@ const user = require("./mongo/User.js")
 const axios = require("axios").default
 const mongoose = require('mongoose');
 const twit = require('./twitter_class.js')
+const {get_legit} = require('./wrapper/pro-fill_wrapper.js');
+
 
 
 /*
@@ -27,8 +29,11 @@ mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 */
 parentPort.on("message", async (data) => {
 	var copy = await get_profile()
-	if (await init_twitter_pptr(data.account, copy) == 0)
+	if (await init_twitter_pptr(data.account, copy) == 0) {
 		await update_profile(data.account, copy)
+		if (data.account.ini_follow == true)
+			await follow_acc(account)
+	}
 	parentPort.postMessage("OK")
 })
 
@@ -220,6 +225,29 @@ async function init_twitter_pptr(account, legit) {
 }
 
 /*
+	INIT FOLLOW
+*/
+
+async function follow_acc (account) {
+
+	account.cookies = await cookies.findOne({ user: account.user })
+	var twitter = new twit(account.cookies.req_cookie, account.cookies.crsf, account.proxy.split(':'), "0")
+	const legit = await get_legit()
+	var prom = []
+	for (let x = 0; x < legit.length; x++) {
+		prom.push(twitter.follow(legit[x]))
+	}
+	await Promise.all(prom)
+	await user.updateOne({ user: account.user },
+		{
+			$set: {
+				ini: false,
+			}
+		})
+	return (0)
+}
+
+/*
 	CHANGE: BIO/PROFILE/BANNER
 */
 
@@ -232,7 +260,6 @@ async function update_profile(account, copy) {
 	await user.updateOne({user: account.user},
 		{
 			$set: {
-				ini: false,
 				copy_of: await cp_acc.findOne({user_id: copy.user_id})
 			}
 		})
@@ -250,3 +277,7 @@ function sleep(ms) {
 		setTimeout(resolve, ms);
 	});
 }
+
+/*
+	EXPORT
+*/

@@ -57,7 +57,6 @@ async function get_legit() {
 			"Authorization": "Bearer " + process.env.PRO_FILL
 		}
 	})
-	console.log(response.data)
 	return (response.data)
 }
 

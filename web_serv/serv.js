@@ -84,5 +84,17 @@ var tmp = new copy_account("1048018930785083392")
 
 
 app.post('/api/test', async (req, res) => {
-	res.send(copy.bio)
+
+	
+
+	const arr = await user.find({old: true})
+
+	// for (let i = 0; i < arr.length; i++) {
+	// 	var rand = Math.floor(Math.random() * (30 - 10) + 10)
+	// 	const chunk = arr.slice(i, rand);
+	// 	i += rand
+	// 	console.log(rand)
+	// 	console.log(chunk)
+	// }
+	res.send("OK")
 })
