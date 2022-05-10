@@ -267,17 +267,3 @@ async function update_profile(account, copy) {
 	console.log(`${account.user} INIT OK`)
 	return (0)
 }
-
-/*
-	UTILS
-*/
-
-function sleep(ms) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
-
-/*
-	EXPORT
-*/

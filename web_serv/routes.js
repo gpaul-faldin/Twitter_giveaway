@@ -10,12 +10,9 @@ const proxies = require('./../srcs/mongo/proxies.js')
 const twitter_info = require('./../srcs/mongo/twitter_info.js')
 const cookies = require('./../srcs/mongo/cookies.js');
 require("dotenv").config();
-const {Webhook} = require('simple-discord-webhooks');
 const ga = require('./../srcs/mongo/giveaway.js');
 const cron_ga = require('../srcs/cron/cron_class_ga.js')
 const {setup_ga} = require('../srcs/setup_ga.js')
-
-const webhook = new Webhook(process.env.HOOK)
 
 /*
 	EVENTS
