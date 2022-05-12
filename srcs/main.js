@@ -92,7 +92,7 @@ async function init_worker(arr) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: 1,
+		size: 10,
 		task: "./srcs/init_acc.js"
 	});
 	for (let x in acc)
@@ -107,7 +107,7 @@ async function check_pva(arr, action) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: action.info.max_threads,
+		size: 10,
 		task: "./srcs/check_for_pva.js"
 	});
 
@@ -127,12 +127,14 @@ async function main(arr, action) {
 
 	// if (action.info.pva == true) {
 	// 	console.log("Check for PVA")
-	// 	await check_pva(arr, action)
+		//await check_pva(arr, action)
 	// }
 
-	for (let x in arr) {
-		await req_main(action, arr[x])
-	}
+	//for (let x in arr) {
+	//	await req_main(action, arr[x])
+	//}
+
+
 	commonEmitter.emit("finish")
 	return (0)
 

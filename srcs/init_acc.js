@@ -34,6 +34,13 @@ parentPort.on("message", async (data) => {
 		await update_profile(data.account, copy)
 		if (data.account.ini_follow == true)
 			await follow_acc(account)
+		else
+			await user.updateOne({ user: data.account.user },
+			{
+				$set: {
+					ini: false,
+				}
+			})
 	}
 	parentPort.postMessage("OK")
 })
@@ -192,8 +199,9 @@ async function init_twitter_pptr(account, legit) {
 			await page.type('input[name="typedScreenName"]', legit.tag)
 			await page.waitForTimeout(1000)
 			await page.evaluate(`
-			document.querySelectorAll('div[role="button"]')[3].click()
-		`)
+			document.querySelectorAll('h2[aria-level="2"]')[2].parentElement.parentElement.children[3].firstChild.click()
+			`)
+			await page.waitForTimeout(1500)
 			await page.click('div[data-testid="settingsDetailSave"]')
 			while (await page.$('a[href="/settings/screen_name"]') == null)
 				await page.waitForTimeout(100)
