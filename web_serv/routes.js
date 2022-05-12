@@ -143,7 +143,7 @@ const init_handler = async function (req, res) {
 			var arr = await User.find({ ini: true })
 		IN_USE = true
 		res.send(`${arr.length} accounts are being initialized`)
-		init_worker(MAX_THREAD, arr)
+		init_worker(arr)
 		return (0)
 	}
 	return (res.status(503).send('Bot already in use'))

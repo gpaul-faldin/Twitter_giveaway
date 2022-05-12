@@ -92,14 +92,13 @@ async function init_worker(arr) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: 10,
+		size: 1,
 		task: "./srcs/init_acc.js"
 	});
-
 	for (let x in acc)
 		prom.push(pool.exec({account: acc[x], index: i}))
 	await Promise.all(prom)
-	await follow_init()
+	//await follow_init()
 	commonEmitter.emit("finish")
 	return (0)
 }

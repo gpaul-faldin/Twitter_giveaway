@@ -29,6 +29,7 @@ mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 */
 parentPort.on("message", async (data) => {
 	var copy = await get_profile()
+	console.log(data.account.user)
 	if (await init_twitter_pptr(data.account, copy) == 0) {
 		await update_profile(data.account, copy)
 		if (data.account.ini_follow == true)

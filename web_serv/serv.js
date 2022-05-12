@@ -87,14 +87,8 @@ app.post('/api/test', async (req, res) => {
 
 	
 
-	const arr = await user.find({old: true})
+	const arr = await user.updateMany({old: true}, {$set: {old: false, ini: true}})
 
-	// for (let i = 0; i < arr.length; i++) {
-	// 	var rand = Math.floor(Math.random() * (30 - 10) + 10)
-	// 	const chunk = arr.slice(i, rand);
-	// 	i += rand
-	// 	console.log(rand)
-	// 	console.log(chunk)
-	// }
+
 	res.send("OK")
 })
