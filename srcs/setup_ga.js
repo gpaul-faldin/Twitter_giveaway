@@ -18,7 +18,7 @@ async function setup_ga(url, end, nbr_acc, id, is_test) {
 	var action = new actions(10);
 	var nfo = await twit.get_info_tweet(id);
 	var txt_split = nfo.text.split('\n');
-	if (nbr_acc == 0 || nbr_acc > await user.countDocuments()) {
+	if (nbr_acc == 0 || nbr_acc > await user.countDocuments({old: {$eq: false}})) {
 		nbr_acc = await user.countDocuments();
 	};
 	action.info.nbr_acc = nbr_acc;

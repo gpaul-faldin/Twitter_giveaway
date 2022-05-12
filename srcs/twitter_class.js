@@ -312,12 +312,16 @@ class twit {
 		this.#headers['content-type'] = 'application/x-www-form-urlencoded'
 		this.#headers.refer = 'https://twitter.com/settings/profile'
 
-		var web = await axios({
+		try {
+			var web = await axios({
 			method: 'POST',
 			url: `https://twitter.com/i/api/1.1/account/update_profile.json?name=${user}&description=${bio}`,
 			headers: this.#headers,
 			proxy: this.#proxy
-		})
+		}) } catch(e) {
+			console.log(`error username/bio ${user} csrf: ${this.#headers['x-csrf-token']}`)
+			throw 'error';
+		}
 	}
 	async #setup_banner_profile(opt, legit_id) {
 		this.#size_img = await cp_acc.findOne({_id: legit_id}).then((info) => {
@@ -325,8 +329,14 @@ class twit {
 				this.#base64_img = info.base64_user
 			else
 				this.#base64_img = info.base64_banner
-			let file = Buffer.from(this.#base64_img, "base64");
-			return (Buffer.byteLength(file))
+			try {
+				let file = Buffer.from(this.#base64_img, "base64")
+				return (Buffer.byteLength(file))
+			} catch (e) {
+				console.log(`Error with ${legit_id}`)
+				throw "CRASH"
+			}
+			
 		})
 		try {
 			var response = await axios({
@@ -351,13 +361,16 @@ class twit {
 		await this.#upload_media()
 		this.#headers['content-type'] = 'application/x-www-form-urlencoded'
 		this.#headers.refer = `https://twitter.com/${tag}`
-
-		var web = await axios({
-			method: 'POST',
-			url: `https://twitter.com/i/api/1.1/account/update_profile_banner.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&skip_status=1&return_user=true&media_id=${this.#media_id}`,
-			headers: this.#headers,
-			proxy: this.#proxy
-		})
+		try {
+			var web = await axios({
+				method: 'POST',
+				url: `https://twitter.com/i/api/1.1/account/update_profile_banner.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&skip_status=1&return_user=true&media_id=${this.#media_id}`,
+				headers: this.#headers,
+				proxy: this.#proxy
+			}) } catch(e) {
+				console.log(`error banner image ${tag}`)
+				throw 'error';
+			}
 	}
 	async update_image(tag, legit_id) {
 
@@ -366,12 +379,16 @@ class twit {
 		this.#headers['content-type'] = 'application/x-www-form-urlencoded'
 		this.#headers.refer = `https://twitter.com/${tag}`
 
+		try {
 		var web = await axios({
 			method: 'POST',
 			url: `https://twitter.com/i/api/1.1/account/update_profile_image.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&skip_status=1&return_user=true&media_id=${this.#media_id}`,
 			headers: this.#headers,
 			proxy: this.#proxy
-		})
+		}) }  catch(e) {
+			console.log(`error profile image ${tag}`)
+			throw 'error';
+		}
 	}
 }
 

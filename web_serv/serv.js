@@ -17,9 +17,9 @@ mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
 
 //////CRON//////
 
-require('./../srcs/cron/update_twitter.js')();
-require('./../srcs/cron/check_timeout.js')();
-require('./../srcs/cron/check_win_ga.js')();
+//require('./../srcs/cron/update_twitter.js')();
+//require('./../srcs/cron/check_timeout.js')();
+//require('./../srcs/cron/check_win_ga.js')();
 
 //////MISC//////
 const app = express()
@@ -84,11 +84,6 @@ var tmp = new copy_account("1048018930785083392")
 
 
 app.post('/api/test', async (req, res) => {
-
-	
-
-	const arr = await user.updateMany({old: true}, {$set: {old: false, ini: true}})
-
-
+	await user.updateMany({}, {$set: {old: true}})
 	res.send("OK")
 })

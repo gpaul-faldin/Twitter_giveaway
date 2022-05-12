@@ -24,7 +24,7 @@ async function retrieve_user_id() {
 
 async function follow_init() {
 	await retrieve_user_id()
-	const arr = await user.find({old: false, ini_follow: true})
+	const arr = await user.find({old: false, ini_follow: true, ini: false})
 
 	for (let i = 0; i < arr.length; i++) {
 		const rand = Math.floor(Math.random() * (30 - 10) + 10)

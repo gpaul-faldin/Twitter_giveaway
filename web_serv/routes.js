@@ -348,6 +348,7 @@ const proxy_delete = async function (req, res) {
 }
 
 const account_delete = async function (req, res) {
+	console.log(req.query)
 	if (!req.query.user)
 		return (res.status(400).send("Missing the user query"))
 	res.send("If the Accounts exists they are being deleted")

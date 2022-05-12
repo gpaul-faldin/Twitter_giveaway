@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "main.js",
 	"scripts": {
-		"start": "nodemon web_serv/serv.js",
+		"start": "node web_serv/serv.js",
 		"test": "PORT=50000 CRON_GA=false nodemon web_serv/serv.js"
 	},
 	"repository": {
