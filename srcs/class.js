@@ -94,12 +94,13 @@ class info_manip {
 	constructor() {
 	}
 	async update_info(nfo, name) {
-
-		console.log(`NAME: ${name}\n NFO: ${nfo}`)
-
-		if (nfo.followers.arr.length === 0)
-			nfo.followers.arr = await user.findOne({user: name}).then(async(x) => await info.findOne({"user": x.user}, {"info.followers.arr": 1}).then((y) => y.info.followers.arr))
-		await user.findOne({user: name}).then(async(x) =>await info.updateOne({"user": x.user}, {info: nfo}))
+		var usr = await user.findOne({tag: '@' + name})
+		if (usr == null)
+			usr = await user.findOne({user: name})
+		if (nfo.followers.arr.length === 0) {
+			nfo.followers.arr = await info.findById(usr.info).then((x) => x.info.followers.arr)
+		}
+		await info.updateOne({_id: usr.info}, {info: nfo})
 	}
 	async update_info_array(nfo_arr) {
 		for (let x in nfo_arr) {

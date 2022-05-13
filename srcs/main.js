@@ -130,9 +130,9 @@ async function main(arr, action) {
 		//await check_pva(arr, action)
 	// }
 
-	//for (let x in arr) {
-	//	await req_main(action, arr[x])
-	//}
+	for (let x in arr) {
+		await req_main(action, arr[x])
+	}
 
 
 	commonEmitter.emit("finish")
