@@ -95,11 +95,11 @@ class info_manip {
 	}
 	async update_info(nfo, name) {
 
+		console.log(`NAME: ${name}\n NFO: ${nfo}`)
+
 		if (nfo.followers.arr.length === 0)
-			nfo.followers.arr = await user.findOne({tag: "@" + name}).then(async(x) => await info.findOne({"user": x.user}, {"info.followers.arr": 1}).then((y) => y.info.followers.arr))
-		if (nfo.following.arr.length === 0)
-			nfo.following.arr = await user.findOne({tag: "@" + name}).then(async(x) => await info.findOne({"user": x.user}, {"info.following.arr": 1}).then((y) => y.info.following.arr))
-		await user.findOne({tag: "@" + name}).then(async(x) =>await info.updateOne({"user": x.user}, {info: nfo}))
+			nfo.followers.arr = await user.findOne({user: name}).then(async(x) => await info.findOne({"user": x.user}, {"info.followers.arr": 1}).then((y) => y.info.followers.arr))
+		await user.findOne({user: name}).then(async(x) =>await info.updateOne({"user": x.user}, {info: nfo}))
 	}
 	async update_info_array(nfo_arr) {
 		for (let x in nfo_arr) {
@@ -135,7 +135,7 @@ class acc_manip {
 	async get_acc_id(nbr) {
 		if (nbr === 0)
 			nbr = await this.get_size()
-		return(await user.find({}, {"_id": 1}).limit(nbr))
+		return(await user.find({old: {$ne: false}}, {"_id": 1}).limit(nbr))
 	}
 	async get_info_id() {
 		return(await info.find({}, {"_id": 1}))

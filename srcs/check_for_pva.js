@@ -26,7 +26,7 @@ var captcha = new capt(process.env.CAPTCHA_KEY, "0152B4EB-D2DC-460A-89A1-629838B
 */
 
 parentPort.on("message", async (data) => {
-	await check_pva(data.action, data.account, data.index)
+	await check_pva(data.account, data.index)
 	parentPort.postMessage("OK")
 })
 
@@ -125,14 +125,14 @@ async function pva(page, user) {
 	await page.waitForTimeout(2000)
 }
 
-async function check_pva(action, account, index) {
+async function check_pva(account, index) {
 
 	var stop = false
 	var suspended = false
 	var timeout = false
 	account = await acc_fill(account)
 	const browser = await puppeteer.launch({
-		headless: action.info.headless,
+		headless: true,
 		args: [
 			`--proxy-server=${account.proxy}`,
 			"--disable-web-security",

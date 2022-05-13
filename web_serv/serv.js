@@ -84,6 +84,12 @@ var tmp = new copy_account("1048018930785083392")
 
 
 app.post('/api/test', async (req, res) => {
-	await user.updateMany({}, {$set: {old: true}})
+	var re = await user.find({old: true}, {tag: 1})
+	var str = ""
+	for (let x in re) {
+		str = str.concat(re[x].tag, ',')
+	}
+	str = str.slice(0, -1)
+	console.log(str)
 	res.send("OK")
 })

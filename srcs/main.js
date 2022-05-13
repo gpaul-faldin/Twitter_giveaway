@@ -103,18 +103,18 @@ async function init_worker(arr) {
 	return (0)
 }
 
-async function check_pva(arr, action) {
+async function check_pva(arr) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: 10,
+		size: 4,
 		task: "./srcs/check_for_pva.js"
 	});
 
 	if (acc.length == 0)
 		return (1)
 	for (let i in acc)
-		prom.push(pool.exec({action: action, account: acc[i], index: i}))
+		prom.push(pool.exec({account: acc[i], index: i}))
 	await Promise.all(prom)
 }
 

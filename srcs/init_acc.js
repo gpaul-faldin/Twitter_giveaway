@@ -118,12 +118,17 @@ async function init_twitter_pptr(account, legit) {
 		await page.type('input[autocomplete="username"]', account.user)
 		await page.evaluate(`document.querySelectorAll('div[role="button"]')[2].click()`)
 		await page.waitForTimeout(1000)
-		while (await page.$('div[data-testid="OCF_CallToAction_Button"]') == null)
-			await page.waitForTimeout(50)
-		await page.click('div[data-testid="OCF_CallToAction_Button"]')
+		let loop = 0
+		while (loop < 20 && await page.$('div[data-testid="OCF_CallToAction_Button"]') == null) {
+			await page.waitForTimeout(500)
+			loop += 1
+		}
+		if (loop < 20)
+			await page.click('div[data-testid="OCF_CallToAction_Button"]')
 		try {
 			await page.solveRecaptchas()
-			await page.waitForSelector('input[name="password"]', { timeout: 0 })
+			while (await page.$('input[name="password"]') == null)
+				await page.waitForTimeout(50)
 			await page.type('input[name="password"]', account.pass)
 			await page.waitForTimeout(1000)
 			await page.click('div[data-testid="LoginForm_Login_Button"]')

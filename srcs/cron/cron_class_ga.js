@@ -28,7 +28,7 @@ class cron_ga {
 				this.del_job()
 				return (1)
 			}
-			var acc = await User.find({user: {$nin: lst.info.acc}, old: false}, { tag: 1 })
+			var acc = await User.find({user: {$nin: lst.info.acc}, old: {$ne: true}}, { tag: 1 })
 				.then((x) => {
 					var random = Math.floor(Math.random() * x.length);
 					return x[random].tag

@@ -89,9 +89,10 @@ class follow extends twitter {
 	}
 	async get_followers_arr(infos) {
 		var re = {}
-		for (let x in infos) {
-			re = await this.get_followers_list_API(infos[x], re)
-		}
+		//for (let x in infos) {
+		//	re = await this.get_followers_list_API(infos[x], re)
+		//}
+		re = await this.get_followers_list_API(infos[0], re)
 		return (re)
 	}
 }
