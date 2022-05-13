@@ -83,7 +83,7 @@ async function req_main(action, user) {
 		}
 		return (value)
 	})
-	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_parti': 1}, $push: {"info.acc": user.user}})
+	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_parti': 1}, $push: {"info.acc": user.tag}})
 	return (0)
 }
 
