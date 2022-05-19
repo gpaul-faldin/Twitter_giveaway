@@ -62,7 +62,6 @@ class twit {
 			ret['like'] = true
 			return (ret);
 		} catch (e) {
-			console.log(e)
 			return (ret)
 		}
 	}
@@ -88,7 +87,6 @@ class twit {
 			ret['rt'] = true
 			return (ret)
 		} catch (e) {
-			console.log(e)
 			return (ret)
 		}
 	}
@@ -131,15 +129,15 @@ class twit {
 			ret['tag'] = true
 			return (ret);
 		} catch (e) {
-			console.log(e)
 			return (ret)
 		}
 	}
 	async tweet_pic() {
 		var ret = {}
-		await this.#setup_screenshot()
-		var img = await this.#upload_media()
 		ret['pic'] = false
+		if (await this.#setup_screenshot() == 1)
+			return (ret)
+		var img = await this.#upload_media()
 		if (img == null)
 			return (ret)
 		this.#headers['content-type'] = "application/json"
@@ -212,7 +210,6 @@ class twit {
 			ret['follow'] = true
 			return (ret);
 		} catch (e) {
-			console.log(e)
 			return (ret)
 		}
 	}
@@ -229,7 +226,7 @@ class twit {
 		} catch (e) { return ("NO") }
 	}
 	async #setup_screenshot() {
-		this.#img_id = await sc.aggregate([{ $match: {tweet_id: this.tweet_id}}, { $sample: { size: 1 } }]).then((x) => x[0].image_id)
+		this.#img_id = await sc.aggregate([{ $match: {tweet_id: this.#tweet_id}}, { $sample: { size: 1 } }]).then((x) => x[0].image_id)
 		this.#size_img = await sc.findOne({image_id: this.#img_id}).then((x) => {
 			this.#base64_img = x.base64_img
 			let file = Buffer.from(this.#base64_img, "base64");
@@ -259,29 +256,31 @@ class twit {
 		form.append('media', file, "blob")
 
 		this.#headers['content-type'] = form.getHeaders()['content-type']
-		var response = await axios({
-			method: "POST",
-			url: `https://upload.twitter.com/i/media/upload.json`,
-			params: {
-				command: "APPEND",
-				media_id: this.#media_id,
-				segment_index: 0,
-			},
-			data: form,
-			headers: this.#headers,
-			proxy: this.#proxy
-		})
-		var web = await axios({
-			method: "POST",
-			url: "https://upload.twitter.com/i/media/upload.json",
-			params: {
-				command: "FINALIZE",
-				media_id: this.#media_id,
-			},
-			headers: this.#headers,
-			proxy: this.#proxy
-		})
-		return (this.#media_id)
+		try {
+			var response = await axios({
+				method: "POST",
+				url: `https://upload.twitter.com/i/media/upload.json`,
+				params: {
+					command: "APPEND",
+					media_id: this.#media_id,
+					segment_index: 0,
+				},
+				data: form,
+				headers: this.#headers,
+				proxy: this.#proxy
+			})
+			var web = await axios({
+				method: "POST",
+				url: "https://upload.twitter.com/i/media/upload.json",
+				params: {
+					command: "FINALIZE",
+					media_id: this.#media_id,
+				},
+				headers: this.#headers,
+				proxy: this.#proxy
+			})
+			return (this.#media_id)
+		} catch (e) {return (null)}
 	}
 	async get_banner(tag) {
 		this.#headers['content-type'] = "application/json"
@@ -336,7 +335,6 @@ class twit {
 				console.log(`Error with ${legit_id}`)
 				throw "CRASH"
 			}
-			
 		})
 		try {
 			var response = await axios({
@@ -374,18 +372,21 @@ class twit {
 	}
 	async update_image(tag, legit_id) {
 
-		await this.#setup_banner_profile("user", legit_id)
+		if (await this.#setup_banner_profile("user", legit_id) == 1)
+			return ({ img: false })
 		await this.#upload_media()
 		this.#headers['content-type'] = 'application/x-www-form-urlencoded'
 		this.#headers.refer = `https://twitter.com/${tag}`
 
 		try {
-		var web = await axios({
-			method: 'POST',
-			url: `https://twitter.com/i/api/1.1/account/update_profile_image.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&skip_status=1&return_user=true&media_id=${this.#media_id}`,
-			headers: this.#headers,
-			proxy: this.#proxy
-		}) }  catch(e) {
+			var web = await axios({
+				method: 'POST',
+				url: `https://twitter.com/i/api/1.1/account/update_profile_image.json?include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&skip_status=1&return_user=true&media_id=${this.#media_id}`,
+				headers: this.#headers,
+				proxy: this.#proxy
+			})
+			return ({ img: true })
+		} catch (e) {
 			console.log(`error profile image ${tag}`)
 			throw 'error';
 		}

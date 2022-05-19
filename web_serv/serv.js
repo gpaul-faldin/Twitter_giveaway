@@ -73,7 +73,7 @@ const cp = require('./../srcs/mongo/copy_accounts.js')
 const {copy_profile} = require('../srcs/wrapper/twitter_wrapper.js')
 const twit = require('../srcs/twitter_class.js')
 const captcha2 = require('../srcs/wrapper/2captcha_wrapper')
-const {actions, acc_manip} = require('../srcs/class.js')
+const {actions, acc_manip, info_manip} = require('../srcs/class.js')
 const {setup_ga} = require('../srcs/setup_ga.js');
 const { get_pp, get_banner, get_bio, get_legit, rm_img} = require('../srcs/wrapper/pro-fill_wrapper.js');
 const screen = require("./../srcs/mongo/screen_ga.js");
@@ -84,10 +84,5 @@ var tmp = new copy_account("1048018930785083392")
 
 
 app.post('/api/test', async (req, res) => {
-	var name = "austinrwillis"
-
-	let usr = await user.findOne({tag: '@' + name})
-	let inf = await info.findById(usr.info)
-	console.log(inf.info)
 	res.send("OK")
 })

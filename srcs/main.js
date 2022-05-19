@@ -74,15 +74,19 @@ async function req_main(action, user) {
 		}
 	}
 	var res_prom = await Promise.all(prom).then(async(value) => {
+		console.log("BEFORE", value)
+		console.log(action)
+		console.log(user)
 		for (let x in value) {
 			if (value[x] == false) {
-				await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_acc': -1}})
-				webhook.send(`${user.user} might be timeout ${value} for ${action.id}`)
+				console.log(user)
+				await webhook.send(`${user.user} might be timeout ${value} for ${action.id}`)
 				break;
 			}
 		}
 		return (value)
 	})
+	console.log(res_prom)
 	await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_parti': 1}, $push: {"info.acc": user.tag}})
 	return (0)
 }

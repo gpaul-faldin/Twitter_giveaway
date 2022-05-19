@@ -136,7 +136,7 @@ class acc_manip {
 	async get_acc_id(nbr) {
 		if (nbr === 0)
 			nbr = await this.get_size()
-		return(await user.find({old: {$ne: false}}, {"_id": 1}).limit(nbr))
+		return(await user.find({old: {$ne: true}}, {"_id": 1}).limit(nbr))
 	}
 	async get_info_id() {
 		return(await info.find({}, {"_id": 1}))

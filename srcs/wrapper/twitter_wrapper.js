@@ -225,7 +225,7 @@ class tweet extends twitter {
 		}
 	}
 	async check_win(giveaway) {
-		var res = await this.client.v2.userTimeline(giveaway.by, { expansions: 'referenced_tweets.id' })
+		var res = await this.client.v2.userTimeline(giveaway.by, { expansions: 'referenced_tweets.id', max_results: 20})
 		let arr = res.data.data
 
 		for (let x in arr) {
@@ -233,15 +233,18 @@ class tweet extends twitter {
 				if (arr[x].referenced_tweets[0].type === 'replied_to' || arr[x].referenced_tweets[0].type === 'quoted') {
 					let ref_id = arr[x].referenced_tweets[0].id
 					if (ref_id === giveaway.tweet_id) {
+						console.log(arr[x].text, "GA check")
 						if (arr[x].text.match(/win|congrat|gg\w+/gi)) {
+							console.log(arr[x].text, "GA check 2")
 							var tag = arr[x].text.match(/(@[A-Za-z1-9])\w+/g)[0]
-							if (tag != null)
+							if (tag != null) {
 								webhook.send(`Just checking to be sure check ${giveaway.tweet_url}`)
 								if (await User.findOne({ tag: tag })) {
 									webhook.send(`Winner Winner chicken dinner!\n${tag} just won this giveaway: ${giveaway.tweet_url}\n<@259353316184555521>`)
 								}
-								await sc.deleteMany({tweet_id: giveaway.tweet_id})
-								await ga.deleteOne({tweet_id: giveaway.tweet_id})
+								await sc.deleteMany({ tweet_id: giveaway.tweet_id })
+								await ga.deleteOne({ tweet_id: giveaway.tweet_id })
+							}
 						}
 					}
 				}

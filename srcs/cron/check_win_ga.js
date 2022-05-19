@@ -4,7 +4,7 @@ const ga = require('./../mongo/giveaway.js')
 const {tweet} = require('../wrapper/twitter_wrapper.js')
 
 module.exports = () => {
-	cron.schedule("0 */4 * * *", async() => {
+	cron.schedule("0 */2 * * *", async() => {
 		var time = Date.now()
 		var twit = new tweet(process.env.TWITTER)
 		var lst = await ga.find({draw: {$lte: time}})
