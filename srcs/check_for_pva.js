@@ -4,14 +4,14 @@
 
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-const {phone_number} = require('./sms_wrapper.js')
+const {phone_number} = require('./wrapper/sms_wrapper.js')
 const fs = require('fs');
 const {parentPort} = require("worker_threads");
 const mongoose = require('mongoose')
 const cookies = require("./mongo/cookies.js")
 const info = require("./mongo/twitter_info.js")
 const user = require("./mongo/User.js")
-const capt = require("./2captcha_wrapper.js")
+const capt = require("./wrapper/2captcha_wrapper.js")
 require("dotenv").config();
 
 mongoose.connect('mongodb://192.168.0.23:27017/Twitter');
@@ -44,6 +44,8 @@ async function acc_fill(account) {
 
 async function pva(page, user) {
 	console.log(`PVA for ${user}`)
+	if (await page.$('input[value="Continue to Twitter"]'))
+		await page.click('input[value="Continue to Twitter"]')
 	if (await page.$('input[value="Start"]'))
 		await page.click('input[value="Start"]')
 	await page.waitForTimeout(1000)
@@ -86,8 +88,8 @@ async function pva(page, user) {
 		console.log(`${user} had funcaptcha`)
 		return (1)
 	}
-	await page.select('#country_code', "372")
-	let phone = new phone_number(34, 'tw', 3)
+	await page.select('#country_code', "84")
+	let phone = new phone_number(10, 'tw', 2)
 	await phone.get_number()
 	await page.type('#phone_number', phone.nbr)
 	await page.click('input[name="discoverable_by_mobile_phone"]')
@@ -154,14 +156,14 @@ async function check_pva(account, index) {
 	await page.goto('https://twitter.com/home', { waitUntil: 'networkidle2' })
 	await page.waitForTimeout(3000)
 	if (await page.url() == "https://twitter.com/account/access") {
-		if (await page.$('input[value="Continue to Twitter"]')) {
-			console.log(`${account.user} is timeout`)
-			await page.click('input[value="Continue to Twitter"]')
-			await page.waitForTimeout(2000)
-			await user.updateOne({user: account.user}, {$set: {timeout: true, end_timeout: Date.now() + (3 * 86400000)}})
-			await browser.close()
-			return (0)
-		}
+		// if (await page.$('input[value="Continue to Twitter"]')) {
+		// 	console.log(`${account.user} is timeout`)
+		// 	await page.click('input[value="Continue to Twitter"]')
+		// 	await page.waitForTimeout(2000)
+		// 	await user.updateOne({user: account.user}, {$set: {timeout: true, end_timeout: Date.now() + (3 * 86400000)}})
+		// 	await browser.close()
+		// 	return (0)
+		// }
 		var status = await pva(page, account.user)
 		if (status >= 1)
 			stop = true

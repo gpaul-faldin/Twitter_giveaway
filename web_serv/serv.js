@@ -41,6 +41,7 @@ app.post('/api/action', handler.check_auth, handler.action_handler)
 app.post('/api/action-v2', handler.check_auth, handler.action_handler2)
 app.post('/api/start', handler.check_auth, handler.start_handler)
 app.post('/api/init', handler.check_auth, handler.init_handler)
+app.post('/api/check-pva', handler.check_auth, handler.complete_pva)
 
 
 //////RETRIEVE DATA//////

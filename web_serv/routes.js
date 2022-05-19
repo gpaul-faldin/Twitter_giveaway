@@ -4,7 +4,7 @@
 var common = require('../srcs/events/common');
 const {actions, acc_manip, info_manip} = require('./../srcs/class')
 const {follow, tweet} = require('../srcs/wrapper/twitter_wrapper.js')
-const {main, init_worker} = require('../srcs/main.js')
+const {main, init_worker, check_pva} = require('../srcs/main.js')
 const User = require('./../srcs/mongo/User.js')
 const proxies = require('./../srcs/mongo/proxies.js')
 const twitter_info = require('./../srcs/mongo/twitter_info.js')
@@ -129,6 +129,17 @@ const start_handler = async function (req, res) {
 		return (res.status(400).send("Error: The account list was empty"))
 	}
 	return (res.status(503).send('Bot already in use'))
+}
+
+const complete_pva = async function (req, res) {
+	var manip = new acc_manip
+	var arr = []
+	arr = await manip.get_spe(req.query.tag).then(async (arr) => await manip.id_array_to_acc(arr))
+	if (arr.length != 0) {
+		check_pva(arr)
+		return (res.send("OK"))
+	}
+	return (res.status(400).send("Error: The account list was empty"))
 }
 
 const init_handler = async function (req, res) {
@@ -394,6 +405,7 @@ module.exports = {
 	action_handler2,
 	start_handler,
 	init_handler,
+	complete_pva,
 	retrieve_lowest_handler,
 	retrieve_random_handler,
 	retrieve_spe_handler,

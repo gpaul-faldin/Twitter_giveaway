@@ -80,7 +80,7 @@ async function req_main(action, user) {
 		for (let x in value) {
 			for (let i in value[x]) {
 				if (value[x][i] == false && i != 'follow') {
-					await webhook.send(`${user.tag} might be timeout ${value} for ${action.id}`)
+					await webhook.send(`${user.tag} might be timeout ${value[x]} for ${action.id}`)
 					break;
 				}
 			}
@@ -171,4 +171,4 @@ function get_random_at(user, nbr) {
 */
 
 
-module.exports = {main, init_worker}
+module.exports = {main, init_worker, check_pva}
