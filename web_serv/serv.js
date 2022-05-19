@@ -80,8 +80,6 @@ const screen = require("./../srcs/mongo/screen_ga.js");
 const fs = require('fs')
 const copy_account = require('./../srcs/scrap_accounts.js')
 
-var tmp = new copy_account("1048018930785083392")
-
 
 app.post('/api/test', async (req, res) => {
 	res.send("OK")

@@ -78,9 +78,9 @@ async function req_main(action, user) {
 		console.log(action)
 		console.log(user)
 		for (let x in value) {
-			if (value[x] == false) {
-				console.log(user)
-				await webhook.send(`${user.user} might be timeout ${value} for ${action.id}`)
+			for (let i in value[x])
+			if (value[x][i] == false && i != 'follow') {
+				await webhook.send(`${user.tag} might be timeout ${value} for ${action.id}`)
 				break;
 			}
 		}
