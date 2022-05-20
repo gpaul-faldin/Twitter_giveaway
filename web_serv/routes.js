@@ -6,6 +6,7 @@ const {actions, acc_manip, info_manip} = require('./../srcs/class')
 const {follow, tweet} = require('../srcs/wrapper/twitter_wrapper.js')
 const {main, init_worker, check_pva} = require('../srcs/main.js')
 const User = require('./../srcs/mongo/User.js')
+const info = require("./../srcs/mongo/twitter_info.js")
 const proxies = require('./../srcs/mongo/proxies.js')
 const twitter_info = require('./../srcs/mongo/twitter_info.js')
 const cookies = require('./../srcs/mongo/cookies.js');
@@ -359,14 +360,23 @@ const proxy_delete = async function (req, res) {
 }
 
 const account_delete = async function (req, res) {
-	console.log(req.query)
 	if (!req.query.user)
 		return (res.status(400).send("Missing the user query"))
-	res.send("If the Accounts exists they are being deleted")
+	res.send("If the accounts exists they are being deleted")
 	var lst = req.query.user.split(',')
 	for (let x in lst) {
-		if (await cookies.find({user: lst[x]}))
+		if (await cookies.find({ user: lst[x] }))
 			await cookies.deleteOne({ user: { $eq: lst[x] } })
+		var tag = await User.findOne({ user: { $eq: lst[x] } }).then((x) => x.tag)
+		var tmp = await info.find({})
+		for (let x in tmp) {
+			var arr = tmp[x].info.followers.arr
+			for (let y = 0; y < arr.length; y++) {
+				if (arr[y] == tag)
+					arr.splice(y, 1);
+			}
+			await info.updateOne({ user: { $eq: tmp[x].user } }, { $set: { "info.followers.arr": arr } })
+		}
 		await User.deleteOne({ user: { $eq: lst[x] } })
 		await twitter_info.deleteOne({ user: { $eq: lst[x] } })
 	}

@@ -26,13 +26,17 @@ class captcha2 {
 		})
 		await this.sleep(10000)
 		while (re.length == 0) {
-			let web = await axios.post(this.url_get + `?key=${this.get.key}&action=${this.get.action}&id=${this.get.id}&json=1`)
-			if (web.data.status == 1)
-				return(web.data.request)
-			else if (web.data.request == "ERROR_CAPTCHA_UNSOLVABLE")
-				return (re)
-			else
-				await this.sleep(5000)
+			try {
+				let web = await axios.post(this.url_get + `?key=${this.get.key}&action=${this.get.action}&id=${this.get.id}&json=1`)
+				if (web.data.status == 1)
+					return(web.data.request)
+				else if (web.data.request == "ERROR_CAPTCHA_UNSOLVABLE")
+					return (re)
+				else
+					await this.sleep(5000)
+				}
+				catch(e) {await this.sleep(5000)}
+			
 		}
 		return (re)
 	}

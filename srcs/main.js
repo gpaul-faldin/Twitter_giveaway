@@ -74,14 +74,12 @@ async function req_main(action, user) {
 		}
 	}
 	var res_prom = await Promise.all(prom).then(async(value) => {
-		console.log("BEFORE", value)
-		console.log(action)
-		console.log(user)
 		for (let x in value) {
 			for (let i in value[x]) {
 				if (value[x][i] == false && i != 'follow') {
-					await webhook.send(`${user.tag} might be timeout ${value[x]} for ${action.id}`)
-					break;
+					await webhook.send(`${user.tag} might be timeout ${i}: ${value[x][i]} for ${action.id}`)
+					await ga.updateOne({tweet_id: action.id}, {$inc: {'info.nbr_acc': -1}})
+					return (0)
 				}
 			}
 		}
@@ -112,7 +110,7 @@ async function check_pva(arr) {
 	var prom = []
 	var acc = create_acc_array(arr)
 	const pool = new StaticPool({
-		size: 4,
+		size: 9,
 		task: "./srcs/check_for_pva.js"
 	});
 

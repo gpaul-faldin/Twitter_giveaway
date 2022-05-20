@@ -10,7 +10,7 @@ const {parentPort} = require("worker_threads");
 const mongoose = require('mongoose')
 const cookies = require("./mongo/cookies.js")
 const info = require("./mongo/twitter_info.js")
-const user = require("./mongo/User.js")
+const User = require("./mongo/User.js")
 const capt = require("./wrapper/2captcha_wrapper.js")
 require("dotenv").config();
 
@@ -43,9 +43,25 @@ async function acc_fill(account) {
 }
 
 async function pva(page, user) {
+	if (await page.$('a[href="https://support.twitter.com/articles/18311"]') != null) {
+		console.log(`Account timeout ${user}`)
+		if (await page.$('input[value="Continue to Twitter"]'))
+			await page.click('input[value="Continue to Twitter"]')
+		await User.updateOne(
+			{ user: user },
+			{
+				$set: {
+					timeout: true,
+					end_timeout: Date.now() + (86400000 * 3)
+				}
+			}
+		)
+		return (0)
+	}
 	console.log(`PVA for ${user}`)
 	if (await page.$('input[value="Continue to Twitter"]'))
 		await page.click('input[value="Continue to Twitter"]')
+	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_PVA.jpg`})
 	if (await page.$('input[value="Start"]'))
 		await page.click('input[value="Start"]')
 	await page.waitForTimeout(1000)
@@ -82,14 +98,15 @@ async function pva(page, user) {
 			encWin.SubmitCaptcha(Token)
 		`)
 	}
+	await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_PVA.jpg`})
 	try {await page.waitForSelector('#country_code')}
 	catch(e) {
 		await page.screenshot({ path: process.cwd() + `/debug_screenshot/${user}_ERRPVA.jpg`})
 		console.log(`${user} had funcaptcha`)
 		return (1)
 	}
-	await page.select('#country_code', "84")
-	let phone = new phone_number(10, 'tw', 2)
+	await page.select('#country_code', "91")
+	let phone = new phone_number(22, 'tw', 2)
 	await phone.get_number()
 	await page.type('#phone_number', phone.nbr)
 	await page.click('input[name="discoverable_by_mobile_phone"]')
@@ -164,7 +181,7 @@ async function check_pva(account, index) {
 		// 	await browser.close()
 		// 	return (0)
 		// }
-		var status = await pva(page, account.user)
+		var status = await pva(page, account.tag)
 		if (status >= 1)
 			stop = true
 		if (status == 2)
@@ -173,16 +190,17 @@ async function check_pva(account, index) {
 			timeout = true
 	}
 	if (suspended == true) {
-		const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
-		for (let x in acc) {
-			if (acc[x].user == account.user) {
-				index = x
-				break ;
-			}
-		}
-		acc[index].tag = "SUSPENDED"
-		fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
-		console.log(`${account.user} is suspended`)
+		console.log(account.tag, "Is suspended")
+		// const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))
+		// for (let x in acc) {
+		// 	if (acc[x].user == account.user) {
+		// 		index = x
+		// 		break ;
+		// 	}
+		// }
+		// acc[index].tag = "SUSPENDED"
+		// fs.writeFileSync(process.cwd() + `/db/acc.json`, JSON.stringify(acc, null, '	'), { flags: "w" });
+		// console.log(`${account.user} is suspended`)
 	}
 	if (timeout == true) {
 		//const acc = JSON.parse(fs.readFileSync(process.cwd() + `/db/acc.json`, 'utf8'))

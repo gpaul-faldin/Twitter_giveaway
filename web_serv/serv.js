@@ -83,5 +83,21 @@ const copy_account = require('./../srcs/scrap_accounts.js')
 
 
 app.post('/api/test', async (req, res) => {
+
+	var name = "MariaLa68858207"
+
+	var tag = await user.findOne({user: {$eq: name}}).then((x) => x.tag)
+	var test = await info.find({})
+	for (let x in test) {
+		var arr = test[x].info.followers.arr
+		for (let y = 0; y < arr.length; y++) {
+			if (arr[y] == tag)
+				arr.splice(y, 1);
+		}
+		await info.updateOne({user: {$eq: test[x].user}}, { $set: {"info.followers.arr": arr}})
+	}
+
+	console.log(tag)
+
 	res.send("OK")
 })
