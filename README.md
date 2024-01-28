@@ -10,6 +10,10 @@ This project was developed to automate bot account participation in Twitter give
 
 This project has been made public to serve as a portfolio showcasing my development experience. It reflects the skills and expertise I gained during its development.
 
+## Deactivated Keys and Webhooks
+
+Please note that any private API keys or webhooks present in the code are deactivated and no longer functional.
+
 ## Project Status
 
 As of the last known update, the project was functional. However, due to the lack of recent updates and documentation, there is a possibility that it may no longer work as intended.
@@ -35,10 +39,6 @@ While the project was functional, there were some unfinished tasks or areas that
 - [x] Being able to respond to a tweet with an image
 - [x] Rework account init to optimize it and make it more random
 - [ ] Add support to set a winrate on a giveaway and program will self-adjust during the participation time
-
-## Deactivated Keys and Webhooks
-
-Please note that any private API keys or webhooks present in the code are deactivated and no longer functional.
 
 ## Disclaimer
 
