@@ -1,45 +1,122 @@
-# Twitter Giveaway Automation
+# 🤖 Twitter Giveaway Automation Bot 🎁
 
-## Overview
+This project is a sophisticated Twitter bot system designed to automate participation in giveaways. It was developed from the ground up as a learning experience and represents my first project of this scale, requiring extensive reverse engineering of Twitter's API endpoints and authentication methods.
 
-This project was developed to automate bot account participation in Twitter giveaways. While the development has been partially completed, it's important to note that the project may no longer be functional as it has not been updated or worked on for an extended period.
+## 📜 Overview
 
-**Disclaimer: The use of automated tools for participating in online activities may violate terms of service agreements on various platforms, including Twitter. Be aware of the ethical and legal implications, and use this project responsibly.**
+The bot can automatically participate in Twitter giveaways by performing actions such as:
+- ✅ Following specified accounts
+- ❤️ Liking tweets
+- 🔄 Retweeting content
+- 👥 Tagging friends in comments
+- 📷 Uploading screenshots (for YouTube requirements)
 
-## Project as a Portfolio
+The system manages a pool of Twitter accounts, handles account initialization, proxy rotation, and even deals with phone verification challenges.
 
-This project has been made public to serve as a portfolio showcasing my development experience. It reflects the skills and expertise I gained during its development.
+## 🛠️ Tech Stack
+
+- **Backend**: Node.js with Express
+- **Database**: MongoDB
+- **Authentication**: Custom Twitter API integration
+- **Automation**: Puppeteer for browser automation
+- **Task Scheduling**: node-cron for timed operations
+
+## 🔍 Reverse Engineering Highlights
+
+Creating this project required significant reverse engineering of Twitter's internal APIs:
+- Discovered undocumented endpoints for actions like liking, retweeting, and following
+- Decoded CSRF token requirements and cookie authentication
+- Reverse-engineered media upload flow for image sharing
+- Built workarounds for rate limiting and account timeouts
+- Created solutions for handling captchas and phone verification challenges
 
 ## Deactivated Keys and Webhooks
 
 Please note that any private API keys or webhooks present in the code are deactivated and no longer functional.
 
-## Project Status
+## 🌐 API Endpoints
 
-As of the last known update, the project was functional. However, due to the lack of recent updates and documentation, there is a possibility that it may no longer work as intended.
+### Action Endpoints
 
-## Instructions
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/action` | POST | Configure a giveaway action |
+| `/api/action-v2` | POST | Enhanced giveaway action setup |
+| `/api/start` | POST | Start configured actions with selected accounts |
+| `/api/init` | POST | Initialize new accounts |
+| `/api/check-pva` | POST | Check for phone verification requirements |
 
-Unfortunately, comprehensive instructions on how to run the project are not available. The lack of documentation makes it challenging to provide specific steps for setup and usage. Users are encouraged to review the codebase and attempt to understand the functionality if they wish to use or modify the project.
+### Data Retrieval
 
-## Future Work
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/retrieve/lowest` | GET | Get accounts with lowest follower/following metrics |
+| `/api/retrieve/random` | GET | Get random accounts from pool |
+| `/api/retrieve/specific` | GET | Retrieve specific accounts by tag |
+| `/api/retrieve/number` | GET | Count active/timeout accounts |
 
-While the project was functional, there were some unfinished tasks or areas that needed improvement. If you decide to revive or enhance the project, consider addressing the following:
+### Data Management
 
-- [ ] Autoscrap giveaways
-- [ ] Docker/Kube
-- [x] Make the participation more natural, utilizing all of the days of the giveaway
-- [x] Ditch puppeteer for actions
-- [x] Pass the Pro-fill as a self-contained web server
-- [x] Setup the init_acc to use the above API 😅
-- [x] Ping on discord when a bot has won a giveaway
-- [x] Handle funcaptcha when accounts are PVA
-- [x] Simplify adding giveaways to the database
-- [x] Add support for YouTube: scrap 10-15 screenshots from comments
-- [x] Being able to respond to a tweet with an image
-- [x] Rework account init to optimize it and make it more random
-- [ ] Add support to set a winrate on a giveaway and program will self-adjust during the participation time
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/add/account` | PUT | Add new accounts to the database |
+| `/api/add/proxy` | PUT | Add proxies to the rotation pool |
+| `/api/update/twitter` | PUT | Update Twitter follower/following data |
+| `/api/update/proxy` | PUT | Update proxy assignments |
+| `/api/delete/proxy` | DELETE | Remove proxies from pool |
+| `/api/delete/account` | DELETE | Remove accounts from system |
 
-## Disclaimer
+## ⚙️ Key Features
 
-**Use this project responsibly. Automating actions on platforms such as Twitter may violate terms of service agreements. Be aware of ethical and legal considerations before using or modifying this project. The developer and contributors are not responsible for any misuse or consequences resulting from the use of this project.**
+### 🔄 Account Rotation
+The system intelligently rotates through available accounts to avoid detection, using metrics like follower counts to determine optimal account selection.
+
+### 🕸️ Proxy Management
+Accounts are assigned rotating proxies to prevent IP-based detection and bans.
+
+### 📱 Phone Verification Handling
+The system can handle Twitter's phone verification challenges using SMS verification services.
+
+### 🎭 Profile Mimicry
+Accounts can be initialized with realistic profiles, including profile pictures, banners, and bio text from a collection of real account templates.
+
+### ⏱️ Natural Timing
+Participations are spread out over the duration of a giveaway to mimic natural human behavior.
+
+### 🔔 Win Detection
+The system monitors giveaways for winner announcements and notifies via Discord webhooks when one of the bot accounts wins.
+
+## 🧠 Intelligent Features
+
+- **Smart Tagging**: Can tag random followers when needed for giveaway requirements
+- **YouTube Integration**: Detects when a giveaway requires YouTube interaction and handles screenshot proof (steal X screenshots from legit participant)
+- **Captcha Solving**: Integration with 2captcha service for automated captcha resolution
+- **Timeout Management**: Detects and manages account timeouts and suspensions
+
+## Deactivated Keys and Webhooks
+
+Please note that any private API keys or webhooks present in the code are deactivated and no longer functional.
+
+## 📊 Dashboard Potential
+
+While not implemented in the current version, the API structure would easily support a dashboard for:
+- Monitoring active giveaways
+- Tracking win rates
+- Managing account pool
+- Visualizing participation metrics
+
+## ⚠️ Disclaimer
+
+This project was created as a learning exercise to understand API reverse engineering, automation, and building scalable backend systems. Using bots to participate in giveaways may violate Twitter's Terms of Service. This code is shared for educational purposes only.
+
+## 🌱 Learning Outcomes
+
+As my first project of this scale, developing this Twitter giveaway automation system taught me:
+- Complex system architecture and component interaction
+- Advanced API reverse engineering techniques
+- MongoDB database modeling and relationships
+- Security considerations for authentication
+- Error handling and resilience in distributed systems
+- Performance optimization for concurrent operations
+
+The experience gained from building this project laid a strong foundation for tackling even more complex software engineering challenges in the future.
