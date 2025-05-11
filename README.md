@@ -120,3 +120,30 @@ As my first project of this scale, developing this Twitter giveaway automation s
 - Performance optimization for concurrent operations
 
 The experience gained from building this project laid a strong foundation for tackling even more complex software engineering challenges in the future.
+
+<!-- PORTFOLIO_METADATA_START -->
+<div align="center">
+  <h3>📊 Portfolio Metadata</h3>
+  <p><em>This section is used for automatic project information extraction</em></p>
+</div>
+
+### 📜 Project Overview
+Twitter Giveaway Automation Bot is a sophisticated system designed to automate participation in Twitter giveaways. Developed as a learning experience in API reverse engineering, this project manages multiple Twitter accounts to follow specified profiles, like tweets, retweet content, tag friends in comments, and even upload screenshots for verification.
+
+### 🎯 Key Features
+- **Account Rotation**: Intelligently rotates through accounts to avoid detection
+- **Proxy Management**: Assigns rotating proxies to prevent IP-based detection and bans
+- **Phone Verification Handling**: Manages Twitter's phone verification challenges
+- **Profile Mimicry**: Initializes accounts with realistic profiles and bio content
+- **Natural Timing**: Spreads participations over time to mimic human behavior
+- **Win Detection**: Monitors giveaways and notifies when a bot account wins
+
+### 🛠️ Technology Stack
+- Node.js
+- Express
+- MongoDB
+- Puppeteer
+- node-cron
+- Discord Webhooks
+- SMS Verification Services
+<!-- PORTFOLIO_METADATA_END -->
