@@ -128,7 +128,7 @@ The experience gained from building this project laid a strong foundation for ta
 </div>
 
 ### 📜 Project Overview
-Twitter Giveaway Automation Bot is a sophisticated system designed to automate participation in Twitter giveaways. Developed as a learning experience in API reverse engineering, this project manages multiple Twitter accounts to follow specified profiles, like tweets, retweet content, tag friends in comments, and even upload screenshots for verification.
+Twitter Giveaway Automation Bot is a sophisticated system designed to automate participation in Twitter giveaways. This project manages multiple Twitter accounts to follow specified profiles, like tweets, retweet content, tag friends in comments, and even upload screenshots for verification.
 
 ### 🎯 Key Features
 - **Account Rotation**: Intelligently rotates through accounts to avoid detection
