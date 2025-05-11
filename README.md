@@ -131,12 +131,12 @@ The experience gained from building this project laid a strong foundation for ta
 Twitter Giveaway Automation Bot is a sophisticated system designed to automate participation in Twitter giveaways. This project manages multiple Twitter accounts to follow specified profiles, like tweets, retweet content, tag friends in comments, and even upload screenshots for verification.
 
 ### 🎯 Key Features
-- **Account Rotation**: Intelligently rotates through accounts to avoid detection
-- **Proxy Management**
-- **Phone Verification Handling**: Manages Twitter's phone verification challenges
-- **Profile Mimicry**: Initializes accounts with realistic profiles and bio content
-- **Natural Timing**: Spreads participations over time to mimic human behavior
-- **Win Detection**: Monitors giveaways and notifies when a bot account wins
+- Intelligently rotates through accounts to avoid detection
+- Assigns rotating proxies to prevent IP-based detection and bans
+- Manages Twitter's phone verification challenges
+- Initializes accounts with realistic profiles and bio content
+- Spreads participations over time to mimic human behavior
+- Monitors giveaways and notifies when a bot account wins
 
 ### 🛠️ Technology Stack
 - Node.js
