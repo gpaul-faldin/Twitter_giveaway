@@ -132,7 +132,7 @@ Twitter Giveaway Automation Bot is a sophisticated system designed to automate p
 
 ### 🎯 Key Features
 - **Account Rotation**: Intelligently rotates through accounts to avoid detection
-- **Proxy Management**: Assigns rotating proxies to prevent IP-based detection and bans
+- **Proxy Management**
 - **Phone Verification Handling**: Manages Twitter's phone verification challenges
 - **Profile Mimicry**: Initializes accounts with realistic profiles and bio content
 - **Natural Timing**: Spreads participations over time to mimic human behavior
